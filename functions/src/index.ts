@@ -2,10 +2,48 @@ import * as functions from "firebase-functions";
 import * as cors from "cors";
 import axios from "axios";
 import { config } from "dotenv";
-import { KAKAO_GET_TOKEN_URL, SEOUL_CODE } from "./constants";
+import {
+  GENDER_FEMALE,
+  GENDER_MALE,
+  KAKAO_GENDER_FEMALE,
+  KAKAO_GENDER_MALE,
+  KAKAO_GET_TOKEN_URL,
+  KAKAO_GET_USER_INFO_URL,
+  KAKAO_PROVIDER,
+  SEOUL_CODE,
+} from "./constants";
 
 const corsOptions: cors.CorsOptions = { origin: true };
 config();
+
+const normalizeGender = (gender: string): number => {
+  const map: { [key: string]: number } = {
+    [KAKAO_GENDER_MALE]: GENDER_MALE,
+    [KAKAO_GENDER_FEMALE]: GENDER_FEMALE,
+  };
+
+  return map[gender];
+};
+
+const normalizeKakaoUser = (user: KakaoUser): NormalizedUser => {
+  const normalizedUser = {
+    id: `kakao:${user.id}`,
+    provider: KAKAO_PROVIDER,
+    nickname: user.kakao_account.profile.nickname,
+    profileImg: user.kakao_account.profile.profile_image_url,
+    email: user.kakao_account.email,
+    birthday: user.kakao_account.birthday,
+    gender: normalizeGender(user.kakao_account.gender),
+  };
+  return normalizedUser;
+};
+
+const getKakaoUser = async (token: string): Promise<KakaoUser> => {
+  const res = await axios.get(KAKAO_GET_USER_INFO_URL, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
 
 interface TokenResponse {
   token_type: string;
@@ -30,6 +68,7 @@ const getToken = async (code: string): Promise<TokenResponse> => {
 };
 
 export const onLoginWithKakao = functions
+  .runWith({ secrets: ["SERVICE_ACCOUNT_KEY"] })
   .region(SEOUL_CODE)
   .https.onRequest(
     (req: functions.https.Request, res: functions.Response<any>) => {
@@ -48,11 +87,15 @@ export const onLoginWithKakao = functions
               const response: TokenResponse = await getToken(code);
               const token = response.access_token;
 
+              const kakaoUser: KakaoUser = await getKakaoUser(token);
+              const normalizedUser: NormalizedUser =
+                normalizeKakaoUser(kakaoUser);
+
               return res.status(200).json({
-                kakaoToken: token,
+                normalizedUser,
               });
             } catch (error: any) {
-              console.error(error.response);
+              console.error(error);
 
               const err = error.response;
               return res.status(err.status).json({
