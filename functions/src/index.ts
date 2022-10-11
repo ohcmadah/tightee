@@ -1,7 +1,9 @@
 import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 import * as cors from "cors";
 import axios from "axios";
 import { config } from "dotenv";
+import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import {
   GENDER_FEMALE,
   GENDER_MALE,
@@ -15,6 +17,36 @@ import {
 
 const corsOptions: cors.CorsOptions = { origin: true };
 config();
+
+const getOrCreateUser = async (
+  normalizedUser: NormalizedUser
+): Promise<User> => {
+  const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY || "");
+
+  const app = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccountKey),
+  });
+  const auth = admin.auth(app);
+
+  try {
+    const user: UserRecord = await auth.getUser(normalizedUser.id);
+    return user;
+  } catch (error: any) {
+    if (error.code === "auth/user-not-found") {
+      const newUser = {
+        uid: normalizedUser.id,
+        provider: normalizedUser.provider,
+        displayName: normalizedUser.nickname,
+        photoURL: normalizedUser.profileImg,
+        email: normalizedUser.email,
+      };
+      const user: UserRecord = await auth.createUser(newUser);
+      return user;
+    }
+    console.error(error);
+    throw error;
+  }
+};
 
 const normalizeGender = (gender: string): number => {
   const map: { [key: string]: number } = {
@@ -91,8 +123,14 @@ export const onLoginWithKakao = functions
               const normalizedUser: NormalizedUser =
                 normalizeKakaoUser(kakaoUser);
 
+              const user = await getOrCreateUser(normalizedUser);
+              const firebaseToken = await admin
+                .auth()
+                .createCustomToken(user.uid, { KAKAO_PROVIDER });
+
               return res.status(200).json({
-                normalizedUser,
+                user,
+                firebaseToken,
               });
             } catch (error: any) {
               console.error(error);

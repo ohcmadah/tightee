@@ -1,5 +1,4 @@
 interface User {
-  isNew: boolean;
   uid: string;
   email?: string;
   displayName?: string;
