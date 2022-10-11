@@ -1,0 +1,11 @@
+const KAKAO_SCOPE_NICKNAME = "profile_nickname";
+const KAKAO_SCOPE_PROFILE_IMAGE = "profile_image";
+const KAKAO_SCOPE_GENDER = "gender";
+const KAKAO_SCOPE_BIRTHDAY = "birthday";
+
+export {
+  KAKAO_SCOPE_NICKNAME,
+  KAKAO_SCOPE_PROFILE_IMAGE,
+  KAKAO_SCOPE_GENDER,
+  KAKAO_SCOPE_BIRTHDAY,
+};
