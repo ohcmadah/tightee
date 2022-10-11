@@ -107,7 +107,7 @@ export const onLoginWithKakao = functions
       return cors(corsOptions)(req, res, async () => {
         switch (req.method) {
           case "POST":
-            const { code } = req.body;
+            const { code } = req.body.data;
             if (!code) {
               return res.status(400).json({
                 code: 400,
