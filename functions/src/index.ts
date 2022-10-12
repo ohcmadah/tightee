@@ -26,9 +26,11 @@ const getOrCreateUser = async (
 ): Promise<User> => {
   const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY || "");
 
-  const app = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccountKey),
-  });
+  const app = !admin.apps.length
+    ? admin.initializeApp({
+        credential: admin.credential.cert(serviceAccountKey),
+      })
+    : admin.app();
   const auth = admin.auth(app);
 
   try {
