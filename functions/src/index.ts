@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import * as express from "express";
 import * as cors from "cors";
 import axios from "axios";
 import { config } from "dotenv";
@@ -15,8 +16,10 @@ import {
   SEOUL_CODE,
 } from "./constants";
 
-const corsOptions: cors.CorsOptions = { origin: true };
 config();
+
+const app = express();
+app.use(cors({ origin: true }));
 
 const getOrCreateUser = async (
   normalizedUser: NormalizedUser
@@ -99,52 +102,43 @@ const getToken = async (code: string): Promise<TokenResponse> => {
   return res.data;
 };
 
-export const onLoginWithKakao = functions
+app.post("/kakao", async (req, res) => {
+  const { code } = req.body;
+  if (!code) {
+    return res.status(400).json({
+      code: 400,
+      message: "code is a required parameter.",
+    });
+  }
+
+  try {
+    const response: TokenResponse = await getToken(code);
+    const token = response.access_token;
+
+    const kakaoUser: KakaoUser = await getKakaoUser(token);
+    const normalizedUser: NormalizedUser = normalizeKakaoUser(kakaoUser);
+
+    const user = await getOrCreateUser(normalizedUser);
+    const firebaseToken = await admin
+      .auth()
+      .createCustomToken(user.uid, { KAKAO_PROVIDER });
+
+    return res.status(200).json({
+      user,
+      firebaseToken,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    const err = error.response;
+    return res.status(err.status).json({
+      code: err.status,
+      message: err.statusText,
+    });
+  }
+});
+
+exports.auth = functions
   .runWith({ secrets: ["SERVICE_ACCOUNT_KEY"] })
   .region(SEOUL_CODE)
-  .https.onRequest(
-    (req: functions.https.Request, res: functions.Response<any>) => {
-      return cors(corsOptions)(req, res, async () => {
-        switch (req.method) {
-          case "POST":
-            const { code } = req.body.data;
-            if (!code) {
-              return res.status(400).json({
-                code: 400,
-                message: "code is a required parameter.",
-              });
-            }
-
-            try {
-              const response: TokenResponse = await getToken(code);
-              const token = response.access_token;
-
-              const kakaoUser: KakaoUser = await getKakaoUser(token);
-              const normalizedUser: NormalizedUser =
-                normalizeKakaoUser(kakaoUser);
-
-              const user = await getOrCreateUser(normalizedUser);
-              const firebaseToken = await admin
-                .auth()
-                .createCustomToken(user.uid, { KAKAO_PROVIDER });
-
-              return res.status(200).json({
-                user,
-                firebaseToken,
-              });
-            } catch (error: any) {
-              console.error(error);
-
-              const err = error.response;
-              return res.status(err.status).json({
-                code: err.status,
-                message: err.statusText,
-              });
-            }
-
-          default:
-            return res.json({});
-        }
-      });
-    }
-  );
+  .https.onRequest(app);
