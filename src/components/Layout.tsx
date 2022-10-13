@@ -1,3 +1,5 @@
+import cn from "classnames";
+
 import styles from "../../styles/layout.module.css";
 
 interface LayoutProps {
@@ -6,7 +8,7 @@ interface LayoutProps {
 }
 
 const Layout = ({ className, children }: LayoutProps) => (
-  <div className={[styles.layout, className].join(" ")}>{children}</div>
+  <div className={cn(styles.layout, className)}>{children}</div>
 );
 
 export default Layout;

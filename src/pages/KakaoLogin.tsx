@@ -1,6 +1,6 @@
+import axios from "axios";
 import { useEffect } from "react";
 import { useLoaderData, useNavigate, redirect } from "react-router-dom";
-import axios from "axios";
 import { doc, getDoc } from "firebase/firestore";
 import { signInWithCustomToken } from "firebase/auth";
 import { db, auth } from "../config";
