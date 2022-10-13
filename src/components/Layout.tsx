@@ -1,7 +1,12 @@
-type LayoutProps = {
-  children: React.ReactNode;
-};
+import styles from "../../styles/layout.module.css";
 
-const Layout = ({ children }: LayoutProps) => <div>{children}</div>;
+interface LayoutProps {
+  className?: string;
+  children: React.ReactNode;
+}
+
+const Layout = ({ className, children }: LayoutProps) => (
+  <div className={[styles.layout, className].join(" ")}>{children}</div>
+);
 
 export default Layout;

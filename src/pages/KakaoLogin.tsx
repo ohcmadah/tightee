@@ -6,6 +6,8 @@ import { signInWithCustomToken } from "firebase/auth";
 import { db, auth } from "../config";
 import { User } from "../../@types";
 
+import Layout from "../components/Layout";
+
 const getUser = async (id: string): Promise<User | null> => {
   try {
     const docSnap = await getDoc(doc(db, "users", id));
@@ -50,7 +52,7 @@ const KakaoLogin = () => {
     });
   }, []);
 
-  return <div>loading...</div>;
+  return <Layout>loading...</Layout>;
 };
 
 export default KakaoLogin;
