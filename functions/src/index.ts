@@ -63,15 +63,18 @@ const normalizeGender = (gender: string): number => {
 };
 
 const normalizeKakaoUser = (user: KakaoUser): NormalizedUser => {
+  const kakaoAccount = user.kakao_account;
+
   const normalizedUser = {
     id: `kakao:${user.id}`,
     provider: KAKAO_PROVIDER,
-    nickname: user.kakao_account.profile.nickname,
-    profileImg: user.kakao_account.profile.profile_image_url,
-    email: user.kakao_account.email,
-    birthday: user.kakao_account.birthday,
-    gender: normalizeGender(user.kakao_account.gender),
+    nickname: kakaoAccount?.profile?.nickname,
+    profileImg: kakaoAccount?.profile?.profile_image_url,
+    email: kakaoAccount?.email,
+    birthday: kakaoAccount?.birthday,
+    gender: kakaoAccount?.gender && normalizeGender(kakaoAccount.gender),
   };
+
   return normalizedUser;
 };
 
