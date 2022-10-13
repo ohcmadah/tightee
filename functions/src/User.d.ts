@@ -7,31 +7,31 @@ interface User {
 }
 
 interface KakaoProfile {
-  nickname: string;
-  thumbnail_image_url: string;
-  profile_image_url: string;
-  is_default_image: boolean;
+  nickname?: string;
+  thumbnail_image_url?: string;
+  profile_image_url?: string;
+  is_default_image?: boolean;
 }
 
 interface KakaoAccount {
-  profile: KakaoProfile;
-  name: string;
-  email: string;
-  birthday: string;
-  gender: string;
+  profile?: KakaoProfile;
+  name?: string;
+  email?: string;
+  birthday?: string;
+  gender?: "male" | "female";
 }
 
 interface KakaoUser {
   id: number;
-  kakao_account: KakaoAccount;
+  kakao_account?: KakaoAccount;
 }
 
 interface NormalizedUser {
   id: string;
   provider: string;
-  nickname: string;
-  profileImg: string;
-  email: string;
-  birthday: string;
-  gender: number;
+  nickname?: string;
+  profileImg?: string;
+  email?: string;
+  birthday?: string;
+  gender?: number;
 }
