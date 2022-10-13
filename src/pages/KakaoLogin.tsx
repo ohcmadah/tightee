@@ -4,7 +4,7 @@ import { useLoaderData, useNavigate, redirect } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { signInWithCustomToken } from "firebase/auth";
 import { db, auth } from "../config";
-import { User } from "../../@types";
+import { User } from "../@types";
 
 import Layout from "../components/Layout";
 
