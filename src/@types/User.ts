@@ -5,3 +5,13 @@ export interface User {
   photoURL?: string;
   provider?: string;
 }
+
+export interface NormalizedUser {
+  id: string;
+  provider: string;
+  nickname?: string;
+  profileImg?: string;
+  email?: string;
+  birthday?: string;
+  gender?: number;
+}

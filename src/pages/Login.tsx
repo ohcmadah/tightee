@@ -35,7 +35,7 @@ const Login = () => {
 
   return (
     <Layout>
-      <h1 className="font-bold text-3xl">Login</h1>
+      <h1 className="text-3xl font-bold">Login</h1>
       <button onClick={onLoginWithKakao}>
         <img src={kakaoLoginButton} alt="Login with Kakao" />
       </button>
