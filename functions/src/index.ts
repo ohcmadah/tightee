@@ -21,7 +21,7 @@ config();
 const app = express();
 app.use(cors({ origin: true }));
 
-const getOrCreateUser = async (
+const updateOrCreateUser = async (
   normalizedUser: NormalizedUser
 ): Promise<User> => {
   const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY || "");
@@ -33,19 +33,23 @@ const getOrCreateUser = async (
     : admin.app();
   const auth = admin.auth(app);
 
+  const properties = {
+    uid: normalizedUser.id,
+    provider: normalizedUser.provider,
+    displayName: normalizedUser.nickname,
+    photoURL: normalizedUser.profileImg,
+    email: normalizedUser.email,
+  };
+
   try {
-    const user: UserRecord = await auth.getUser(normalizedUser.id);
+    const user: UserRecord = await auth.updateUser(
+      normalizedUser.id,
+      properties
+    );
     return user;
   } catch (error: any) {
     if (error.code === "auth/user-not-found") {
-      const newUser = {
-        uid: normalizedUser.id,
-        provider: normalizedUser.provider,
-        displayName: normalizedUser.nickname,
-        photoURL: normalizedUser.profileImg,
-        email: normalizedUser.email,
-      };
-      const user: UserRecord = await auth.createUser(newUser);
+      const user: UserRecord = await auth.createUser(properties);
       return user;
     }
     console.error(error);
@@ -123,7 +127,7 @@ app.post("/kakao", async (req, res) => {
     const kakaoUser: KakaoUser = await getKakaoUser(token);
     const normalizedUser: NormalizedUser = normalizeKakaoUser(kakaoUser);
 
-    const user = await getOrCreateUser(normalizedUser);
+    const user = await updateOrCreateUser(normalizedUser);
     const firebaseToken = await admin
       .auth()
       .createCustomToken(user.uid, { KAKAO_PROVIDER });
