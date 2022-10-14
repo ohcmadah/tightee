@@ -129,7 +129,7 @@ app.post("/kakao", async (req, res) => {
       .createCustomToken(user.uid, { KAKAO_PROVIDER });
 
     return res.status(200).json({
-      user,
+      user: normalizedUser,
       firebaseToken,
     });
   } catch (error: any) {
