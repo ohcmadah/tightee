@@ -19,7 +19,7 @@ const Agreement = () => {
 
   return (
     <main>
-      <h2>약관동의</h2>
+      <h2 className="text-lg font-medium">약관동의</h2>
       <section>
         <div>동의 리스트</div>
         <Checkbox
