@@ -1,8 +1,10 @@
+@import "../../colors.scss";
+
 .container {
   &::before {
     content: "";
     display: inline-block;
-    border: 1px solid var(--grayscale-20);
+    border: 1px solid $color-grayscale-20;
     border-radius: 6px;
     width: 24px;
     height: 24px;
