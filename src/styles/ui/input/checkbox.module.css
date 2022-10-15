@@ -1,0 +1,15 @@
+.container::before {
+  content: "";
+  display: inline-block;
+  border: 1px solid var(--grayscale-20);
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+}
+
+.container.checked::before {
+  background-image: url(../../../assets/checked.png);
+  background-size: 24px 24px;
+  border: none;
+}

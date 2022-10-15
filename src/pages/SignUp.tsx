@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import Layout from "../components/Layout";
+import { Checkbox } from "../ui/Input/Checkbox";
 
 const Header = () => (
   <header className="mb-7">
@@ -12,12 +14,25 @@ const Header = () => (
   </header>
 );
 
-const Agreement = () => (
-  <main>
-    <h2>약관동의</h2>
-    <section>동의 리스트</section>
-  </main>
-);
+const Agreement = () => {
+  const [checked, setChecked] = useState(false);
+
+  return (
+    <main>
+      <h2>약관동의</h2>
+      <section>
+        <div>동의 리스트</div>
+        <Checkbox
+          className="font-medium"
+          checked={checked}
+          onChange={(evt) => setChecked(evt.target.checked)}
+        >
+          전체 동의
+        </Checkbox>
+      </section>
+    </main>
+  );
+};
 
 const Footer = () => (
   <footer>

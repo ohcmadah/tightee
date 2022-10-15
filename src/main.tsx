@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import KakaoLogin, { kakaoLoader } from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
 
-import "../styles/index.css";
+import "./styles/index.css";
 
 const router = createBrowserRouter([
   {

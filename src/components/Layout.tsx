@@ -1,6 +1,6 @@
 import cn from "classnames";
 
-import styles from "../../styles/layout.module.css";
+import styles from "../styles/components/layout.module.css";
 
 interface LayoutProps {
   className?: string;
