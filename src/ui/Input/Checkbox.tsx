@@ -6,6 +6,7 @@ type CheckboxProps = {
   checked: boolean;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
   disabled?: boolean;
+  name?: string;
   children?: string | React.ReactNode;
 };
 

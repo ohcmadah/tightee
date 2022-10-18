@@ -1,9 +1,15 @@
 export interface User {
-  uid: string;
+  id: string;
   email?: string;
-  displayName?: string;
-  photoURL?: string;
-  provider?: string;
+  nickname: string;
+  profileImg: string;
+  region: string;
+  birthdate: Date;
+  gender: number;
+  MBTI?: string;
+  subscribe: {
+    marketing: boolean;
+  };
 }
 
 export interface NormalizedUser {
