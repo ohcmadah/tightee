@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import cn from "classnames";
 import useForm, { Validator } from "../../hooks/useForm";
@@ -7,7 +7,7 @@ import Layout from "../../components/Layout";
 import { Checkbox } from "../../ui/Input/Checkbox";
 
 import { User } from "../../@types";
-import styles from "../styles/pages/SignUp.module.scss";
+import styles from "../../styles/pages/SignUp.module.scss";
 
 const STEP_AGREEMENT = "AGREEMENT";
 const STEP_PROFILE = "PROFILE";
@@ -49,14 +49,20 @@ const Agreement = ({ onAgree }: { onAgree: Function }) => {
     validator: agreementValidator,
   };
 
-  const { values, errors, handleChange, initAll } = useForm(config);
+  const { values, errors, handleChange, handleSubmit, initAll } =
+    useForm(config);
   const { age, personal, terms, marketing } = values;
+
+  const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(evt.target.name, evt.target.checked);
+  };
 
   const isAllChecked = age && personal && terms && marketing;
   const checkAll = (obj: AgreementValues, value: boolean): AgreementValues => {
-    return Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: value }), {
-      ...config.initialValues,
-    });
+    return Object.keys(obj).reduce(
+      (acc, key) => ({ ...acc, [key]: value }),
+      config.initialValues
+    );
   };
 
   return (
@@ -79,44 +85,31 @@ const Agreement = ({ onAgree }: { onAgree: Function }) => {
           전체 동의
         </Checkbox>
         <div className="my-4 h-px bg-grayscale-20" />
-        <Checkbox
-          className="mb-2"
-          checked={age}
-          onChange={(evt) => {
-            handleChange("age", evt.target.checked);
-          }}
-        >
+        <Checkbox className="mb-2" name="age" checked={age} onChange={onChange}>
           만 14세 이상입니다.(필수)
         </Checkbox>
         <Checkbox
           className="mb-2"
+          name="personal"
           checked={personal}
-          onChange={(evt) => {
-            handleChange("personal", evt.target.checked);
-          }}
+          onChange={onChange}
         >
           개인정보처리 동의(필수)
         </Checkbox>
         <Checkbox
           className="mb-2"
+          name="terms"
           checked={terms}
-          onChange={(evt) => {
-            handleChange("terms", evt.target.checked);
-          }}
+          onChange={onChange}
         >
           이용 약관 동의(필수)
         </Checkbox>
-        <Checkbox
-          checked={marketing}
-          onChange={(evt) => {
-            handleChange("marketing", evt.target.checked);
-          }}
-        >
+        <Checkbox name="marketing" checked={marketing} onChange={onChange}>
           맞춤형 혜택 제공
         </Checkbox>
       </section>
       <div className="text-danger">{Object.values(errors)[0]}</div>
-      <button onClick={() => {}}>다음</button>
+      <button onClick={handleSubmit}>다음</button>
     </main>
   );
 };

@@ -11,10 +11,11 @@ type CheckboxProps = {
 };
 
 export const Checkbox = ({
-  className,
-  checked,
   onChange,
   disabled,
+  checked,
+  className,
+  name,
   children,
 }: CheckboxProps) => (
   <label
@@ -30,6 +31,7 @@ export const Checkbox = ({
   >
     <input
       type="checkbox"
+      name={name}
       checked={checked}
       onChange={onChange}
       readOnly={!onChange}

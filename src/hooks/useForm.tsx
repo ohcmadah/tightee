@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Errors = {
   [name: string]: string;
@@ -24,18 +24,23 @@ const useForm = <T,>({
     setValues({ ...values, [key]: value });
   };
 
+  const handleSubmit = () => {
+    const errors = validator(values);
+    setErrors(errors);
+    if (Object.keys(errors).length === 0) {
+      onSubmit(values);
+    }
+  };
+
   const initAll = (values: T) => {
     setValues(values);
   };
-
-  useEffect(() => {
-    setErrors(validator(values));
-  }, [values]);
 
   return {
     values,
     errors,
     handleChange,
+    handleSubmit,
     initAll,
   };
 };
