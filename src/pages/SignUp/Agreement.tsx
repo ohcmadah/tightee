@@ -11,16 +11,8 @@ import { Footer } from "../../components/Footer";
 
 import styles from "../../styles/pages/SignUp.module.scss";
 
-const agreementValidator = (values: AgreementState): string | null => {
-  const { age, personal, terms } = values;
-  if (!age || !personal || !terms) {
-    return "서비스 이용을 위해 필수 약관에 동의해 주세요!";
-  }
-  return null;
-};
-
 export const Agreement = () => {
-  const { agreement } = useSignUpState();
+  const { agreement, error } = useSignUpState();
   const dispatch = useSignUpDispatch();
 
   const { age, personal, terms, marketing } = agreement;
@@ -34,10 +26,7 @@ export const Agreement = () => {
   };
 
   const onSubmit = () => {
-    if (agreementValidator(agreement)) {
-    } else {
-      dispatch({ type: "NEXT" });
-    }
+    dispatch({ type: "NEXT" });
   };
 
   const isAllChecked = age && personal && terms && marketing;
@@ -107,7 +96,7 @@ export const Agreement = () => {
         </section>
       </main>
       <Footer>
-        <div className="text-danger">{}</div>
+        <div className="text-danger">{error}</div>
         <button onClick={onSubmit}>다음</button>
       </Footer>
     </>
