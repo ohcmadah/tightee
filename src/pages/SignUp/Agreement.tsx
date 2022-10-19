@@ -10,6 +10,7 @@ import { Checkbox } from "../../components/Input/Checkbox";
 import { Footer } from "../../components/Footer";
 
 import styles from "../../styles/pages/SignUp.module.scss";
+import { URL_PERSONAL_AGREEMENT } from "../../common/constants";
 
 export const Agreement = () => {
   const { agreement, error } = useSignUpState();
@@ -44,7 +45,7 @@ export const Agreement = () => {
         타이티에 오신 것을 환영합니다!
       </Header>
       <main>
-        <h2 className="text-xl font-medium">약관동의</h2>
+        <h2 className="text-2xl font-bold">약관동의</h2>
         <section
           className={cn(
             styles.agreementList,
@@ -52,7 +53,7 @@ export const Agreement = () => {
           )}
         >
           <Checkbox
-            className="text-base font-medium"
+            className="font-medium"
             checked={isAllChecked}
             onChange={() => {
               const newValues = checkAll(agreement, !isAllChecked);
@@ -80,7 +81,16 @@ export const Agreement = () => {
             checked={personal}
             onChange={onChange}
           >
-            개인정보처리 동의(필수)
+            <div className="flex w-full justify-between">
+              <span>개인정보처리 동의(필수)</span>
+              <a
+                target="_blank"
+                href={URL_PERSONAL_AGREEMENT}
+                className="text-grayscale-20 underline"
+              >
+                보기
+              </a>
+            </div>
           </Checkbox>
           <Checkbox
             className="mb-2"
@@ -96,8 +106,16 @@ export const Agreement = () => {
         </section>
       </main>
       <Footer>
-        <div className="text-danger">{error}</div>
-        <button onClick={onSubmit}>다음</button>
+        <div className="text-base text-system-alert">{error}</div>
+        <button
+          className="mt-3 w-full rounded-md bg-system-yellow p-3.5 text-base font-bold"
+          onClick={onSubmit}
+        >
+          다음
+        </button>
+        <button className="mt-3 w-full rounded-md border border-grayscale-20 p-3.5 text-base font-bold text-grayscale-20">
+          이전으로
+        </button>
       </Footer>
     </>
   );

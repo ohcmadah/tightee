@@ -18,7 +18,10 @@ type SignUpState = {
 
 const SignUpStateContext = createContext<SignUpState | undefined>(undefined);
 
-type Action = { type: "UPDATE"; key: string; value: any } | { type: "NEXT" };
+type Action =
+  | { type: "UPDATE"; key: string; value: any }
+  | { type: "NEXT" }
+  | { type: "PREV" };
 
 type SignUpDispatch = Dispatch<Action>;
 const SignUpDispatchContext = createContext<SignUpDispatch | undefined>(
@@ -45,6 +48,13 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
         return error ? { ...state, error } : { ...state, step: "PROFILE" };
       } else {
         return { ...state, step: "SUBMITTING" };
+      }
+
+    case "PREV":
+      if (step === "PROFILE") {
+        return { ...state, step: "AGREEMENT" };
+      } else {
+        return state;
       }
 
     default:

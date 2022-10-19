@@ -1,3 +1,3 @@
 export const Footer = ({ children }: { children: React.ReactNode }) => (
-  <footer>{children}</footer>
+  <footer className="mt-12">{children}</footer>
 );

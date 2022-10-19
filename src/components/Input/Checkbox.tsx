@@ -20,7 +20,7 @@ export const Checkbox = ({
 }: CheckboxProps) => (
   <label
     className={cn(
-      "inline-flex select-none items-center",
+      "inline-flex select-none items-center text-base",
       styles.container,
       {
         "cursor-pointer": onChange && !disabled,
