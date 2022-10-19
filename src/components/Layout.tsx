@@ -1,7 +1,14 @@
-type LayoutProps = {
-  children: React.ReactNode;
-};
+import cn from "classnames";
 
-const Layout = ({ children }: LayoutProps) => <div>{children}</div>;
+import styles from "../styles/components/layout.module.css";
+
+interface LayoutProps {
+  className?: string;
+  children: React.ReactNode;
+}
+
+const Layout = ({ className, children }: LayoutProps) => (
+  <div className={cn(styles.layout, className)}>{children}</div>
+);
 
 export default Layout;

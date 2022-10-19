@@ -4,8 +4,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Login from "./pages/Login";
 import KakaoLogin, { kakaoLoader } from "./pages/KakaoLogin";
+import SignUp from "./pages/SignUp";
 
-import "../styles/index.css";
+import "./styles/index.scss";
 
 const router = createBrowserRouter([
   {
@@ -13,9 +14,17 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
+    path: "/login",
+    element: <Login />,
+  },
+  {
     path: "/callback/kakaotalk",
     element: <KakaoLogin />,
     loader: kakaoLoader,
+  },
+  {
+    path: "/signup",
+    element: <SignUp />,
   },
 ]);
 

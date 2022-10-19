@@ -1,0 +1,22 @@
+@import "../../colors.scss";
+
+$checkbox-size: 20px;
+
+.container {
+  &::before {
+    content: "";
+    display: inline-block;
+    border: 1px solid $color-grayscale-20;
+    border-radius: 6px;
+    width: $checkbox-size;
+    height: $checkbox-size;
+    margin-right: 12px;
+    flex: none;
+  }
+
+  &.checked::before {
+    background-image: url(../../../assets/checked.png);
+    background-size: $checkbox-size $checkbox-size;
+    border: none;
+  }
+}
