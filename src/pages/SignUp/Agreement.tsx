@@ -10,7 +10,7 @@ import { Checkbox } from "../../components/Input/Checkbox";
 import { Footer } from "../../components/Footer";
 
 import styles from "../../styles/pages/SignUp.module.scss";
-import { URL_PERSONAL_AGREEMENT } from "../../common/constants";
+import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
 
 export const Agreement = () => {
   const { agreement, error } = useSignUpState();
@@ -98,7 +98,16 @@ export const Agreement = () => {
             checked={terms}
             onChange={onChange}
           >
-            이용 약관 동의(필수)
+            <div className="flex w-full justify-between">
+              <span>이용 약관 동의(필수)</span>
+              <a
+                target="_blank"
+                href={URL_TERMS}
+                className="text-grayscale-20 underline"
+              >
+                보기
+              </a>
+            </div>
           </Checkbox>
           <Checkbox name="marketing" checked={marketing} onChange={onChange}>
             맞춤형 혜택 제공
