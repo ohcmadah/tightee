@@ -1,18 +1,18 @@
 import cn from "classnames";
+import { useNavigate } from "react-router-dom";
 import {
   AgreementState,
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
+import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
 
 import { Header } from "../../components/Header";
-import { Checkbox } from "../../components/Input/Checkbox";
+import { Checkbox } from "../../components/Input";
 import { Footer } from "../../components/Footer";
+import { ColoredButton, OutlineButton } from "../../components/Button";
 
 import styles from "../../styles/pages/SignUp.module.scss";
-import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
-import { ColoredButton, OutlineButton } from "../../components/Button";
-import { useNavigate } from "react-router-dom";
 
 const Divider = () => <div className="h-px bg-grayscale-20" />;
 

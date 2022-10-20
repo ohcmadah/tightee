@@ -6,6 +6,7 @@ import {
 
 import Layout from "../../components/Layout";
 import { Agreement } from "./Agreement";
+import { Profile } from "./Profile";
 
 const Main = () => {
   const { step } = useSignUpState();
@@ -14,7 +15,7 @@ const Main = () => {
       return <Agreement />;
 
     case "PROFILE":
-      return <div></div>;
+      return <Profile />;
 
     case "SUBMITTING":
       return <div></div>;

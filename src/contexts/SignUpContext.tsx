@@ -8,12 +8,21 @@ export type AgreementState = {
   marketing: boolean;
 };
 
-type Error = string | null;
+export type ProfileState = {
+  nickname: string;
+  region: string;
+  birthdate: Date;
+  gender: number;
+  MBTI?: string;
+};
+
+export type Error = string | null;
 
 type SignUpState = {
   step: "AGREEMENT" | "PROFILE" | "SUBMITTING";
   error: Error;
   agreement: AgreementState;
+  profile: ProfileState;
 };
 
 const SignUpStateContext = createContext<SignUpState | undefined>(undefined);
@@ -45,13 +54,15 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
       const { step, agreement } = state;
       if (step === "AGREEMENT") {
         const error = agreementValidator(agreement);
-        return error ? { ...state, error } : { ...state, step: "PROFILE" };
+        return error
+          ? { ...state, error }
+          : { ...state, error, step: "PROFILE" };
       } else {
         return { ...state, step: "SUBMITTING" };
       }
 
     case "PREV":
-      if (step === "PROFILE") {
+      if (state.step === "PROFILE") {
         return { ...state, step: "AGREEMENT" };
       } else {
         return state;
@@ -75,6 +86,12 @@ export const SignUpContextProvider = ({
       personal: false,
       terms: false,
       marketing: false,
+    },
+    profile: {
+      nickname: "",
+      region: "",
+      birthdate: new Date(),
+      gender: 0,
     },
   });
   return (
