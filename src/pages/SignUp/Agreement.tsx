@@ -32,7 +32,7 @@ const LabelWithLink = ({
 );
 
 export const Agreement = () => {
-  const { agreement, error } = useSignUpState();
+  const { agreement, errors } = useSignUpState();
   const dispatch = useSignUpDispatch();
   const navigate = useNavigate();
 
@@ -114,7 +114,7 @@ export const Agreement = () => {
 
       <Footer className={[styles.footer, "flex flex-col"]}>
         <div className="h-6 text-center text-base text-system-alert">
-          {error}
+          {errors?.agreement}
         </div>
         <ColoredButton color="yellow" onClick={onClickNext}>
           다음

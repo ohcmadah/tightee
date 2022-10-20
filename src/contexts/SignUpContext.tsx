@@ -16,11 +16,15 @@ export type ProfileState = {
   MBTI?: string;
 };
 
-export type Error = string | null;
+type Error = string;
+export type Errors = {
+  agreement?: Error;
+  profile?: Record<string, Error>;
+} | null;
 
 type SignUpState = {
   step: "AGREEMENT" | "PROFILE" | "SUBMITTING";
-  error: Error;
+  errors: Errors;
   agreement: AgreementState;
   profile: ProfileState;
 };
@@ -37,11 +41,38 @@ const SignUpDispatchContext = createContext<SignUpDispatch | undefined>(
   undefined
 );
 
-const agreementValidator = (values: AgreementState): Error => {
-  const { age, personal, terms } = values;
+const agreementValidator = (values: SignUpState): Errors => {
+  const {
+    agreement: { age, personal, terms },
+    profile,
+  } = values;
   if (!age || !personal || !terms) {
-    return "서비스 이용을 위해 필수 약관에 동의해 주세요!";
+    return { agreement: "서비스 이용을 위해 필수 약관에 동의해 주세요!" };
   }
+
+  return null;
+};
+
+const profileValidator = (values: SignUpState): Errors => {
+  const { profile } = values;
+
+  const errorByKeyMap: { [key: string]: Error } = {
+    nickname: "닉네임이 입력되지 않았어요.",
+    region: "지역이 선택되지 않았어요.",
+    birthdate: "생년월일을 정확하게 입력해주세요.",
+    gender: "성별이 선택되지 않았어요.",
+  };
+  const profileErrors = Object.entries(profile).reduce((acc, [key, value]) => {
+    if (!value) {
+      const errorMsg = errorByKeyMap[key];
+      return { ...acc, [key]: errorMsg };
+    }
+    return acc;
+  }, {});
+  if (Object.keys(profileErrors).length !== 0) {
+    return { profile: profileErrors };
+  }
+
   return null;
 };
 
@@ -51,14 +82,12 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
       return setProperty<SignUpState>(state, action.key, action.value);
 
     case "NEXT":
-      const { step, agreement } = state;
-      if (step === "AGREEMENT") {
-        const error = agreementValidator(agreement);
-        return error
-          ? { ...state, error }
-          : { ...state, error, step: "PROFILE" };
+      if (state.step === "AGREEMENT") {
+        const errors = agreementValidator(state);
+        return { ...state, errors, step: errors ? state.step : "PROFILE" };
       } else {
-        return { ...state, step: "SUBMITTING" };
+        const errors = profileValidator(state);
+        return { ...state, errors, step: errors ? state.step : "SUBMITTING" };
       }
 
     case "PREV":
@@ -80,7 +109,7 @@ export const SignUpContextProvider = ({
 }) => {
   const [signUpState, dispatch] = useReducer(signUpReducer, {
     step: "AGREEMENT",
-    error: null,
+    errors: null,
     agreement: {
       age: false,
       personal: false,

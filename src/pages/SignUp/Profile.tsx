@@ -1,7 +1,6 @@
 import {
   useSignUpDispatch,
   useSignUpState,
-  Error as ErrorType,
 } from "../../contexts/SignUpContext";
 
 import { Header } from "../../components/Header";
@@ -15,7 +14,7 @@ import { BasicInput } from "../../components/Input";
 type SectionProps = {
   required?: boolean;
   label: string;
-  error: ErrorType;
+  error?: string;
   children: React.ReactNode;
 };
 const Section = ({ required, label, error, children }: SectionProps) => (
@@ -29,7 +28,7 @@ const Section = ({ required, label, error, children }: SectionProps) => (
 );
 
 export const Profile = () => {
-  const { profile, error } = useSignUpState();
+  const { profile, errors } = useSignUpState();
   const dispatch = useSignUpDispatch();
 
   const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +56,7 @@ export const Profile = () => {
       </Header>
 
       <main>
-        <Section required label="닉네임" error={error}>
+        <Section required label="닉네임" error={errors?.profile?.nickname}>
           <BasicInput
             type="text"
             name="nickname"
