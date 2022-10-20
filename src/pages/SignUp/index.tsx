@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import {
   SignUpContextProvider,
   useSignUpState,
@@ -25,8 +25,13 @@ const Main = () => {
 };
 
 const SignUp = () => {
-  const location = useLocation();
-  const { firebaseToken, user } = location.state;
+  const { state } = useLocation();
+
+  if (!state) {
+    return <Navigate to="/" />;
+  }
+
+  const { firebaseToken, user } = state;
 
   return (
     <SignUpContextProvider>
