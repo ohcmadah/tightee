@@ -13,7 +13,7 @@ export type ProfileState = {
   nickname: string;
   region: string;
   birthdate: { year?: string; month?: string; day?: string };
-  gender: number;
+  gender: number | null;
   MBTI?: string;
 };
 
@@ -154,7 +154,7 @@ export const SignUpContextProvider = ({
       nickname: "",
       region: "",
       birthdate: {},
-      gender: 0,
+      gender: null,
     },
   });
   return (

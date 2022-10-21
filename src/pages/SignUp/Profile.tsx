@@ -1,9 +1,12 @@
 import React from "react";
+import cn from "classnames";
 import {
+  ProfileState,
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
 import * as constants from "../../common/constants";
+import { range } from "../../common/utils";
 
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
@@ -12,7 +15,8 @@ import { Error, Label } from "../../components/Form";
 import { BasicInput, Select } from "../../components/Input";
 
 import styles from "../../styles/pages/SignUp.module.scss";
-import { range } from "../../common/utils";
+import maleImage from "../../assets/male.png";
+import femaleImage from "../../assets/female.png";
 
 const REGIONS = [
   { code: constants.REGION_SEOUL, value: "서울특별시" },
@@ -33,6 +37,42 @@ const REGIONS = [
   { code: constants.REGION_GYEONGSANGNAMDO, value: "경상남도" },
   { code: constants.REGION_JEJUDO, value: "제주특별자치도" },
 ];
+
+const GenderButton = ({
+  gender,
+  children,
+}: {
+  gender: number;
+  children: React.ReactNode;
+}) => {
+  const { profile } = useSignUpState();
+  const dispatch = useSignUpDispatch();
+
+  return (
+    <OutlineButton
+      className={cn(
+        "flex w-1/2 items-center justify-center text-grayscale-100",
+        {
+          "bg-system-dimyellow": profile.gender === gender,
+        }
+      )}
+      onClick={() => {
+        dispatch({
+          type: "UPDATE",
+          key: "profile.gender",
+          value: gender,
+        });
+      }}
+    >
+      <img
+        src={gender === constants.GENDER_MALE ? maleImage : femaleImage}
+        alt={gender === constants.GENDER_MALE ? "male" : "female"}
+        className="mr-4 w-6"
+      />
+      {children}
+    </OutlineButton>
+  );
+};
 
 type SectionProps = {
   required?: boolean;
@@ -144,6 +184,12 @@ export const Profile = () => {
               placeholder="일"
               maxLength={2}
             />
+          </div>
+        </Section>
+        <Section required label="성별" error={errors?.profile?.gender}>
+          <div className="flex gap-x-3">
+            <GenderButton gender={constants.GENDER_MALE}>남자</GenderButton>
+            <GenderButton gender={constants.GENDER_FEMALE}>여자</GenderButton>
           </div>
         </Section>
       </main>
