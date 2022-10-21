@@ -1,4 +1,4 @@
-const setProperty = <T extends Record<string, any>>(
+export const setProperty = <T extends Record<string, any>>(
   obj: T,
   path: string,
   value: any
@@ -10,4 +10,8 @@ const setProperty = <T extends Record<string, any>>(
   };
 };
 
-export { setProperty };
+export function* range(start: number, end: number) {
+  for (let i = start; i <= end; i++) {
+    yield i;
+  }
+}

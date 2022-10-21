@@ -1,14 +1,5 @@
 import cn from "classnames";
 
-type InputProps = {
-  type: string;
-  className?: string;
-  name?: string;
-  value: string;
-  onChange?: React.ChangeEventHandler;
-  placeholder?: string;
-};
-
 export const BasicInput = ({
   type,
   className,
@@ -16,7 +7,8 @@ export const BasicInput = ({
   value,
   onChange,
   placeholder,
-}: InputProps) => {
+  maxLength,
+}: React.HTMLProps<HTMLInputElement>) => {
   return (
     <input
       type={type}
@@ -29,6 +21,7 @@ export const BasicInput = ({
       onChange={onChange}
       readOnly={!onChange}
       placeholder={placeholder}
+      maxLength={maxLength}
     />
   );
 };

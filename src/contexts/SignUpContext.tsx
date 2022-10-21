@@ -11,7 +11,7 @@ export type AgreementState = {
 export type ProfileState = {
   nickname: string;
   region: string;
-  birthdate: Date;
+  birthdate: { year?: string; month?: string; day?: string };
   gender: number;
   MBTI?: string;
 };
@@ -44,7 +44,6 @@ const SignUpDispatchContext = createContext<SignUpDispatch | undefined>(
 const agreementValidator = (values: SignUpState): Errors => {
   const {
     agreement: { age, personal, terms },
-    profile,
   } = values;
   if (!age || !personal || !terms) {
     return { agreement: "서비스 이용을 위해 필수 약관에 동의해 주세요!" };
@@ -56,7 +55,7 @@ const agreementValidator = (values: SignUpState): Errors => {
 const profileValidator = (values: SignUpState): Errors => {
   const { profile } = values;
 
-  const errorByKeyMap: { [key: string]: Error } = {
+  const emptyErrorByKeyMap: { [key: string]: Error } = {
     nickname: "닉네임이 입력되지 않았어요.",
     region: "지역이 선택되지 않았어요.",
     birthdate: "생년월일을 정확하게 입력해주세요.",
@@ -64,11 +63,12 @@ const profileValidator = (values: SignUpState): Errors => {
   };
   const profileErrors = Object.entries(profile).reduce((acc, [key, value]) => {
     if (!value) {
-      const errorMsg = errorByKeyMap[key];
+      const errorMsg = emptyErrorByKeyMap[key];
       return { ...acc, [key]: errorMsg };
     }
     return acc;
   }, {});
+
   if (Object.keys(profileErrors).length !== 0) {
     return { profile: profileErrors };
   }
@@ -119,7 +119,7 @@ export const SignUpContextProvider = ({
     profile: {
       nickname: "",
       region: "",
-      birthdate: new Date(),
+      birthdate: {},
       gender: 0,
     },
   });

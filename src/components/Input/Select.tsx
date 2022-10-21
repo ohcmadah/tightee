@@ -6,7 +6,7 @@ import styles from "../../styles/components/Input.module.scss";
 export const Select = ({
   className,
   name,
-  value,
+  value = "",
   onChange,
   placeholder,
   children,
