@@ -105,7 +105,9 @@ export const Profile = () => {
             placeholder="지역을 선택해 주세요."
           >
             {REGIONS.map(({ code, value }) => (
-              <option value={code}>{value}</option>
+              <option key={code} value={code}>
+                {value}
+              </option>
             ))}
           </Select>
         </Section>
@@ -128,7 +130,9 @@ export const Profile = () => {
               placeholder="월"
             >
               {[...range(1, 12)].map((month) => (
-                <option value={month}>{month}</option>
+                <option key={month} value={month < 10 ? `0${month}` : month}>
+                  {month}
+                </option>
               ))}
             </Select>
             <BasicInput
