@@ -9,7 +9,6 @@ import * as constants from "../../common/constants";
 import { range } from "../../common/utils";
 
 import { Header } from "../../components/Header";
-import { Footer } from "../../components/Footer";
 import { ColoredButton, OutlineButton } from "../../components/Button";
 import { Error, Label } from "../../components/Form";
 import { BasicInput, Select } from "../../components/Input";
@@ -17,6 +16,7 @@ import { BasicInput, Select } from "../../components/Input";
 import styles from "../../styles/pages/SignUp.module.scss";
 import maleImage from "../../assets/male.png";
 import femaleImage from "../../assets/female.png";
+import lightImage from "../../assets/light.png";
 
 const REGIONS = [
   { code: constants.REGION_SEOUL, value: "서울특별시" },
@@ -36,6 +36,25 @@ const REGIONS = [
   { code: constants.REGION_GYEONGSANGBUKDO, value: "경상북도" },
   { code: constants.REGION_GYEONGSANGNAMDO, value: "경상남도" },
   { code: constants.REGION_JEJUDO, value: "제주특별자치도" },
+];
+
+const MBTIS = [
+  "ISTJ",
+  "ISTP",
+  "ISFJ",
+  "ISFP",
+  "INTJ",
+  "INTP",
+  "INFJ",
+  "INFP",
+  "ESTJ",
+  "ESTP",
+  "ESFJ",
+  "ESFP",
+  "ENTJ",
+  "ENTP",
+  "ENFJ",
+  "ENFP",
 ];
 
 const GenderButton = ({
@@ -111,7 +130,7 @@ export const Profile = () => {
     updateValue(evt.target.name, evt.target.value);
   };
 
-  const onClickNext = () => {
+  const onClickSubmit = () => {
     dispatch({ type: "NEXT" });
   };
 
@@ -192,14 +211,32 @@ export const Profile = () => {
             <GenderButton gender={constants.GENDER_FEMALE}>여자</GenderButton>
           </div>
         </Section>
+        <Section label="MBTI">
+          <Select
+            name="MBTI"
+            value={profile.MBTI}
+            onChange={onSelect}
+            placeholder="MBTI를 선택해 주세요."
+          >
+            {MBTIS.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </Select>
+          <div className="mt-2.5 flex items-center rounded-xl bg-system-dimyellow py-3 px-3.5 text-sm text-grayscale-80">
+            <img src={lightImage} alt="tip" className="mr-3 w-6" />
+            지금 몰라도 나중에 입력할 수 있어요!
+          </div>
+        </Section>
       </main>
 
-      <Footer className={[styles.footer, "flex flex-col"]}>
-        <ColoredButton color="yellow" onClick={onClickNext}>
-          다음
+      <footer className={cn(styles.footer, "mt-8 flex flex-col")}>
+        <ColoredButton color="yellow" onClick={onClickSubmit}>
+          시작하기
         </ColoredButton>
         <OutlineButton onClick={onClickPrev}>이전으로</OutlineButton>
-      </Footer>
+      </footer>
     </>
   );
 };

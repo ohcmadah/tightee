@@ -9,7 +9,6 @@ import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
 
 import { Header } from "../../components/Header";
 import { Checkbox } from "../../components/Input";
-import { Footer } from "../../components/Footer";
 import { ColoredButton, OutlineButton } from "../../components/Button";
 
 import styles from "../../styles/pages/SignUp.module.scss";
@@ -112,7 +111,7 @@ export const Agreement = () => {
         </section>
       </main>
 
-      <Footer className={[styles.footer, "flex flex-col"]}>
+      <footer className={cn(styles.footer, "mt-10 flex flex-col")}>
         <div className="h-6 text-center text-base text-system-alert">
           {errors?.agreement}
         </div>
@@ -120,7 +119,7 @@ export const Agreement = () => {
           다음
         </ColoredButton>
         <OutlineButton onClick={onClickPrev}>이전으로</OutlineButton>
-      </Footer>
+      </footer>
     </>
   );
 };

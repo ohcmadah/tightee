@@ -6,6 +6,7 @@ module.exports = {
       colors: {
         primary: "#F4B183",
         "grayscale-100": "#000000",
+        "grayscale-80": "#696969",
         "grayscale-20": "#c0c0c0",
         "system-alert": "#ff0000",
         "system-yellow": "#FFE699",
