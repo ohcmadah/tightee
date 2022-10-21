@@ -9,7 +9,8 @@ import { ColoredButton, OutlineButton } from "../../components/Button";
 
 import styles from "../../styles/pages/SignUp.module.scss";
 import { Error, Label } from "../../components/Form";
-import { BasicInput } from "../../components/Input";
+import { BasicInput, Select } from "../../components/Input";
+import React from "react";
 
 type SectionProps = {
   required?: boolean;
@@ -31,12 +32,20 @@ export const Profile = () => {
   const { profile, errors } = useSignUpState();
   const dispatch = useSignUpDispatch();
 
-  const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+  const updateValue = (key: string, value: any) => {
     dispatch({
       type: "UPDATE",
-      key: `profile.${evt.target.name}`,
-      value: evt.target.value,
+      key: `profile.${key}`,
+      value,
     });
+  };
+
+  const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    updateValue(evt.target.name, evt.target.value);
+  };
+
+  const onSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
+    updateValue(evt.target.name, evt.target.value);
   };
 
   const onClickNext = () => {
@@ -64,6 +73,16 @@ export const Profile = () => {
             onChange={onChange}
             placeholder="닉네임을 입력해 주세요."
           />
+        </Section>
+        <Section required label="지역" error={errors?.profile?.region}>
+          <Select
+            name="region"
+            value={profile.region}
+            onChange={onSelect}
+            placeholder="지역을 선택해 주세요."
+          >
+            <option value=""></option>
+          </Select>
         </Section>
       </main>
 

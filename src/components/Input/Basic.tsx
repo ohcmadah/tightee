@@ -21,7 +21,7 @@ export const BasicInput = ({
     <input
       type={type}
       className={cn(
-        "rounded-md border border-grayscale-20 bg-white py-3.5 px-5 text-base font-medium",
+        "rounded-md border border-grayscale-20 bg-white py-3.5 px-5 text-base font-medium placeholder:text-grayscale-20",
         className
       )}
       name={name}
