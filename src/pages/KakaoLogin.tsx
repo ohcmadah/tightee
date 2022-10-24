@@ -15,6 +15,7 @@ import { AuthResponse, User } from "../@types";
 import { authKakao } from "../common/apis";
 
 import Layout from "../components/Layout";
+import { Big } from "../components/Spinner";
 
 const getUser = async (id: string): Promise<User | null> => {
   try {
@@ -78,7 +79,11 @@ const Auth = () => {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Big />
+      </div>
+    );
   }
 
   return user ? (
@@ -93,7 +98,13 @@ const KakaoLogin = () => {
 
   return (
     <Layout>
-      <Suspense fallback={<p>Loading...</p>}>
+      <Suspense
+        fallback={
+          <p>
+            <Big />
+          </p>
+        }
+      >
         <Await resolve={data.auth} errorElement={<p>Error!</p>}>
           <Auth />
         </Await>

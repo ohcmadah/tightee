@@ -8,10 +8,10 @@ import {
 import * as constants from "../../common/constants";
 import { range } from "../../common/utils";
 
-import { Header } from "../../components/Header";
+import Header from "../../components/Header";
 import { ColoredButton, OutlineButton } from "../../components/Button";
-import { Error, Label } from "../../components/Form";
-import { BasicInput, Select } from "../../components/Input";
+import Form from "../../components/Form";
+import Input from "../../components/Input";
 
 import styles from "../../styles/pages/SignUp.module.scss";
 import maleImage from "../../assets/male.png";
@@ -102,11 +102,11 @@ type SectionProps = {
 
 const Section = ({ required, label, error, children }: SectionProps) => (
   <section className={"mb-4 flex flex-col last:mb-0"}>
-    <Label required={required} className="mb-2">
+    <Form.Label required={required} className="mb-2">
       {label}
-    </Label>
+    </Form.Label>
     {children}
-    <Error className="mt-1.5">{error}</Error>
+    <Form.Error className="mt-1.5">{error}</Form.Error>
   </section>
 );
 
@@ -148,7 +148,7 @@ export const Profile = () => {
 
       <main>
         <Section required label="닉네임" error={errors?.profile?.nickname}>
-          <BasicInput
+          <Input.Basic
             type="text"
             name="nickname"
             value={profile.nickname}
@@ -157,7 +157,7 @@ export const Profile = () => {
           />
         </Section>
         <Section required label="지역" error={errors?.profile?.region}>
-          <Select
+          <Input.Select
             name="region"
             value={profile.region}
             onChange={onSelect}
@@ -168,11 +168,11 @@ export const Profile = () => {
                 {value}
               </option>
             ))}
-          </Select>
+          </Input.Select>
         </Section>
         <Section required label="생년월일" error={errors?.profile?.birthdate}>
           <div className="flex gap-x-3">
-            <BasicInput
+            <Input.Basic
               type="text"
               className="w-1/3"
               name="birthdate.year"
@@ -181,7 +181,7 @@ export const Profile = () => {
               placeholder="연"
               maxLength={4}
             />
-            <Select
+            <Input.Select
               className="w-1/3"
               name="birthdate.month"
               value={profile.birthdate.month}
@@ -193,8 +193,8 @@ export const Profile = () => {
                   {month}
                 </option>
               ))}
-            </Select>
-            <BasicInput
+            </Input.Select>
+            <Input.Basic
               type="text"
               className="w-1/3"
               name="birthdate.day"
@@ -212,7 +212,7 @@ export const Profile = () => {
           </div>
         </Section>
         <Section label="MBTI">
-          <Select
+          <Input.Select
             name="MBTI"
             value={profile.MBTI}
             onChange={onSelect}
@@ -223,7 +223,7 @@ export const Profile = () => {
                 {value}
               </option>
             ))}
-          </Select>
+          </Input.Select>
           <div className="mt-2.5 flex items-center rounded-xl bg-system-dimyellow py-3 px-3.5 text-sm text-grayscale-80">
             <img src={lightImage} alt="tip" className="mr-3 w-6" />
             지금 몰라도 나중에 입력할 수 있어요!

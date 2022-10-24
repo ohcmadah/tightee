@@ -1,6 +1,6 @@
 import cn from "classnames";
 
-export const BasicInput = ({
+export const Basic = ({
   type,
   className,
   name,

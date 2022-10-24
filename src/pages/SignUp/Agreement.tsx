@@ -7,8 +7,8 @@ import {
 } from "../../contexts/SignUpContext";
 import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
 
-import { Header } from "../../components/Header";
-import { Checkbox } from "../../components/Input";
+import Header from "../../components/Header";
+import Input from "../../components/Input";
 import { ColoredButton, OutlineButton } from "../../components/Button";
 
 import styles from "../../styles/pages/SignUp.module.scss";
@@ -84,30 +84,38 @@ export const Agreement = () => {
             "mt-4 flex flex-col rounded-md border border-grayscale-20/50 py-7 px-5"
           )}
         >
-          <Checkbox
+          <Input.Checkbox
             className="font-medium"
             checked={isAllChecked}
             onChange={onCheckAll}
           >
             전체 동의
-          </Checkbox>
+          </Input.Checkbox>
 
           <Divider />
 
-          <Checkbox name="age" checked={age} onChange={onChange}>
+          <Input.Checkbox name="age" checked={age} onChange={onChange}>
             만 14세 이상입니다.(필수)
-          </Checkbox>
-          <Checkbox name="personal" checked={personal} onChange={onChange}>
+          </Input.Checkbox>
+          <Input.Checkbox
+            name="personal"
+            checked={personal}
+            onChange={onChange}
+          >
             <LabelWithLink link={URL_PERSONAL_AGREEMENT}>
               개인정보처리 동의(필수)
             </LabelWithLink>
-          </Checkbox>
-          <Checkbox name="terms" checked={terms} onChange={onChange}>
+          </Input.Checkbox>
+          <Input.Checkbox name="terms" checked={terms} onChange={onChange}>
             <LabelWithLink link={URL_TERMS}>이용 약관 동의(필수)</LabelWithLink>
-          </Checkbox>
-          <Checkbox name="marketing" checked={marketing} onChange={onChange}>
+          </Input.Checkbox>
+          <Input.Checkbox
+            name="marketing"
+            checked={marketing}
+            onChange={onChange}
+          >
             맞춤형 혜택 제공
-          </Checkbox>
+          </Input.Checkbox>
         </section>
       </main>
 
