@@ -1,7 +1,6 @@
 import React from "react";
 import cn from "classnames";
 import {
-  ProfileState,
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
@@ -110,7 +109,7 @@ const Section = ({ required, label, error, children }: SectionProps) => (
   </section>
 );
 
-export const Profile = () => {
+const Profile = () => {
   const { profile, errors } = useSignUpState();
   const dispatch = useSignUpDispatch();
 
@@ -240,3 +239,5 @@ export const Profile = () => {
     </>
   );
 };
+
+export default Profile;

@@ -1,6 +1,7 @@
 import { createContext, Dispatch, useContext, useReducer } from "react";
 import moment from "moment";
 import { setProperty } from "../common/utils";
+import { AuthResponse } from "../@types";
 
 export type AgreementState = {
   age: boolean;
@@ -13,7 +14,7 @@ export type ProfileState = {
   nickname: string;
   region: string;
   birthdate: { year?: string; month?: string; day?: string };
-  gender: number | null;
+  gender?: number;
   MBTI?: string;
 };
 
@@ -24,6 +25,7 @@ export type Errors = {
 } | null;
 
 type SignUpState = {
+  token: string;
   step: "AGREEMENT" | "PROFILE" | "SUBMITTING";
   errors: Errors;
   agreement: AgreementState;
@@ -35,7 +37,8 @@ const SignUpStateContext = createContext<SignUpState | undefined>(undefined);
 type Action =
   | { type: "UPDATE"; key: string; value: any }
   | { type: "NEXT" }
-  | { type: "PREV" };
+  | { type: "PREV" }
+  | { type: "SUBMIT" };
 
 type SignUpDispatch = Dispatch<Action>;
 const SignUpDispatchContext = createContext<SignUpDispatch | undefined>(
@@ -120,8 +123,7 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
         const errors = agreementValidator(state);
         return { ...state, errors, step: errors ? state.step : "PROFILE" };
       } else {
-        const errors = profileValidator(state);
-        return { ...state, errors, step: errors ? state.step : "SUBMITTING" };
+        return state;
       }
 
     case "PREV":
@@ -131,17 +133,24 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
         return state;
       }
 
+    case "SUBMIT":
+      const errors = profileValidator(state);
+      return { ...state, errors, step: errors ? state.step : "SUBMITTING" };
+
     default:
       throw new Error("Unhandled action");
   }
 };
 
 export const SignUpContextProvider = ({
+  auth,
   children,
 }: {
+  auth: AuthResponse["data"];
   children: React.ReactNode;
 }) => {
   const [signUpState, dispatch] = useReducer(signUpReducer, {
+    token: auth.firebaseToken,
     step: "AGREEMENT",
     errors: null,
     agreement: {
@@ -151,10 +160,13 @@ export const SignUpContextProvider = ({
       marketing: false,
     },
     profile: {
-      nickname: "",
+      nickname: auth.user.nickname || "",
       region: "",
-      birthdate: {},
-      gender: null,
+      birthdate: {
+        month: auth.user.birthday?.substring(0, 2),
+        day: auth.user.birthday?.substring(2),
+      },
+      gender: auth.user.gender,
     },
   });
   return (

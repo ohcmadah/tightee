@@ -5,8 +5,9 @@ import {
 } from "../../contexts/SignUpContext";
 
 import Layout from "../../components/Layout";
-import { Agreement } from "./Agreement";
-import { Profile } from "./Profile";
+import Agreement from "./Agreement";
+import Profile from "./Profile";
+import Submitting from "./Submitting";
 
 const Main = () => {
   const { step } = useSignUpState();
@@ -18,7 +19,7 @@ const Main = () => {
       return <Profile />;
 
     case "SUBMITTING":
-      return <div></div>;
+      return <Submitting />;
 
     default:
       return <div></div>;
@@ -32,10 +33,8 @@ const SignUp = () => {
     return <Navigate to="/" />;
   }
 
-  const { firebaseToken, user } = state;
-
   return (
-    <SignUpContextProvider>
+    <SignUpContextProvider auth={state}>
       <Layout className="py-16">
         <Main />
       </Layout>

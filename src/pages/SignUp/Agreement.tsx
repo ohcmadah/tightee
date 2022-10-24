@@ -30,7 +30,7 @@ const LabelWithLink = ({
   </div>
 );
 
-export const Agreement = () => {
+const Agreement = () => {
   const { agreement, errors } = useSignUpState();
   const dispatch = useSignUpDispatch();
   const navigate = useNavigate();
@@ -131,3 +131,5 @@ export const Agreement = () => {
     </>
   );
 };
+
+export default Agreement;
