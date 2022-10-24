@@ -24,8 +24,10 @@ export type Errors = {
   profile?: Record<string, Error>;
 } | null;
 
-type SignUpState = {
+export type SignUpState = {
   token: string;
+  id: string;
+  email?: string;
   step: "AGREEMENT" | "PROFILE" | "SUBMITTING";
   errors: Errors;
   agreement: AgreementState;
@@ -103,7 +105,7 @@ const profileValidator = (values: SignUpState): Errors => {
   const birthdateError = birthdateValidator(profile.birthdate);
   const errors = {
     ...emptyErrors,
-    birthdate: birthdateError,
+    ...(birthdateError === "" ? {} : { birthdate: birthdateError }),
   };
 
   if (Object.keys(errors).length !== 0) {
@@ -135,6 +137,8 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
 
     case "SUBMIT":
       const errors = profileValidator(state);
+      console.log(errors);
+
       return { ...state, errors, step: errors ? state.step : "SUBMITTING" };
 
     default:
@@ -150,6 +154,8 @@ export const SignUpContextProvider = ({
   children: React.ReactNode;
 }) => {
   const [signUpState, dispatch] = useReducer(signUpReducer, {
+    id: auth.user.id,
+    email: auth.user.email,
     token: auth.firebaseToken,
     step: "AGREEMENT",
     errors: null,

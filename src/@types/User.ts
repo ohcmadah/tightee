@@ -1,12 +1,11 @@
 export interface User {
   id: string;
-  email?: string;
+  email: string | null;
   nickname: string;
-  profileImg: string;
   region: string;
-  birthdate: Date;
+  birthdate: number;
   gender: number;
-  MBTI?: string;
+  MBTI: string | null;
   subscribe: {
     marketing: boolean;
   };
@@ -16,7 +15,6 @@ export interface NormalizedUser {
   id: string;
   provider: string;
   nickname?: string;
-  profileImg?: string;
   email?: string;
   birthday?: string;
   gender?: number;

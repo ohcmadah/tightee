@@ -4,7 +4,6 @@ import {
   KAKAO_SCOPE_BIRTHDAY,
   KAKAO_SCOPE_GENDER,
   KAKAO_SCOPE_NICKNAME,
-  KAKAO_SCOPE_PROFILE_IMAGE,
 } from "../common/constants";
 
 declare global {
@@ -17,7 +16,6 @@ const onLoginWithKakao = () => {
   const redirectUri = `${location.origin}/callback/kakaotalk`;
   const scope = [
     KAKAO_SCOPE_NICKNAME,
-    KAKAO_SCOPE_PROFILE_IMAGE,
     KAKAO_SCOPE_GENDER,
     KAKAO_SCOPE_BIRTHDAY,
   ].join(",");

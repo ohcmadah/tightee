@@ -130,7 +130,7 @@ const Profile = () => {
   };
 
   const onClickSubmit = () => {
-    dispatch({ type: "NEXT" });
+    dispatch({ type: "SUBMIT" });
   };
 
   const onClickPrev = () => {

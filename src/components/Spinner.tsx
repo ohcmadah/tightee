@@ -14,8 +14,10 @@ const Base = ({ width, height }: { width: number; height: number }) => (
   </svg>
 );
 
-export const Big = () => (
-  <div className="inline-block rounded-full bg-white p-6 drop-shadow-md">
-    <Base width={64} height={64} />
-  </div>
-);
+export default {
+  Big: () => (
+    <div className="inline-block rounded-full bg-white p-6 drop-shadow-md">
+      <Base width={64} height={64} />
+    </div>
+  ),
+};
