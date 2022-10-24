@@ -15,6 +15,7 @@ import { AuthResponse, User } from "../@types";
 import { authKakao } from "../common/apis";
 
 import Layout from "../components/Layout";
+import Spinner from "../components/Spinner";
 
 const getUser = async (id: string): Promise<User | null> => {
   try {
@@ -41,17 +42,20 @@ type LoginCallbackProps = {
 };
 
 const LoginCallback = ({ token }: LoginCallbackProps) => {
+  const [isLogin, setIsLogin] = useState(false);
+
   useEffect(() => {
     const login = async (token: string): Promise<void> => {
       try {
         await signInWithCustomToken(auth, token);
+        setIsLogin(true);
       } catch (error) {}
     };
 
     login(token);
   }, []);
 
-  return <div>login...</div>;
+  return isLogin ? <Navigate to="/" replace /> : <div>login...</div>;
 };
 
 const Auth = () => {
@@ -78,7 +82,11 @@ const Auth = () => {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Spinner.Big />
+      </div>
+    );
   }
 
   return user ? (
@@ -93,7 +101,13 @@ const KakaoLogin = () => {
 
   return (
     <Layout>
-      <Suspense fallback={<p>Loading...</p>}>
+      <Suspense
+        fallback={
+          <p>
+            <Spinner.Big />
+          </p>
+        }
+      >
         <Await resolve={data.auth} errorElement={<p>Error!</p>}>
           <Auth />
         </Await>

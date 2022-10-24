@@ -37,7 +37,6 @@ const updateOrCreateUser = async (
     uid: normalizedUser.id,
     provider: normalizedUser.provider,
     displayName: normalizedUser.nickname,
-    photoURL: normalizedUser.profileImg,
     email: normalizedUser.email,
   };
 
@@ -73,7 +72,6 @@ const normalizeKakaoUser = (user: KakaoUser): NormalizedUser => {
     id: `kakao:${user.id}`,
     provider: KAKAO_PROVIDER,
     nickname: kakaoAccount?.profile?.nickname,
-    profileImg: kakaoAccount?.profile?.profile_image_url,
     email: kakaoAccount?.email,
     birthday: kakaoAccount?.birthday,
     gender: kakaoAccount?.gender && normalizeGender(kakaoAccount.gender),

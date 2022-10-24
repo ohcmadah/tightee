@@ -1,11 +1,13 @@
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import {
   SignUpContextProvider,
   useSignUpState,
 } from "../../contexts/SignUpContext";
 
 import Layout from "../../components/Layout";
-import { Agreement } from "./Agreement";
+import Agreement from "./Agreement";
+import Profile from "./Profile";
+import Submitting from "./Submitting";
 
 const Main = () => {
   const { step } = useSignUpState();
@@ -14,10 +16,10 @@ const Main = () => {
       return <Agreement />;
 
     case "PROFILE":
-      return <div></div>;
+      return <Profile />;
 
     case "SUBMITTING":
-      return <div></div>;
+      return <Submitting />;
 
     default:
       return <div></div>;
@@ -25,11 +27,14 @@ const Main = () => {
 };
 
 const SignUp = () => {
-  const location = useLocation();
-  const { firebaseToken, user } = location.state;
+  const { state } = useLocation();
+
+  if (!state) {
+    return <Navigate to="/" />;
+  }
 
   return (
-    <SignUpContextProvider>
+    <SignUpContextProvider auth={state}>
       <Layout className="py-16">
         <Main />
       </Layout>

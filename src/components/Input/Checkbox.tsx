@@ -1,5 +1,5 @@
 import cn from "classnames";
-import styles from "../../styles/ui/input/Checkbox.module.scss";
+import styles from "../../styles/components/Input.module.scss";
 
 type CheckboxProps = {
   className?: string;
