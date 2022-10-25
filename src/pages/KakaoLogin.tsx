@@ -9,10 +9,11 @@ import {
   Navigate,
 } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
-import { signInWithCustomToken } from "firebase/auth";
 import { db, auth } from "../config";
 import { AuthResponse, User } from "../@types";
 import { authKakao } from "../common/apis";
+import { signInWithCustomToken } from "firebase/auth";
+import { useAuthState } from "../contexts/AuthContext";
 
 import Layout from "../components/Layout";
 import Spinner from "../components/Spinner";
@@ -42,20 +43,19 @@ type LoginCallbackProps = {
 };
 
 const LoginCallback = ({ token }: LoginCallbackProps) => {
-  const [isLogin, setIsLogin] = useState(false);
+  const { user } = useAuthState();
 
   useEffect(() => {
     const login = async (token: string): Promise<void> => {
       try {
         await signInWithCustomToken(auth, token);
-        setIsLogin(true);
       } catch (error) {}
     };
 
     login(token);
   }, []);
 
-  return isLogin ? <Navigate to="/" replace /> : <div>login...</div>;
+  return user ? <Navigate to="/" replace /> : <div>login...</div>;
 };
 
 const Auth = () => {
@@ -82,11 +82,7 @@ const Auth = () => {
   }, []);
 
   if (isLoading) {
-    return (
-      <div>
-        <Spinner.Big />
-      </div>
-    );
+    return <Spinner.Big />;
   }
 
   return user ? (
@@ -101,13 +97,7 @@ const KakaoLogin = () => {
 
   return (
     <Layout>
-      <Suspense
-        fallback={
-          <p>
-            <Spinner.Big />
-          </p>
-        }
-      >
+      <Suspense fallback={<Spinner.Big />}>
         <Await resolve={data.auth} errorElement={<p>Error!</p>}>
           <Auth />
         </Await>
