@@ -16,6 +16,12 @@ import { useAuthState } from "../contexts/AuthContext";
 import Layout from "../components/Layout";
 import Spinner from "../components/Spinner";
 
+const Loading = () => (
+  <div className="flex h-[100vh] w-full items-center justify-center">
+    <Spinner.Big />
+  </div>
+);
+
 export const kakaoLoader = async () => {
   const searchParams = new URLSearchParams(location.search);
   const code = searchParams.get("code");
@@ -43,7 +49,7 @@ const LoginCallback = ({ token }: LoginCallbackProps) => {
     login(token);
   }, []);
 
-  return user ? <Navigate to="/" replace /> : <div>login...</div>;
+  return user ? <Navigate to="/" replace /> : <Loading />;
 };
 
 const Login = () => {
@@ -62,7 +68,7 @@ const KakaoLogin = () => {
 
   return (
     <Layout>
-      <Suspense fallback={<Spinner.Big />}>
+      <Suspense fallback={<Loading />}>
         <Await resolve={data.auth} errorElement={<p>Error!</p>}>
           <Login />
         </Await>

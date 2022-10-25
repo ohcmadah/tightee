@@ -8,7 +8,7 @@ import * as constants from "../../common/constants";
 import { range } from "../../common/utils";
 
 import Header from "../../components/Header";
-import { ColoredButton, OutlineButton } from "../../components/Button";
+import Button from "../../components/Button";
 import Form from "../../components/Form";
 import Input from "../../components/Input";
 
@@ -67,7 +67,7 @@ const GenderButton = ({
   const dispatch = useSignUpDispatch();
 
   return (
-    <OutlineButton
+    <Button.Outline
       className={cn(
         "flex w-1/2 items-center justify-center text-grayscale-100",
         {
@@ -88,7 +88,7 @@ const GenderButton = ({
         className="mr-4 w-6"
       />
       {children}
-    </OutlineButton>
+    </Button.Outline>
   );
 };
 
@@ -231,10 +231,10 @@ const Profile = () => {
       </main>
 
       <footer className={cn(styles.footer, "mt-8 flex flex-col")}>
-        <ColoredButton color="yellow" onClick={onClickSubmit}>
+        <Button.Colored color="yellow" onClick={onClickSubmit}>
           시작하기
-        </ColoredButton>
-        <OutlineButton onClick={onClickPrev}>이전으로</OutlineButton>
+        </Button.Colored>
+        <Button.Outline onClick={onClickPrev}>이전으로</Button.Outline>
       </footer>
     </>
   );
