@@ -1,32 +1,20 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 import {
   useLoaderData,
-  useNavigate,
   redirect,
   defer,
   Await,
   useAsyncValue,
   Navigate,
 } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db, auth } from "../config";
-import { AuthResponse, User } from "../@types";
+import { auth } from "../config";
+import { AuthResponse } from "../@types";
 import { authKakao } from "../common/apis";
 import { signInWithCustomToken } from "firebase/auth";
 import { useAuthState } from "../contexts/AuthContext";
 
 import Layout from "../components/Layout";
 import Spinner from "../components/Spinner";
-
-const getUser = async (id: string): Promise<User | null> => {
-  try {
-    const docSnap = await getDoc(doc(db, "users", id));
-    const user = docSnap.data() as User;
-    return user;
-  } catch (error) {
-    return null;
-  }
-};
 
 export const kakaoLoader = async () => {
   const searchParams = new URLSearchParams(location.search);
@@ -58,37 +46,14 @@ const LoginCallback = ({ token }: LoginCallbackProps) => {
   return user ? <Navigate to="/" replace /> : <div>login...</div>;
 };
 
-const Auth = () => {
-  const res = useAsyncValue() as AuthResponse;
-  const auth = res.data;
-
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const wrapper = async () => {
-      try {
-        const userId = auth.user.id;
-        const user = await getUser(userId);
-        setIsLoading(false);
-        setUser(user);
-      } catch (error) {
-        navigate("/login");
-      }
-    };
-
-    wrapper();
-  }, []);
-
-  if (isLoading) {
-    return <Spinner.Big />;
-  }
+const Login = () => {
+  const { data } = useAsyncValue() as AuthResponse;
+  const { user, firebaseToken } = data;
 
   return user ? (
-    <LoginCallback token={auth.firebaseToken} />
+    <LoginCallback token={firebaseToken} />
   ) : (
-    <Navigate to="/signup" state={auth} />
+    <Navigate to="/signup" state={data} />
   );
 };
 
@@ -99,7 +64,7 @@ const KakaoLogin = () => {
     <Layout>
       <Suspense fallback={<Spinner.Big />}>
         <Await resolve={data.auth} errorElement={<p>Error!</p>}>
-          <Auth />
+          <Login />
         </Await>
       </Suspense>
     </Layout>

@@ -1,8 +1,9 @@
-import { NormalizedUser } from "./User";
+import { NormalizedUser, User } from "./User";
 
 export interface AuthResponse {
   data: {
     firebaseToken: string;
-    user: NormalizedUser;
+    user: User | null;
+    kakaoUser: NormalizedUser;
   };
 }

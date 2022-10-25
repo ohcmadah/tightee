@@ -137,8 +137,6 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
 
     case "SUBMIT":
       const errors = profileValidator(state);
-      console.log(errors);
-
       return { ...state, errors, step: errors ? state.step : "SUBMITTING" };
 
     default:
@@ -154,8 +152,8 @@ export const SignUpContextProvider = ({
   children: React.ReactNode;
 }) => {
   const [signUpState, dispatch] = useReducer(signUpReducer, {
-    id: auth.user.id,
-    email: auth.user.email,
+    id: auth.kakaoUser.id,
+    email: auth.kakaoUser.email,
     token: auth.firebaseToken,
     step: "AGREEMENT",
     errors: null,
@@ -166,13 +164,13 @@ export const SignUpContextProvider = ({
       marketing: false,
     },
     profile: {
-      nickname: auth.user.nickname || "",
+      nickname: auth.kakaoUser.nickname || "",
       region: "",
       birthdate: {
-        month: auth.user.birthday?.substring(0, 2),
-        day: auth.user.birthday?.substring(2),
+        month: auth.kakaoUser.birthday?.substring(0, 2),
+        day: auth.kakaoUser.birthday?.substring(2),
       },
-      gender: auth.user.gender,
+      gender: auth.kakaoUser.gender,
     },
   });
   return (

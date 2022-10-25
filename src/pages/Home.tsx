@@ -4,7 +4,6 @@ import { useAuthState } from "../contexts/AuthContext";
 
 const Home = () => {
   const auth = useAuthState();
-  console.log(auth);
 
   if (!auth.user) {
     return <Navigate to="/login" replace />;
