@@ -9,11 +9,16 @@ import KakaoLogin, { kakaoLoader } from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
 
 import "./styles/index.scss";
+import WithAuthentication from "./components/WithAuthentication";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: (
+      <WithAuthentication>
+        <Home />
+      </WithAuthentication>
+    ),
   },
   {
     path: "/login",
