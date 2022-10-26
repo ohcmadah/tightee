@@ -125,13 +125,20 @@ app.post("/kakao", async (req, res) => {
     const kakaoUser: KakaoUser = await getKakaoUser(token);
     const normalizedUser: NormalizedUser = normalizeKakaoUser(kakaoUser);
 
-    const user = await updateOrCreateUser(normalizedUser);
+    const authUser = await updateOrCreateUser(normalizedUser);
     const firebaseToken = await admin
       .auth()
-      .createCustomToken(user.uid, { KAKAO_PROVIDER });
+      .createCustomToken(authUser.uid, { KAKAO_PROVIDER });
+
+    const user = await admin
+      .firestore()
+      .collection("users")
+      .doc(authUser.uid)
+      .get();
 
     return res.status(200).json({
-      user: normalizedUser,
+      user: user.data(),
+      kakaoUser: normalizedUser,
       firebaseToken,
     });
   } catch (error: any) {

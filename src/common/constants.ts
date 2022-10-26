@@ -10,6 +10,8 @@ export const URL_PERSONAL_AGREEMENT =
   "https://tightee.notion.site/a1b5cc0997014242a057b74025c3d997";
 export const URL_TERMS =
   "https://tightee.notion.site/42cd086ecc40494d87e927042ca51b5e";
+export const URL_CS =
+  "https://tightee.notion.site/620b2d7e3da74414829ff268e54a6d2e";
 
 export const REGION_SEOUL = "seoul";
 export const REGION_BUSAN = "busan";

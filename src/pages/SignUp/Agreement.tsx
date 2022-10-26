@@ -9,7 +9,7 @@ import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
 
 import Header from "../../components/Header";
 import Input from "../../components/Input";
-import { ColoredButton, OutlineButton } from "../../components/Button";
+import Button from "../../components/Button";
 
 import styles from "../../styles/pages/SignUp.module.scss";
 
@@ -123,10 +123,10 @@ const Agreement = () => {
         <div className="h-6 text-center text-base text-system-alert">
           {errors?.agreement}
         </div>
-        <ColoredButton color="yellow" onClick={onClickNext}>
+        <Button.Colored color="yellow" onClick={onClickNext}>
           다음
-        </ColoredButton>
-        <OutlineButton onClick={onClickPrev}>이전으로</OutlineButton>
+        </Button.Colored>
+        <Button.Outline onClick={onClickPrev}>이전으로</Button.Outline>
       </footer>
     </>
   );
