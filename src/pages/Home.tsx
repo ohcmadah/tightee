@@ -1,6 +1,6 @@
-import Header from "../../components/Header";
+import Header from "../components/Header";
 
-import home from "../../assets/home.png";
+import home from "../assets/home.png";
 
 const Home = () => (
   <Header>

@@ -4,7 +4,7 @@ import { AuthContextProvider } from "./contexts/AuthContext";
 
 import WithAuthentication from "./components/WithAuthentication";
 import Main from "./pages/Main";
-import Home from "./pages/Main/Home";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import KakaoLogin from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
