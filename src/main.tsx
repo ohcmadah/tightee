@@ -1,44 +1,36 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthContextProvider } from "./contexts/AuthContext";
 
-import Home from "./pages/Home";
+import WithAuthentication from "./components/WithAuthentication";
+import Main from "./pages/Main";
+import Home from "./pages/Main/Home";
 import Login from "./pages/Login";
-import KakaoLogin, { kakaoLoader } from "./pages/KakaoLogin";
+import KakaoLogin from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
+import Question from "./pages/Question";
 
 import "./styles/index.scss";
-import WithAuthentication from "./components/WithAuthentication";
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: (
-      <WithAuthentication>
-        <Home />
-      </WithAuthentication>
-    ),
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/callback/kakaotalk",
-    element: <KakaoLogin />,
-    loader: kakaoLoader,
-  },
-  {
-    path: "/signup",
-    element: <SignUp />,
-  },
-]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
+  <BrowserRouter>
     <AuthContextProvider>
-      <RouterProvider router={router} />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <WithAuthentication>
+              <Main />
+            </WithAuthentication>
+          }
+        >
+          <Route index element={<Home />} />
+          <Route path="question" element={<Question />} />
+        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/callback/kakaotalk" element={<KakaoLogin />} />
+        <Route path="/signup" element={<SignUp />} />
+      </Routes>
     </AuthContextProvider>
-  </React.StrictMode>
+  </BrowserRouter>
 );
