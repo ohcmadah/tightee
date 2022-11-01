@@ -16,8 +16,8 @@ const Base = ({ width, height }: { width: number; height: number }) => (
 
 export default {
   Big: () => (
-    <div className="inline-block rounded-full bg-white p-6 drop-shadow-md">
-      <Base width={64} height={64} />
+    <div className="inline-block rounded-full bg-white p-3 drop-shadow-md">
+      <Base width={32} height={32} />
     </div>
   ),
 };

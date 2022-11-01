@@ -60,7 +60,7 @@ const GenderButton = ({
   gender,
   children,
 }: {
-  gender: number;
+  gender: string;
   children: React.ReactNode;
 }) => {
   const { profile } = useSignUpState();

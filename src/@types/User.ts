@@ -4,7 +4,7 @@ export interface User {
   nickname: string;
   region: string;
   birthdate: number;
-  gender: number;
+  gender: string;
   MBTI: string | null;
   subscribe: {
     marketing: boolean;
@@ -17,5 +17,5 @@ export interface NormalizedUser {
   nickname?: string;
   email?: string;
   birthday?: string;
-  gender?: number;
+  gender?: string;
 }

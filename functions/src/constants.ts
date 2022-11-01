@@ -6,8 +6,8 @@ const KAKAO_PROVIDER = "KAKAO";
 
 const SEOUL_CODE = "asia-northeast3";
 
-const GENDER_MALE = 0;
-const GENDER_FEMALE = 1;
+const GENDER_MALE = "M";
+const GENDER_FEMALE = "F";
 
 export {
   KAKAO_GET_TOKEN_URL,

@@ -6,13 +6,7 @@ import { AuthResponse } from "../@types";
 import { authKakao } from "../common/apis";
 
 import Layout from "../components/Layout";
-import Spinner from "../components/Spinner";
-
-const Loading = () => (
-  <div className="flex h-[100vh] w-full items-center justify-center">
-    <Spinner.Big />
-  </div>
-);
+import Loading from "../components/Loading";
 
 const KakaoLogin = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +37,7 @@ const KakaoLogin = () => {
   }, []);
 
   if (isLoading) {
-    return <Loading />;
+    return <Loading.Full />;
   }
 
   return (

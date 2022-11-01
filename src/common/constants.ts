@@ -3,8 +3,8 @@ export const KAKAO_SCOPE_PROFILE_IMAGE = "profile_image";
 export const KAKAO_SCOPE_GENDER = "gender";
 export const KAKAO_SCOPE_BIRTHDAY = "birthday";
 
-export const GENDER_MALE = 0;
-export const GENDER_FEMALE = 1;
+export const GENDER_MALE = "M";
+export const GENDER_FEMALE = "F";
 
 export const URL_PERSONAL_AGREEMENT =
   "https://tightee.notion.site/a1b5cc0997014242a057b74025c3d997";
