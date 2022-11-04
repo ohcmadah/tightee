@@ -14,7 +14,7 @@ export type ProfileState = {
   nickname: string;
   region: string;
   birthdate: { year?: string; month?: string; day?: string };
-  gender?: number;
+  gender?: string;
   MBTI?: string;
 };
 

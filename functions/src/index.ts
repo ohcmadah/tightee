@@ -56,8 +56,8 @@ const updateOrCreateUser = async (
   }
 };
 
-const normalizeGender = (gender: string): number => {
-  const map: { [key: string]: number } = {
+const normalizeGender = (gender: string): string => {
+  const map: { [key: string]: string } = {
     [KAKAO_GENDER_MALE]: GENDER_MALE,
     [KAKAO_GENDER_FEMALE]: GENDER_FEMALE,
   };

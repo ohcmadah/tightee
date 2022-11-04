@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { signInWithCustomToken } from "firebase/auth";
+import { auth } from "../../config";
 import { User } from "../../@types";
 import { createUser } from "../../common/apis";
 import { SignUpState, useSignUpState } from "../../contexts/SignUpContext";
 
-import Spinner from "../../components/Spinner";
-import { Navigate } from "react-router-dom";
+import Loading from "../../components/Loading";
 
 const convertStateToUser = (state: SignUpState): User | null => {
   const {
@@ -42,19 +44,14 @@ const Submitting = () => {
       if (user) {
         try {
           await createUser(user);
+          await signInWithCustomToken(auth, state.token);
           setIsDone(true);
         } catch (error) {}
       }
     })();
   }, []);
 
-  return isDone ? (
-    <Navigate to="/" replace />
-  ) : (
-    <div className="h-full w-full">
-      <Spinner.Big />
-    </div>
-  );
+  return isDone ? <Navigate to="/" replace /> : <Loading.Full />;
 };
 
 export default Submitting;

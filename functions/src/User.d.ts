@@ -32,5 +32,5 @@ interface NormalizedUser {
   nickname?: string;
   email?: string;
   birthday?: string;
-  gender?: number;
+  gender?: string;
 }

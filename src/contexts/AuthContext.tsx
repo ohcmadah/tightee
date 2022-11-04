@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../config";
 
 type AuthState = {
+  isLoading: boolean;
   user: User | null;
   error: Error | null;
 };
@@ -14,16 +15,24 @@ export const AuthContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<AuthState["user"]>(null);
   const [error, setError] = useState<AuthState["error"]>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser, setError);
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        if (isLoading) setIsLoading(false);
+        setUser(user);
+      },
+      setError
+    );
     return () => unsubscribe();
   }, []);
 
   return (
-    <AuthStateContext.Provider value={{ user, error }}>
+    <AuthStateContext.Provider value={{ isLoading, user, error }}>
       {children}
     </AuthStateContext.Provider>
   );

@@ -1,78 +1,52 @@
-import { Suspense, useEffect } from "react";
-import {
-  useLoaderData,
-  redirect,
-  defer,
-  Await,
-  useAsyncValue,
-  Navigate,
-} from "react-router-dom";
-import { auth } from "../config";
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { signInWithCustomToken } from "firebase/auth";
+import { auth as firebaseAuth } from "../config";
 import { AuthResponse } from "../@types";
 import { authKakao } from "../common/apis";
-import { signInWithCustomToken } from "firebase/auth";
-import { useAuthState } from "../contexts/AuthContext";
 
 import Layout from "../components/Layout";
-import Spinner from "../components/Spinner";
-
-const Loading = () => (
-  <div className="flex h-[100vh] w-full items-center justify-center">
-    <Spinner.Big />
-  </div>
-);
-
-export const kakaoLoader = async () => {
-  const searchParams = new URLSearchParams(location.search);
-  const code = searchParams.get("code");
-  if (!code) {
-    return redirect("/");
-  }
-  const authKakaoPromise = authKakao(code);
-  return defer({ auth: authKakaoPromise });
-};
-
-type LoginCallbackProps = {
-  token: string;
-};
-
-const LoginCallback = ({ token }: LoginCallbackProps) => {
-  const { user } = useAuthState();
-
-  useEffect(() => {
-    const login = async (token: string): Promise<void> => {
-      try {
-        await signInWithCustomToken(auth, token);
-      } catch (error) {}
-    };
-
-    login(token);
-  }, []);
-
-  return user ? <Navigate to="/" replace /> : <Loading />;
-};
-
-const Login = () => {
-  const { data } = useAsyncValue() as AuthResponse;
-  const { user, firebaseToken } = data;
-
-  return user ? (
-    <LoginCallback token={firebaseToken} />
-  ) : (
-    <Navigate to="/signup" state={data} />
-  );
-};
+import Loading from "../components/Loading";
 
 const KakaoLogin = () => {
-  const data: any = useLoaderData();
+  const [isLoading, setIsLoading] = useState(true);
+  const [auth, setAuth] = useState<AuthResponse["data"] | null>(null);
+
+  const searchParams = new URLSearchParams(location.search);
+  const code = searchParams.get("code");
+
+  if (!code) {
+    return <Navigate to="/login" />;
+  }
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await authKakao(code);
+        const { user, firebaseToken } = res.data;
+
+        if (user) {
+          await signInWithCustomToken(firebaseAuth, firebaseToken);
+        } else {
+          setAuth(res.data);
+        }
+
+        setIsLoading(false);
+      } catch (error) {}
+    })();
+  }, []);
+
+  if (isLoading) {
+    return <Loading.Full />;
+  }
 
   return (
     <Layout>
-      <Suspense fallback={<Loading />}>
-        <Await resolve={data.auth} errorElement={<p>Error!</p>}>
-          <Login />
-        </Await>
-      </Suspense>
+      {auth ? (
+        <Navigate to="/signup" state={auth} />
+      ) : (
+        <Navigate to="/" replace />
+      )}
     </Layout>
   );
 };
