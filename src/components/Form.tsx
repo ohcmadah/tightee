@@ -1,37 +1,93 @@
 import cn from "classnames";
+import React from "react";
+import { range } from "../common/utils";
+
+import Input from "./Input";
 
 const requiredClass = "after:content-['*'] after:ml-1 after:text-system-alert";
 
-export default {
-  Label: ({
-    required,
-    className,
-    children,
-  }: {
-    required?: boolean;
-    className?: string;
-    children: React.ReactNode;
-  }) => (
-    <label
-      className={cn(
-        "text-lg font-bold",
-        { [requiredClass]: required },
-        className
-      )}
-    >
-      {children}
-    </label>
-  ),
+const Label = ({
+  required,
+  className,
+  children,
+}: {
+  required?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) => (
+  <label
+    className={cn(
+      "text-lg font-bold",
+      { [requiredClass]: required },
+      className
+    )}
+  >
+    {children}
+  </label>
+);
 
-  Error: ({
-    className,
-    children,
-  }: {
-    className?: string;
-    children: React.ReactNode;
-  }) => (
-    <div className={cn("h-6 text-base text-system-alert", className)}>
-      {children}
-    </div>
-  ),
+const Error = ({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) => (
+  <div className={cn("h-6 text-base text-system-alert", className)}>
+    {children}
+  </div>
+);
+
+const BirthdateInput = ({
+  values,
+  onChange,
+}: {
+  values: { year?: string; month?: string; day?: string };
+  onChange: (name: string, value: string) => any;
+}) => (
+  <div className="flex gap-x-3">
+    <Input.Basic
+      type="text"
+      className="w-1/3"
+      name="year"
+      value={values.year}
+      onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+        onChange(evt.target.name, evt.target.value)
+      }
+      placeholder="연"
+      maxLength={4}
+    />
+    <Input.Select
+      className="w-1/3"
+      name="month"
+      value={values.month}
+      onChange={(evt: React.ChangeEvent<HTMLSelectElement>) =>
+        onChange(evt.target.name, evt.target.value)
+      }
+      placeholder="월"
+    >
+      {[...range(1, 12)].map((month) => (
+        <option key={month} value={month < 10 ? `0${month}` : month}>
+          {month}
+        </option>
+      ))}
+    </Input.Select>
+    <Input.Basic
+      type="text"
+      className="w-1/3"
+      name="day"
+      value={values.day}
+      onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+        onChange(evt.target.name, evt.target.value)
+      }
+      placeholder="일"
+      maxLength={2}
+    />
+  </div>
+);
+
+export default {
+  Label: Label,
+  Error: Error,
+  BirthdateInput: BirthdateInput,
 };

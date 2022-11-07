@@ -5,7 +5,6 @@ import {
   useSignUpState,
 } from "../../contexts/SignUpContext";
 import * as constants from "../../common/constants";
-import { range } from "../../common/utils";
 
 import Header from "../../components/Header";
 import Button from "../../components/Button";
@@ -16,45 +15,8 @@ import styles from "../../styles/pages/SignUp.module.scss";
 import maleImage from "../../assets/male.png";
 import femaleImage from "../../assets/female.png";
 import lightImage from "../../assets/light.png";
-
-const REGIONS = [
-  { code: constants.REGION_SEOUL, value: "서울특별시" },
-  { code: constants.REGION_BUSAN, value: "부산광역시" },
-  { code: constants.REGION_DAEGU, value: "대구광역시" },
-  { code: constants.REGION_INCHEON, value: "인천광역시" },
-  { code: constants.REGION_GWANGJU, value: "광주광역시" },
-  { code: constants.REGION_DAEJEON, value: "대전광역시" },
-  { code: constants.REGION_ULSAN, value: "울산광역시" },
-  { code: constants.REGION_SEJONG, value: "세종특별자치시" },
-  { code: constants.REGION_GYEONGGIDO, value: "경기도" },
-  { code: constants.REGION_GANGWONDO, value: "강원도" },
-  { code: constants.REGION_CHUNGCHEONGBUKDO, value: "충청북도" },
-  { code: constants.REGION_CHUNGCHEONGNAMDO, value: "충청남도" },
-  { code: constants.REGION_JEOLLABUKDO, value: "전라북도" },
-  { code: constants.REGION_JEOLLANAMDO, value: "전라남도" },
-  { code: constants.REGION_GYEONGSANGBUKDO, value: "경상북도" },
-  { code: constants.REGION_GYEONGSANGNAMDO, value: "경상남도" },
-  { code: constants.REGION_JEJUDO, value: "제주특별자치도" },
-];
-
-const MBTIS = [
-  "ISTJ",
-  "ISTP",
-  "ISFJ",
-  "ISFP",
-  "INTJ",
-  "INTP",
-  "INFJ",
-  "INFP",
-  "ESTJ",
-  "ESTP",
-  "ESFJ",
-  "ESFP",
-  "ENTJ",
-  "ENTP",
-  "ENFJ",
-  "ENFP",
-];
+import RegionSelector from "../../components/RegionSelector";
+import MBTISelector from "../../components/MBTISelector";
 
 const GenderButton = ({
   gender,
@@ -121,10 +83,6 @@ const Profile = () => {
     });
   };
 
-  const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    updateValue(evt.target.name, evt.target.value);
-  };
-
   const onSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
     updateValue(evt.target.name, evt.target.value);
   };
@@ -151,58 +109,20 @@ const Profile = () => {
             type="text"
             name="nickname"
             value={profile.nickname}
-            onChange={onChange}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+              updateValue(evt.target.name, evt.target.value);
+            }}
             placeholder="닉네임을 입력해 주세요."
           />
         </Section>
         <Section required label="지역" error={errors?.profile?.region}>
-          <Input.Select
-            name="region"
-            value={profile.region}
-            onChange={onSelect}
-            placeholder="지역을 선택해 주세요."
-          >
-            {REGIONS.map(({ code, value }) => (
-              <option key={code} value={code}>
-                {value}
-              </option>
-            ))}
-          </Input.Select>
+          <RegionSelector value={profile.region} onChange={onSelect} />
         </Section>
         <Section required label="생년월일" error={errors?.profile?.birthdate}>
-          <div className="flex gap-x-3">
-            <Input.Basic
-              type="text"
-              className="w-1/3"
-              name="birthdate.year"
-              value={profile.birthdate.year}
-              onChange={onChange}
-              placeholder="연"
-              maxLength={4}
-            />
-            <Input.Select
-              className="w-1/3"
-              name="birthdate.month"
-              value={profile.birthdate.month}
-              onChange={onSelect}
-              placeholder="월"
-            >
-              {[...range(1, 12)].map((month) => (
-                <option key={month} value={month < 10 ? `0${month}` : month}>
-                  {month}
-                </option>
-              ))}
-            </Input.Select>
-            <Input.Basic
-              type="text"
-              className="w-1/3"
-              name="birthdate.day"
-              value={profile.birthdate.day}
-              onChange={onChange}
-              placeholder="일"
-              maxLength={2}
-            />
-          </div>
+          <Form.BirthdateInput
+            values={profile.birthdate}
+            onChange={(name, value) => updateValue(`birthdate.${name}`, value)}
+          />
         </Section>
         <Section required label="성별" error={errors?.profile?.gender}>
           <div className="flex gap-x-3">
@@ -211,18 +131,7 @@ const Profile = () => {
           </div>
         </Section>
         <Section label="MBTI">
-          <Input.Select
-            name="MBTI"
-            value={profile.MBTI}
-            onChange={onSelect}
-            placeholder="MBTI를 선택해 주세요."
-          >
-            {MBTIS.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </Input.Select>
+          <MBTISelector value={profile.MBTI} onChange={onSelect} />
           <div className="mt-2.5 flex items-center rounded-xl bg-system-dimyellow py-3 px-3.5 text-sm text-grayscale-80">
             <img src={lightImage} alt="tip" className="mr-3 w-6" />
             지금 몰라도 나중에 입력할 수 있어요!
