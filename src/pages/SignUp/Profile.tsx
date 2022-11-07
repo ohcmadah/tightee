@@ -4,7 +4,6 @@ import {
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
-import * as constants from "../../common/constants";
 
 import Header from "../../components/Header";
 import Button from "../../components/Button";

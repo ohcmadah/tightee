@@ -1,10 +1,18 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
+import cn from "classnames";
 import useForm from "../hooks/useForm";
 import { useAuthState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
 import { getUser } from "../common/apis";
 import { User } from "../@types";
+import Loading from "../components/Loading";
+import {
+  URL_CS,
+  URL_MBTI_TEST,
+  URL_PERSONAL_AGREEMENT,
+  URL_TERMS,
+} from "../common/constants";
 
 import Button from "../components/Button";
 import Form from "../components/Form";
@@ -14,7 +22,24 @@ import RegionSelector from "../components/RegionSelector";
 import MBTISelector from "../components/MBTISelector";
 
 import eyesIcon from "../assets/eyes.png";
-import Loading from "../components/Loading";
+
+const ExternalLink = ({
+  className,
+  href,
+  children,
+}: {
+  className: string;
+  href: string;
+  children: React.ReactNode;
+}) => (
+  <a
+    className={cn("text-base text-grayscale-20", className)}
+    target="_blank"
+    href={href}
+  >
+    {children}
+  </a>
+);
 
 const ProfileForm = ({ user }: { user: User }) => {
   const birthdate = moment(user.birthdate);
@@ -81,14 +106,55 @@ const ProfileForm = ({ user }: { user: User }) => {
         </Form.Section>
         <Form.Section label="MBTI">
           <MBTISelector value={values.MBTI || undefined} onChange={onSelect} />
+          <ExternalLink href={URL_MBTI_TEST} className="mt-3">
+            {"MBTI 검사 바로가기 >"}
+          </ExternalLink>
         </Form.Section>
-      </main>
 
-      <footer className="mt-8 flex flex-col">
-        <Button.Colored color="yellow" onClick={handleSubmit}>
+        <Button.Colored
+          className="w-full"
+          color="yellow"
+          onClick={handleSubmit}
+        >
           수정하기
         </Button.Colored>
-      </footer>
+
+        <section className="my-28">
+          <Form.Label className="mb-2">맞춤형 혜택</Form.Label>
+          <div className="flex items-center justify-between text-base">
+            이벤트 등 다양한 혜택을 제공받을 수 있어요
+            <Input.Switch />
+          </div>
+        </section>
+
+        <section className="mb-6 flex items-center">
+          <Button.Outline className="mr-8 min-w-[200px]">
+            로그아웃
+          </Button.Outline>
+          <span className="text-base">다음에 또 만나요!</span>
+        </section>
+
+        <section className="mb-6 flex items-center">
+          <Button.Outline className="mr-8 min-w-[200px]">
+            회원탈퇴
+          </Button.Outline>
+          <span className="text-base">
+            지금까지 쌓은 소중한 기록들이 모두 사라져요 :(
+          </span>
+        </section>
+
+        <section className="flex justify-around">
+          <ExternalLink className="font-bold" href={URL_CS}>
+            고객센터
+          </ExternalLink>
+          <ExternalLink className="font-bold" href={URL_PERSONAL_AGREEMENT}>
+            개인정보 처리방침
+          </ExternalLink>
+          <ExternalLink className="font-bold" href={URL_TERMS}>
+            서비스 이용 약관
+          </ExternalLink>
+        </section>
+      </main>
     </>
   );
 };
