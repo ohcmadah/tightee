@@ -27,7 +27,7 @@ const RegionSelector = ({
   onChange,
   placeholder = "지역을 선택해 주세요.",
 }: {
-  value: string;
+  value?: string;
   onChange: React.FormEventHandler<HTMLSelectElement>;
   placeholder?: string;
 }) => (

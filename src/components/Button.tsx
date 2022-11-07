@@ -1,5 +1,7 @@
-import React from "react";
 import cn from "classnames";
+import maleImage from "../assets/male.png";
+import femaleImage from "../assets/female.png";
+import { GENDER_FEMALE, GENDER_MALE } from "../common/constants";
 
 interface ButtonProps {
   className?: string;
@@ -53,7 +55,42 @@ const Outline = ({ className, onClick, disabled, children }: ButtonProps) => (
   </button>
 );
 
+const genderButtonStyle =
+  "flex w-1/2 items-center justify-center text-grayscale-100";
+
+const GenderToggle = ({
+  value,
+  onChange,
+}: {
+  value?: string;
+  onChange: (gender: string) => any;
+}) => {
+  return (
+    <div className="flex gap-x-3">
+      <Outline
+        className={cn(genderButtonStyle, {
+          "bg-system-dimyellow": value === GENDER_MALE,
+        })}
+        onClick={() => onChange(GENDER_MALE)}
+      >
+        <img className="mr-4 w-6" src={maleImage} alt="male" />
+        남자
+      </Outline>
+      <Outline
+        className={cn(genderButtonStyle, {
+          "bg-system-dimyellow": value === GENDER_FEMALE,
+        })}
+        onClick={() => onChange(GENDER_FEMALE)}
+      >
+        <img className="mr-4 w-6" src={femaleImage} alt="female" />
+        여자
+      </Outline>
+    </div>
+  );
+};
+
 export default {
   Colored: Colored,
   Outline: Outline,
+  GenderToggle: GenderToggle,
 };

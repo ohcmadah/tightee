@@ -86,8 +86,26 @@ const BirthdateInput = ({
   </div>
 );
 
+type SectionProps = {
+  required?: boolean;
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+};
+
+const Section = ({ required, label, error, children }: SectionProps) => (
+  <section className={"mb-4 flex flex-col last:mb-0"}>
+    <Label required={required} className="mb-2">
+      {label}
+    </Label>
+    {children}
+    <Error className="mt-1.5">{error}</Error>
+  </section>
+);
+
 export default {
   Label: Label,
   Error: Error,
   BirthdateInput: BirthdateInput,
+  Section: Section,
 };
