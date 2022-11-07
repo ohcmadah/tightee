@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { setProperty } from "../common/utils";
 
-type Errors = {
+export type Errors = {
   [name: string]: string;
 };
 

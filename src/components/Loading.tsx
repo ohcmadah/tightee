@@ -9,7 +9,7 @@ const Full = () => (
 
 const Modal = () => (
   <ModalPortal>
-    <div className="t-0 l-0 b-0 r-0 fixed flex h-full w-full items-center justify-center bg-grayscale-100/60">
+    <div className="fixed top-0 left-0 bottom-0 right-0 flex h-full w-full items-center justify-center bg-grayscale-100/60">
       <Spinner.Big />
     </div>
   </ModalPortal>
