@@ -201,9 +201,11 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
         />
         나의 프로필
       </Header>
-      <ProfileForm user={user} onSubmit={onSubmit} />
-      <Settings onLogout={onLogout} />
-      {isLoading && <Loading.Modal />}
+      {isLoading && (
+        <ModalPortal>
+          <Loading.Modal />
+        </ModalPortal>
+      )}
     </>
   );
 };

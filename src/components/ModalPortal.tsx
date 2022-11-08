@@ -4,7 +4,9 @@ import ReactDOM from "react-dom";
 const CONTAINER_ID = "modal";
 
 const ModalPortal = ({ children }: { children: React.ReactNode }) => {
-  const container = useRef<HTMLDivElement | null>(null);
+  const container = useRef<HTMLElement | null>(
+    document.getElementById(CONTAINER_ID)
+  );
 
   const init = () => {
     const { body } = document;
