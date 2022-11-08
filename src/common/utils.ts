@@ -27,7 +27,7 @@ export const convertBirthdateToUTC = (birthdate: {
   if (!year || !month || !day) {
     return null;
   }
-  return Date.UTC(parseInt(year), parseInt(month), parseInt(day));
+  return Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day));
 };
 
 export const convertUTCToBirthdate = (utctime: number) => {

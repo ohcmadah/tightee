@@ -31,7 +31,7 @@ const Colored = ({
 }: ColoredProps) => (
   <button
     className={cn(
-      "rounded-md p-3.5 text-base font-bold",
+      "rounded-md p-3.5 text-base font-bold disabled:bg-grayscale-10 disabled:text-grayscale-60",
       convertColorToClassName(color),
       className
     )}

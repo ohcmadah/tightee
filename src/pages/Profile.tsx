@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import moment from "moment";
+import React, { useEffect, useMemo, useState } from "react";
 import cn from "classnames";
 import { useNavigate } from "react-router-dom";
-import useForm, { Errors } from "../hooks/useForm";
+import useForm from "../hooks/useForm";
 import { useAuthState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
 import { getUser, updateUser } from "../common/apis";
@@ -90,14 +89,32 @@ const Settings = ({
 };
 
 const ProfileForm = ({
-  values,
-  errors,
-  handleChange,
+  user,
+  onSubmit,
 }: {
-  values: ProfileState;
-  errors: Errors;
-  handleChange: Function;
+  user: User;
+  onSubmit: (newValues: ProfileState) => any;
 }) => {
+  const initialValues = useMemo(
+    () => ({
+      nickname: user.nickname,
+      region: user.region,
+      birthdate: convertUTCToBirthdate(user.birthdate),
+      gender: user.gender,
+      MBTI: user.MBTI || undefined,
+    }),
+    [user]
+  );
+
+  const { values, errors, handleChange, handleSubmit } = useForm<ProfileState>({
+    initialValues,
+    onSubmit,
+    validator: (values) => {
+      const errors = profileValidator(values);
+      return errors ? errors : {};
+    },
+  });
+
   const onSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
     handleChange(evt.target.name, evt.target.value);
   };
@@ -135,64 +152,22 @@ const ProfileForm = ({
           {"MBTI 검사 바로가기 >"}
         </ExternalLink>
       </Form.Section>
+
+      <Button.Colored
+        className="w-full"
+        color="yellow"
+        disabled={JSON.stringify(initialValues) === JSON.stringify(values)}
+        onClick={handleSubmit}
+      >
+        수정하기
+      </Button.Colored>
     </>
   );
 };
 
-const ActualProfile = ({ uid }: { uid: string }) => {
-  const [user, setUser] = useState<User>();
+const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      try {
-        const doc = await getUser(uid);
-        const user = doc.data() as User;
-        setUser(user);
-      } catch (error) {}
-      setIsLoading(false);
-    })();
-  }, []);
-
-  const { values, errors, handleChange, handleSubmit, initAll } =
-    useForm<ProfileState>({
-      initialValues: {
-        nickname: "",
-        region: "",
-        birthdate: {},
-        gender: "",
-        MBTI: "",
-      },
-      onSubmit: async (values) => {
-        const newProfile = {
-          ...values,
-          birthdate: convertBirthdateToUTC(values.birthdate),
-        };
-        setIsLoading(true);
-        try {
-          await updateUser(uid, newProfile);
-        } catch (error) {}
-        setIsLoading(false);
-      },
-      validator: (values) => {
-        const errors = profileValidator(values);
-        return errors ? errors : {};
-      },
-    });
-
-  useEffect(() => {
-    if (user) {
-      initAll({
-        nickname: user.nickname,
-        region: user.region,
-        birthdate: convertUTCToBirthdate(user.birthdate),
-        gender: user.gender,
-        MBTI: user.MBTI || undefined,
-      });
-    }
-  }, [user]);
 
   const onLogout = async () => {
     try {
@@ -201,6 +176,19 @@ const ActualProfile = ({ uid }: { uid: string }) => {
       setIsLoading(false);
       navigate("/");
     } catch (error) {}
+  };
+
+  const onSubmit = async (values: ProfileState) => {
+    setIsLoading(true);
+    try {
+      const newProfile = {
+        ...values,
+        birthdate: convertBirthdateToUTC(values.birthdate),
+      };
+      await updateUser(user.id, newProfile);
+    } catch (error) {}
+    setIsLoading(false);
+    init();
   };
 
   return (
@@ -213,24 +201,34 @@ const ActualProfile = ({ uid }: { uid: string }) => {
         />
         나의 프로필
       </Header>
-      <ProfileForm
-        values={values}
-        errors={errors}
-        handleChange={handleChange}
-      />
-      <Button.Colored className="w-full" color="yellow" onClick={handleSubmit}>
-        수정하기
-      </Button.Colored>
+      <ProfileForm user={user} onSubmit={onSubmit} />
       <Settings onLogout={onLogout} />
       {isLoading && <Loading.Modal />}
     </>
   );
 };
 
+const ProfileWrapper = ({ uid }: { uid: string }) => {
+  const [user, setUser] = useState<User>();
+
+  const init = async () => {
+    try {
+      const doc = await getUser(uid);
+      const user = doc.data() as User;
+      setUser(user);
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  return user ? <ActualProfile init={init} user={user} /> : <Loading.Modal />;
+};
+
 const Profile = () => {
   const auth = useAuthState();
-
-  return auth.user ? <ActualProfile uid={auth.user.uid} /> : <Loading.Full />;
+  return auth.user ? <ProfileWrapper uid={auth.user.uid} /> : <Loading.Full />;
 };
 
 export default Profile;

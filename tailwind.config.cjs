@@ -10,6 +10,7 @@ module.exports = {
         "grayscale-80": "#696969",
         "grayscale-60": "#808080",
         "grayscale-20": "#c0c0c0",
+        "grayscale-10": "#D7D7D7",
         "system-alert": "#ff0000",
         "system-yellow": "#FFE699",
         "system-dimyellow": "#F8F5D5",
