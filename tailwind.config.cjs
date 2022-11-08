@@ -16,6 +16,9 @@ module.exports = {
         "system-dimyellow": "#F8F5D5",
         "kakao-container": "#FEE500",
       },
+      zIndex: {
+        popup: "100",
+      },
     },
   },
   plugins: [],

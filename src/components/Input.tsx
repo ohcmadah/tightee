@@ -96,10 +96,15 @@ export const Select = ({
   </select>
 );
 
-const Switch = () => {
+const Switch = ({ checked, onChange }: React.HTMLProps<HTMLInputElement>) => {
   return (
     <label className={cn(styles.switch, "relative inline-block")}>
-      <input type="checkbox" className="h-0 w-0 opacity-0" />
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="h-0 w-0 opacity-0"
+      />
       <span
         className={cn(
           styles.slider,

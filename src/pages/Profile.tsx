@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import cn from "classnames";
 import { useNavigate } from "react-router-dom";
+import { UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
 import { useAuthState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
@@ -15,6 +16,7 @@ import {
 } from "../common/constants";
 import { auth as firebaseAuth } from "../config";
 import { ProfileState } from "../contexts/SignUpContext";
+import { convertBirthdateToUTC, convertUTCToBirthdate } from "../common/utils";
 
 import Button from "../components/Button";
 import Form from "../components/Form";
@@ -22,9 +24,9 @@ import Header from "../components/Header";
 import Input from "../components/Input";
 import RegionSelector from "../components/RegionSelector";
 import MBTISelector from "../components/MBTISelector";
+import ModalPortal from "../components/ModalPortal";
 
 import eyesIcon from "../assets/eyes.png";
-import { convertBirthdateToUTC, convertUTCToBirthdate } from "../common/utils";
 
 const ExternalLink = ({
   className,
@@ -45,17 +47,25 @@ const ExternalLink = ({
 );
 
 const Settings = ({
+  subscribe,
+  onUpdateUser,
   onLogout,
 }: {
+  subscribe: boolean;
+  onUpdateUser: (data: UpdateData<User>) => any;
   onLogout: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
+  const toggleSubscribe = () => {
+    onUpdateUser({ subscribe: { marketing: !subscribe } });
+  };
+
   return (
     <>
       <section className="my-28">
         <Form.Label className="mb-2">맞춤형 혜택</Form.Label>
         <div className="flex items-center justify-between text-base">
           이벤트 등 다양한 혜택을 제공받을 수 있어요
-          <Input.Switch />
+          <Input.Switch checked={subscribe} onChange={toggleSubscribe} />
         </div>
       </section>
 
@@ -90,10 +100,10 @@ const Settings = ({
 
 const ProfileForm = ({
   user,
-  onSubmit,
+  onUpdateUser,
 }: {
   user: User;
-  onSubmit: (newValues: ProfileState) => any;
+  onUpdateUser: (data: UpdateData<User>) => any;
 }) => {
   const initialValues = useMemo(
     () => ({
@@ -108,7 +118,13 @@ const ProfileForm = ({
 
   const { values, errors, handleChange, handleSubmit } = useForm<ProfileState>({
     initialValues,
-    onSubmit,
+    onSubmit: (values) => {
+      const newProfile = {
+        ...values,
+        birthdate: convertBirthdateToUTC(values.birthdate),
+      };
+      onUpdateUser(newProfile);
+    },
     validator: (values) => {
       const errors = profileValidator(values);
       return errors ? errors : {};
@@ -178,14 +194,10 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
     } catch (error) {}
   };
 
-  const onSubmit = async (values: ProfileState) => {
+  const onUpdateUser = async (data: UpdateData<User>) => {
     setIsLoading(true);
     try {
-      const newProfile = {
-        ...values,
-        birthdate: convertBirthdateToUTC(values.birthdate),
-      };
-      await updateUser(user.id, newProfile);
+      await updateUser(user.id, data);
     } catch (error) {}
     setIsLoading(false);
     init();
@@ -201,6 +213,12 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
         />
         나의 프로필
       </Header>
+      <ProfileForm user={user} onUpdateUser={onUpdateUser} />
+      <Settings
+        subscribe={user.subscribe.marketing}
+        onUpdateUser={onUpdateUser}
+        onLogout={onLogout}
+      />
       {isLoading && (
         <ModalPortal>
           <Loading.Modal />
@@ -225,7 +243,13 @@ const ProfileWrapper = ({ uid }: { uid: string }) => {
     init();
   }, []);
 
-  return user ? <ActualProfile init={init} user={user} /> : <Loading.Modal />;
+  return user ? (
+    <ActualProfile init={init} user={user} />
+  ) : (
+    <ModalPortal>
+      <Loading.Modal />
+    </ModalPortal>
+  );
 };
 
 const Profile = () => {
