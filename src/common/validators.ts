@@ -1,5 +1,4 @@
 import moment from "moment";
-import { ProfileState } from "../contexts/SignUpContext";
 
 const birthdateValidator = (birthdate: {
   year?: string;
@@ -12,9 +11,10 @@ const birthdateValidator = (birthdate: {
   }
 
   const normalizedYear = year.padStart(4, "0");
+  const normalizedMonth = month.padStart(2, "0");
   const normalizedDay = day.padStart(2, "0");
 
-  const date = moment(`${normalizedYear}-${month}-${normalizedDay}`);
+  const date = moment(`${normalizedYear}-${normalizedMonth}-${normalizedDay}`);
   const today = moment();
 
   if (!date.isValid() || date.isBefore("1900-01-01")) {

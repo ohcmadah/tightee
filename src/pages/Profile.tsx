@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import useForm, { Errors } from "../hooks/useForm";
 import { useAuthState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
-import { getUser } from "../common/apis";
+import { getUser, updateUser } from "../common/apis";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -25,6 +25,7 @@ import RegionSelector from "../components/RegionSelector";
 import MBTISelector from "../components/MBTISelector";
 
 import eyesIcon from "../assets/eyes.png";
+import { convertBirthdateToUTC, convertUTCToBirthdate } from "../common/utils";
 
 const ExternalLink = ({
   className,
@@ -44,61 +45,13 @@ const ExternalLink = ({
   </a>
 );
 
-const ProfileForm = ({
-  values,
-  errors,
-  handleChange,
-  handleSubmit,
+const Settings = ({
   onLogout,
 }: {
-  values: ProfileState;
-  errors: Errors;
-  handleChange: Function;
-  handleSubmit: React.MouseEventHandler<HTMLButtonElement>;
   onLogout: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
-  const onSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
-    handleChange(evt.target.name, evt.target.value);
-  };
-
   return (
-    <main>
-      <Form.Section required label="닉네임" error={errors?.nickname}>
-        <Input.Basic
-          type="text"
-          value={values.nickname}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-            handleChange("nickname", evt.target.value);
-          }}
-          placeholder="닉네임을 입력해 주세요."
-        />
-      </Form.Section>
-      <Form.Section required label="지역" error={errors?.region}>
-        <RegionSelector value={values.region} onChange={onSelect} />
-      </Form.Section>
-      <Form.Section required label="생년월일" error={errors?.birthdate}>
-        <Form.BirthdateInput
-          values={values.birthdate}
-          onChange={(name, value) => handleChange(`birthdate.${name}`, value)}
-        />
-      </Form.Section>
-      <Form.Section required label="성별" error={errors?.gender}>
-        <Button.GenderToggle
-          value={values.gender}
-          onChange={(gender) => handleChange("gender", gender)}
-        />
-      </Form.Section>
-      <Form.Section label="MBTI">
-        <MBTISelector value={values.MBTI || undefined} onChange={onSelect} />
-        <ExternalLink href={URL_MBTI_TEST} className="mt-3">
-          {"MBTI 검사 바로가기 >"}
-        </ExternalLink>
-      </Form.Section>
-
-      <Button.Colored className="w-full" color="yellow" onClick={handleSubmit}>
-        수정하기
-      </Button.Colored>
-
+    <>
       <section className="my-28">
         <Form.Label className="mb-2">맞춤형 혜택</Form.Label>
         <div className="flex items-center justify-between text-base">
@@ -132,7 +85,57 @@ const ProfileForm = ({
           서비스 이용 약관
         </ExternalLink>
       </section>
-    </main>
+    </>
+  );
+};
+
+const ProfileForm = ({
+  values,
+  errors,
+  handleChange,
+}: {
+  values: ProfileState;
+  errors: Errors;
+  handleChange: Function;
+}) => {
+  const onSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
+    handleChange(evt.target.name, evt.target.value);
+  };
+
+  return (
+    <>
+      <Form.Section required label="닉네임" error={errors?.nickname}>
+        <Input.Basic
+          type="text"
+          value={values.nickname}
+          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+            handleChange("nickname", evt.target.value);
+          }}
+          placeholder="닉네임을 입력해 주세요."
+        />
+      </Form.Section>
+      <Form.Section required label="지역" error={errors?.region}>
+        <RegionSelector value={values.region} onChange={onSelect} />
+      </Form.Section>
+      <Form.Section required label="생년월일" error={errors?.birthdate}>
+        <Form.BirthdateInput
+          values={values.birthdate}
+          onChange={(name, value) => handleChange(`birthdate.${name}`, value)}
+        />
+      </Form.Section>
+      <Form.Section required label="성별" error={errors?.gender}>
+        <Button.GenderToggle
+          value={values.gender}
+          onChange={(gender) => handleChange("gender", gender)}
+        />
+      </Form.Section>
+      <Form.Section label="MBTI">
+        <MBTISelector value={values.MBTI || undefined} onChange={onSelect} />
+        <ExternalLink href={URL_MBTI_TEST} className="mt-3">
+          {"MBTI 검사 바로가기 >"}
+        </ExternalLink>
+      </Form.Section>
+    </>
   );
 };
 
@@ -162,7 +165,17 @@ const ActualProfile = ({ uid }: { uid: string }) => {
         gender: "",
         MBTI: "",
       },
-      onSubmit: () => {},
+      onSubmit: async (values) => {
+        const newProfile = {
+          ...values,
+          birthdate: convertBirthdateToUTC(values.birthdate),
+        };
+        setIsLoading(true);
+        try {
+          await updateUser(uid, newProfile);
+        } catch (error) {}
+        setIsLoading(false);
+      },
       validator: (values) => {
         const errors = profileValidator(values);
         return errors ? errors : {};
@@ -171,15 +184,10 @@ const ActualProfile = ({ uid }: { uid: string }) => {
 
   useEffect(() => {
     if (user) {
-      const birthdate = moment(user.birthdate);
       initAll({
         nickname: user.nickname,
         region: user.region,
-        birthdate: {
-          year: birthdate.year().toString(),
-          month: birthdate.month().toString(),
-          day: birthdate.day().toString(),
-        },
+        birthdate: convertUTCToBirthdate(user.birthdate),
         gender: user.gender,
         MBTI: user.MBTI || undefined,
       });
@@ -209,9 +217,11 @@ const ActualProfile = ({ uid }: { uid: string }) => {
         values={values}
         errors={errors}
         handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        onLogout={onLogout}
       />
+      <Button.Colored className="w-full" color="yellow" onClick={handleSubmit}>
+        수정하기
+      </Button.Colored>
+      <Settings onLogout={onLogout} />
       {isLoading && <Loading.Modal />}
     </>
   );

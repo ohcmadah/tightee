@@ -9,7 +9,7 @@ export type Validator<T> = (values: T) => Errors | {};
 
 type useFormProps<T> = {
   initialValues: T;
-  onSubmit: Function;
+  onSubmit: (values: T) => any;
   validator: Validator<T>;
 };
 

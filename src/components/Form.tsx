@@ -67,7 +67,7 @@ const BirthdateInput = ({
       placeholder="월"
     >
       {[...range(1, 12)].map((month) => (
-        <option key={month} value={month < 10 ? `0${month}` : month}>
+        <option key={month} value={month}>
           {month}
         </option>
       ))}

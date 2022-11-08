@@ -18,7 +18,7 @@ export const Basic = ({
         className
       )}
       name={name}
-      value={value}
+      value={value || ""}
       onChange={onChange}
       readOnly={!onChange}
       placeholder={placeholder}

@@ -7,14 +7,13 @@ import { createUser } from "../../common/apis";
 import { SignUpState, useSignUpState } from "../../contexts/SignUpContext";
 
 import Loading from "../../components/Loading";
+import { convertBirthdateToUTC } from "../../common/utils";
 
 const convertStateToUser = (state: SignUpState): User | null => {
-  const {
-    birthdate: { year, month, day },
-    gender,
-  } = state.profile;
+  const { gender } = state.profile;
+  const birthdate = convertBirthdateToUTC(state.profile.birthdate);
 
-  if (!year || !month || !day || !gender) {
+  if (!gender || !birthdate) {
     return null;
   }
 
@@ -23,7 +22,7 @@ const convertStateToUser = (state: SignUpState): User | null => {
     email: state.email || null,
     nickname: state.profile.nickname,
     region: state.profile.region,
-    birthdate: Date.UTC(parseInt(year), parseInt(month), parseInt(day)),
+    birthdate: birthdate,
     gender: gender,
     MBTI: state.profile.MBTI || null,
     subscribe: {
