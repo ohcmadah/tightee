@@ -27,3 +27,39 @@ $checkbox-size: 20px;
   background-position: center right 15px;
   background-image: url(../../assets/down_arrow.svg);
 }
+
+.switch {
+  $slider-size: 25px;
+  $switch-padding: 3px;
+
+  width: calc($slider-size * 2 + $switch-padding * 2);
+  height: calc($slider-size + $switch-padding * 2);
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: $slider-size;
+    width: $slider-size;
+    left: $switch-padding;
+    bottom: $switch-padding;
+    background-color: white;
+    -webkit-transition: 0.3s;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  input:checked + .slider {
+    background-color: $color-primary;
+
+    &:before {
+      -webkit-transform: translateX($slider-size);
+      -ms-transform: translateX($slider-size);
+      transform: translateX($slider-size);
+    }
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px $color-primary;
+  }
+}

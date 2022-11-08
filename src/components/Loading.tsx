@@ -1,4 +1,4 @@
-import ModalPortal from "./ModalPortal";
+import Popup from "./Popup";
 import Spinner from "./Spinner";
 
 const Full = () => (
@@ -8,11 +8,9 @@ const Full = () => (
 );
 
 const Modal = () => (
-  <ModalPortal>
-    <div className="t-0 l-0 b-0 r-0 fixed flex h-full w-full items-center justify-center bg-grayscale-100/60">
-      <Spinner.Big />
-    </div>
-  </ModalPortal>
+  <Popup.Background>
+    <Spinner.Big />
+  </Popup.Background>
 );
 
 export default {

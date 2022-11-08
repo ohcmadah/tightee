@@ -18,7 +18,7 @@ export const Basic = ({
         className
       )}
       name={name}
-      value={value}
+      value={value || ""}
       onChange={onChange}
       readOnly={!onChange}
       placeholder={placeholder}
@@ -96,8 +96,28 @@ export const Select = ({
   </select>
 );
 
+const Switch = ({ checked, onChange }: React.HTMLProps<HTMLInputElement>) => {
+  return (
+    <label className={cn(styles.switch, "relative inline-block")}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="h-0 w-0 opacity-0"
+      />
+      <span
+        className={cn(
+          styles.slider,
+          "absolute top-0 left-0 right-0 bottom-0 cursor-pointer rounded-[34px] bg-grayscale-20 duration-300"
+        )}
+      ></span>
+    </label>
+  );
+};
+
 export default {
   Basic: Basic,
   Checkbox: Checkbox,
   Select: Select,
+  Switch: Switch,
 };

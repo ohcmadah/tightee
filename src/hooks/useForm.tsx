@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { setProperty } from "../common/utils";
 
-type Errors = {
+export type Errors = {
   [name: string]: string;
 };
 
@@ -8,11 +9,11 @@ export type Validator<T> = (values: T) => Errors | {};
 
 type useFormProps<T> = {
   initialValues: T;
-  onSubmit: Function;
+  onSubmit: (values: T) => any;
   validator: Validator<T>;
 };
 
-const useForm = <T,>({
+const useForm = <T extends Record<string, any>>({
   initialValues,
   onSubmit,
   validator,
@@ -21,7 +22,8 @@ const useForm = <T,>({
   const [errors, setErrors] = useState<Errors>({});
 
   const handleChange = (key: string, value: any) => {
-    setValues({ ...values, [key]: value });
+    const newValues = setProperty(values, key, value);
+    setValues(newValues);
   };
 
   const handleSubmit = () => {
