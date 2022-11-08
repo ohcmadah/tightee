@@ -19,6 +19,9 @@ module.exports = {
       zIndex: {
         popup: "100",
       },
+      height: {
+        nav: "58px",
+      },
     },
   },
   plugins: [],
