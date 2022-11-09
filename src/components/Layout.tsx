@@ -8,7 +8,7 @@ interface LayoutProps {
 }
 
 const Layout = ({ className, children }: LayoutProps) => (
-  <div className={cn(styles.layout, className)}>{children}</div>
+  <main className={cn(styles.layout, className)}>{children}</main>
 );
 
 export default Layout;
