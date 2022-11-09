@@ -4,11 +4,24 @@ import femaleImage from "../assets/female.png";
 import { GENDER_FEMALE, GENDER_MALE } from "../common/constants";
 
 interface ButtonProps {
-  className?: string;
+  className?: string | string[];
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
   children: React.ReactNode;
 }
+
+const Basic = ({ className, onClick, disabled, children }: ButtonProps) => (
+  <button
+    className={cn(
+      "rounded-md bg-white p-3.5 text-base drop-shadow-md disabled:bg-grayscale-10 disabled:text-grayscale-60",
+      className
+    )}
+    onClick={onClick}
+    disabled={disabled}
+  >
+    {children}
+  </button>
+);
 
 interface ColoredProps extends ButtonProps {
   color: "primary" | "yellow";
@@ -90,6 +103,7 @@ const GenderToggle = ({
 };
 
 export default {
+  Basic: Basic,
   Colored: Colored,
   Outline: Outline,
   GenderToggle: GenderToggle,

@@ -18,6 +18,11 @@ export function* range(start: number, end: number) {
   }
 }
 
+export const getLocalTime = () => {
+  const timezoneOffset = new Date().getTimezoneOffset();
+  return moment.utc().utcOffset(-timezoneOffset);
+};
+
 export const convertBirthdateToUTC = (birthdate: {
   year?: string;
   month?: string;
