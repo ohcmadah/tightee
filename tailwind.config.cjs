@@ -18,6 +18,7 @@ module.exports = {
       },
       zIndex: {
         popup: "100",
+        nav: "99",
       },
       height: {
         nav: "58px",
