@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
 import moment from "moment";
+import { getTodayQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
-import { getOption, getTodayQuestions } from "../common/apis";
 import Loading from "../components/Loading";
-import ModalPortal from "../components/ModalPortal";
 
 import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
@@ -31,24 +29,13 @@ const Title = () => (
   </>
 );
 
-const OptionSection = ({ options }: { options: Promise<OptionType>[] }) => {
-  const { data } = useAsyncAPI(async () => {
-    return await Promise.allSettled(options);
-  });
-  return (
-    data && (
-      <section className="flex flex-col gap-y-4">
-        {data.map((result) => {
-          return (
-            result.status === "fulfilled" && (
-              <Button.Basic>{result.value.text}</Button.Basic>
-            )
-          );
-        })}
-      </section>
-    )
-  );
-};
+const OptionSection = ({ options }: { options: OptionType[] }) => (
+  <section className="flex flex-col gap-y-4">
+    {options.map((option) => (
+      <Button.Basic key={option.text}>{option.text}</Button.Basic>
+    ))}
+  </section>
+);
 
 const QuestionSection = ({ title }: { title: string }) => {
   return (
@@ -59,65 +46,36 @@ const QuestionSection = ({ title }: { title: string }) => {
   );
 };
 
-const Main = ({
-  question,
-  options,
-}: {
-  question?: QuestionType;
-  options?: Promise<OptionType>[];
-}) => (
+const Main = ({ question }: { question?: QuestionType }) => (
   <main>
     <QuestionSection title={question?.title || ""} />
-    <OptionSection options={options || []} />
+    <OptionSection options={question?.options || []} />
   </main>
 );
 
-const PopupRenderer = ({ isLoading }: { isLoading: boolean }) =>
-  isLoading ? (
-    <ModalPortal>
-      <Loading.Modal />
-    </ModalPortal>
-  ) : (
-    <></>
-  );
-
-const getQuestionAndOptions = async () => {
-  const questions = await getTodayQuestions();
-  if (questions.docs.length === 0) {
-    return null;
-  }
-  const question = questions.docs[0].data() as QuestionType;
-  const options = question.options.map(async (option) => {
-    const doc = await getOption(option.id);
-    return doc.data() as OptionType;
-  });
-  return { question, options };
-};
-
 const Question = () => {
-  const res = useAsyncAPI(getQuestionAndOptions);
-  const [error, setError] = useState<string | null>(null);
+  const { data, error, isLoading } = useAsyncAPI(getTodayQuestion);
 
-  useEffect(() => {
-    if (res.error) {
-      return setError("에러가 발생했습니다.");
-    }
-    if (!res.isLoading && !res.data) {
-      return setError("오늘의 질문이 존재하지 않습니다.");
-    }
-  }, [res]);
+  if (isLoading) {
+    return <Loading.Full />;
+  }
 
-  return !error ? (
-    <>
-      <Header className="flex items-center" optionRenderer={<DateBadge />}>
-        <Title />
-      </Header>
-      <Main question={res.data?.question} options={res.data?.options} />
-      <PopupRenderer isLoading={res.isLoading} />\
-    </>
-  ) : (
-    <div>{error}</div>
-  );
+  if (error) {
+    return <div>{`${error}`}</div>;
+  }
+
+  if (data?.status === 200) {
+    return (
+      <>
+        <Header className="flex items-center" optionRenderer={<DateBadge />}>
+          <Title />
+        </Header>
+        <Main question={data?.data} />
+      </>
+    );
+  } else {
+    return <div>{`${data?.statusText}`}</div>;
+  }
 };
 
 export default Question;

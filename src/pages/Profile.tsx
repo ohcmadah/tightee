@@ -27,6 +27,7 @@ import MBTISelector from "../components/MBTISelector";
 import ModalPortal from "../components/ModalPortal";
 
 import eyesIcon from "../assets/eyes.png";
+import useAsyncAPI from "../hooks/useAsyncAPI";
 
 const ExternalLink = ({
   className,
@@ -229,26 +230,22 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
 };
 
 const ProfileWrapper = ({ uid }: { uid: string }) => {
-  const [user, setUser] = useState<User>();
+  const { data, error, isLoading } = useAsyncAPI(getUser, uid);
 
-  const init = async () => {
-    try {
-      const doc = await getUser(uid);
-      const user = doc.data() as User;
-      setUser(user);
-    } catch (error) {}
-  };
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  return user ? (
-    <ActualProfile init={init} user={user} />
-  ) : (
+  return data?.data() ? (
+    <ActualProfile
+      init={() => {
+        // TODO: useAsyncAPI에 forceUpdate 만들기
+        location.reload();
+      }}
+      user={data.data() as User}
+    />
+  ) : isLoading ? (
     <ModalPortal>
       <Loading.Modal />
     </ModalPortal>
+  ) : (
+    <div>{`${error}`}</div>
   );
 };
 

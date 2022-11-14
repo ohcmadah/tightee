@@ -1,4 +1,4 @@
 export * from "./User";
-export * from "./Response";
+export * from "./Auth";
 export * from "./Question";
 export * from "./Option";
