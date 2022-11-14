@@ -1,15 +1,17 @@
 import moment from "moment";
 import { getTodayQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
+import { URL_CS } from "../common/constants";
+import { Option as OptionType, Question as QuestionType } from "../@types";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
 import Loading from "../components/Loading";
+import Error from "../components/Error";
+import ExternalLink from "../components/ExternalLink";
 
 import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
-
-import { Option as OptionType, Question as QuestionType } from "../@types";
 
 const DateBadge = () => (
   <div className="ml-auto inline-block rounded-full bg-primary-peach py-1.5 px-6 text-base font-normal">
@@ -61,7 +63,7 @@ const Question = () => {
   }
 
   if (error) {
-    return <div>{`${error}`}</div>;
+    return <Error.Default />;
   }
 
   if (data?.status === 200) {
@@ -74,7 +76,18 @@ const Question = () => {
       </>
     );
   } else {
-    return <div>{`${data?.statusText}`}</div>;
+    return (
+      <Error.Default>
+        <article>
+          오늘의 질문이 존재하지 않습니다.
+          <br />
+          <ExternalLink className="text-primary" href={URL_CS}>
+            고객센터
+          </ExternalLink>
+          로 문의해 주세요.
+        </article>
+      </Error.Default>
+    );
   }
 };
 

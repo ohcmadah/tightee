@@ -28,24 +28,8 @@ import ModalPortal from "../components/ModalPortal";
 
 import eyesIcon from "../assets/eyes.png";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-
-const ExternalLink = ({
-  className,
-  href,
-  children,
-}: {
-  className: string;
-  href: string;
-  children: React.ReactNode;
-}) => (
-  <a
-    className={cn("text-base text-grayscale-20", className)}
-    target="_blank"
-    href={href}
-  >
-    {children}
-  </a>
-);
+import ExternalLink from "../components/ExternalLink";
+import Error from "../components/Error";
 
 const Settings = ({
   subscribe,
@@ -232,20 +216,26 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
 const ProfileWrapper = ({ uid }: { uid: string }) => {
   const { data, error, isLoading } = useAsyncAPI(getUser, uid);
 
-  return data?.data() ? (
+  if (isLoading) {
+    return (
+      <ModalPortal>
+        <Loading.Modal />
+      </ModalPortal>
+    );
+  }
+
+  if (error) {
+    return <Error.Default />;
+  }
+
+  return (
     <ActualProfile
       init={() => {
         // TODO: useAsyncAPI에 forceUpdate 만들기
         location.reload();
       }}
-      user={data.data() as User}
+      user={data?.data() as User}
     />
-  ) : isLoading ? (
-    <ModalPortal>
-      <Loading.Modal />
-    </ModalPortal>
-  ) : (
-    <div>{`${error}`}</div>
   );
 };
 
