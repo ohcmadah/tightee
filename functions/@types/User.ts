@@ -1,4 +1,4 @@
-interface User {
+export interface User {
   uid: string;
   email?: string;
   displayName?: string;
@@ -21,12 +21,12 @@ interface KakaoAccount {
   gender?: "male" | "female";
 }
 
-interface KakaoUser {
+export interface KakaoUser {
   id: number;
   kakao_account?: KakaoAccount;
 }
 
-interface NormalizedUser {
+export interface NormalizedUser {
   id: string;
   provider: string;
   nickname?: string;
