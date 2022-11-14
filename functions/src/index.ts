@@ -185,15 +185,20 @@ questionApp.get("/:date", async (req, res) => {
       async (option) => await db.doc("options/" + option.id).get()
     );
     const options = (await Promise.allSettled(optionsPromise)).reduce(
-      (acc: Option[], result) =>
-        result.status === "fulfilled"
-          ? [...acc, result.value.data() as Option]
-          : acc,
+      (acc: { id: string; text: string }[], result) => {
+        if (result.status === "fulfilled") {
+          const option = result.value.data() as Option;
+          return [...acc, { id: result.value.id, text: option.text }];
+        } else {
+          return acc;
+        }
+      },
       []
     );
 
     return res.status(200).json({
       ...question,
+      id: questions.docs[0].id,
       options,
     });
   } catch (error) {
