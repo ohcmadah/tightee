@@ -1,5 +1,6 @@
 import moment from "moment";
-import { getTodayQuestion } from "../common/apis";
+import { Navigate } from "react-router-dom";
+import { answer, getTodayAnswer, getTodayQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Option as OptionType, Question as QuestionType } from "../@types";
@@ -12,6 +13,8 @@ import ExternalLink from "../components/ExternalLink";
 
 import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
+import { useState } from "react";
+import ModalPortal from "../components/ModalPortal";
 
 const DateBadge = () => (
   <div className="ml-auto inline-block rounded-full bg-primary-peach py-1.5 px-6 text-base font-normal">
@@ -31,10 +34,22 @@ const Title = () => (
   </>
 );
 
-const OptionSection = ({ options }: { options: OptionType[] }) => (
+const OptionSection = ({
+  options,
+  onAnswer,
+}: {
+  options: OptionType[];
+  onAnswer: (id: string) => any;
+}) => (
   <section className="flex flex-col gap-y-4">
     {options.map((option) => (
-      <Button.Basic key={option.text}>{option.text}</Button.Basic>
+      <Button.Basic
+        key={option.text}
+        className="leading-8"
+        onClick={() => onAnswer(option.id)}
+      >
+        {option.text}
+      </Button.Basic>
     ))}
   </section>
 );
@@ -48,33 +63,65 @@ const QuestionSection = ({ title }: { title: string }) => {
   );
 };
 
-const Main = ({ question }: { question?: QuestionType }) => (
+const Main = ({
+  question,
+  onAnswer,
+}: {
+  question: QuestionType;
+  onAnswer: (id: string) => any;
+}) => (
   <main>
-    <QuestionSection title={question?.title || ""} />
-    <OptionSection options={question?.options || []} />
+    <QuestionSection title={question.title} />
+    <OptionSection options={question.options} onAnswer={onAnswer} />
   </main>
 );
 
+const ActualQuestion = ({ question }: { question: QuestionType }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onAnswer = async (optionId: string) => {
+    setIsLoading(true);
+    try {
+      await answer(question.id, optionId);
+    } catch (error) {}
+    setIsLoading(false);
+    // TODO:
+    location.reload();
+  };
+
+  return (
+    <>
+      <Header className="flex items-center" optionRenderer={<DateBadge />}>
+        <Title />
+      </Header>
+      <Main question={question} onAnswer={onAnswer} />
+      {isLoading && (
+        <ModalPortal>
+          <Loading.Modal />
+        </ModalPortal>
+      )}
+    </>
+  );
+};
+
 const Question = () => {
-  const { data, error, isLoading } = useAsyncAPI(getTodayQuestion);
+  const todayQuestion = useAsyncAPI(getTodayQuestion);
+  const todayAnswer = useAsyncAPI(getTodayAnswer);
 
-  if (isLoading) {
-    return <Loading.Full />;
-  }
-
-  if (error) {
+  if (todayQuestion.error || todayAnswer.error) {
     return <Error.Default />;
   }
 
-  if (data?.status === 200) {
-    return (
-      <>
-        <Header className="flex items-center" optionRenderer={<DateBadge />}>
-          <Title />
-        </Header>
-        <Main question={data?.data} />
-      </>
-    );
+  if (todayQuestion.isLoading || !todayQuestion.data || todayAnswer.isLoading) {
+    return <Loading.Full />;
+  }
+
+  if (!todayAnswer.data?.empty) {
+    return <Navigate to="/answer" />;
+  }
+
+  if (todayQuestion.data.status === 200) {
+    return <ActualQuestion question={todayQuestion.data.data} />;
   } else {
     return (
       <Error.Default>

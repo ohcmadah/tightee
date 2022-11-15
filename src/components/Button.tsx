@@ -13,7 +13,7 @@ interface ButtonProps {
 const Basic = ({ className, onClick, disabled, children }: ButtonProps) => (
   <button
     className={cn(
-      "rounded-md bg-white p-3.5 text-base drop-shadow-md disabled:bg-grayscale-10 disabled:text-grayscale-60",
+      "rounded-md border border-grayscale-20 bg-white p-3.5 text-base drop-shadow-md disabled:bg-grayscale-10 disabled:text-grayscale-60",
       className
     )}
     onClick={onClick}

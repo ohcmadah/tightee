@@ -2,7 +2,7 @@ import Popup from "./Popup";
 import Spinner from "./Spinner";
 
 const Full = () => (
-  <div className="flex h-[100vh] w-full items-center justify-center">
+  <div className="fixed top-0 bottom-0 left-0 right-0 flex items-center justify-center bg-white">
     <Spinner.Big />
   </div>
 );
