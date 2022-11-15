@@ -214,29 +214,22 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
 };
 
 const ProfileWrapper = ({ uid }: { uid: string }) => {
-  const { data, error, isLoading } = useAsyncAPI(getUser, uid);
+  const { state, data, forceUpdate } = useAsyncAPI(getUser, uid);
 
-  if (isLoading) {
-    return (
-      <ModalPortal>
-        <Loading.Modal />
-      </ModalPortal>
-    );
+  switch (state) {
+    case "loading":
+      return (
+        <ModalPortal>
+          <Loading.Modal />
+        </ModalPortal>
+      );
+
+    case "error":
+      return <Error.Default />;
+
+    case "loaded":
+      return <ActualProfile init={forceUpdate} user={data.data() as User} />;
   }
-
-  if (error) {
-    return <Error.Default />;
-  }
-
-  return (
-    <ActualProfile
-      init={() => {
-        // TODO: useAsyncAPI에 forceUpdate 만들기
-        location.reload();
-      }}
-      user={data?.data() as User}
-    />
-  );
 };
 
 const Profile = () => {

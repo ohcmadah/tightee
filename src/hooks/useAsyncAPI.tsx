@@ -1,33 +1,42 @@
 import { useState, useEffect } from "react";
+import useForceUpdate from "./useForceUpdate";
+
+type useAsyncAPIState<T> =
+  | {
+      state: "loading";
+      data: null;
+    }
+  | {
+      state: "loaded";
+      data: T;
+    }
+  | {
+      state: "error";
+      data: unknown;
+    };
 
 const useAsyncAPI = <T,>(
   api: (...args: any[]) => Promise<T>,
   ...args: any[]
 ) => {
-  type useAsyncAPIState = {
-    data: T | null;
-    isLoading: boolean;
-    error: unknown | null;
-  };
-
-  const [state, setState] = useState<useAsyncAPIState>({
+  const [state, setState] = useState<useAsyncAPIState<T>>({
+    state: "loading",
     data: null,
-    isLoading: true,
-    error: null,
   });
+  const { updated, forceUpdate } = useForceUpdate();
 
   useEffect(() => {
     (async () => {
       try {
         const data = await api(...args);
-        setState((prevValue) => ({ ...prevValue, data, isLoading: false }));
+        setState(() => ({ state: "loaded", data }));
       } catch (error) {
-        setState((prevValue) => ({ ...prevValue, error, isLoading: false }));
+        setState(() => ({ state: "error", data: error }));
       }
     })();
-  }, []);
+  }, [updated]);
 
-  return state;
+  return { ...state, forceUpdate };
 };
 
 export default useAsyncAPI;

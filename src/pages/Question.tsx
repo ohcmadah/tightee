@@ -76,7 +76,13 @@ const Main = ({
   </main>
 );
 
-const ActualQuestion = ({ question }: { question: QuestionType }) => {
+const ActualQuestion = ({
+  question,
+  forceUpdate,
+}: {
+  question: QuestionType;
+  forceUpdate: Function;
+}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const onAnswer = async (optionId: string) => {
@@ -85,8 +91,7 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
       await answer(question.id, optionId);
     } catch (error) {}
     setIsLoading(false);
-    // TODO:
-    location.reload();
+    forceUpdate();
   };
 
   return (
@@ -104,20 +109,25 @@ const Question = () => {
   const todayQuestion = useAsyncAPI(getTodayQuestion);
   const todayAnswer = useAsyncAPI(getTodayAnswer);
 
-  if (todayQuestion.error || todayAnswer.error) {
+  if (todayQuestion.state === "error" || todayAnswer.state === "error") {
     return <Error.Default />;
   }
 
-  if (todayQuestion.isLoading || !todayQuestion.data || todayAnswer.isLoading) {
+  if (todayQuestion.state === "loading" || todayAnswer.state === "loading") {
     return <Loading.Full />;
   }
 
-  if (!todayAnswer.data?.empty) {
+  if (!todayAnswer.data.empty) {
     return <Navigate to="/answer" />;
   }
 
   if (todayQuestion.data.status === 200) {
-    return <ActualQuestion question={todayQuestion.data.data} />;
+    return (
+      <ActualQuestion
+        question={todayQuestion.data.data}
+        forceUpdate={todayAnswer.forceUpdate}
+      />
+    );
   } else {
     return (
       <Error.Default>
