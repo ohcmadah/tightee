@@ -27,24 +27,9 @@ import MBTISelector from "../components/MBTISelector";
 import ModalPortal from "../components/ModalPortal";
 
 import eyesIcon from "../assets/eyes.png";
-
-const ExternalLink = ({
-  className,
-  href,
-  children,
-}: {
-  className: string;
-  href: string;
-  children: React.ReactNode;
-}) => (
-  <a
-    className={cn("text-base text-grayscale-20", className)}
-    target="_blank"
-    href={href}
-  >
-    {children}
-  </a>
-);
+import useAsyncAPI from "../hooks/useAsyncAPI";
+import ExternalLink from "../components/ExternalLink";
+import Error from "../components/Error";
 
 const Settings = ({
   subscribe,
@@ -229,26 +214,28 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
 };
 
 const ProfileWrapper = ({ uid }: { uid: string }) => {
-  const [user, setUser] = useState<User>();
+  const { data, error, isLoading } = useAsyncAPI(getUser, uid);
 
-  const init = async () => {
-    try {
-      const doc = await getUser(uid);
-      const user = doc.data() as User;
-      setUser(user);
-    } catch (error) {}
-  };
+  if (isLoading) {
+    return (
+      <ModalPortal>
+        <Loading.Modal />
+      </ModalPortal>
+    );
+  }
 
-  useEffect(() => {
-    init();
-  }, []);
+  if (error) {
+    return <Error.Default />;
+  }
 
-  return user ? (
-    <ActualProfile init={init} user={user} />
-  ) : (
-    <ModalPortal>
-      <Loading.Modal />
-    </ModalPortal>
+  return (
+    <ActualProfile
+      init={() => {
+        // TODO: useAsyncAPI에 forceUpdate 만들기
+        location.reload();
+      }}
+      user={data?.data() as User}
+    />
   );
 };
 

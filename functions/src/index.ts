@@ -5,6 +5,7 @@ import * as cors from "cors";
 import axios from "axios";
 import { config } from "dotenv";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
+import { User, NormalizedUser, KakaoUser, Question, Option } from "../@types";
 import {
   GENDER_FEMALE,
   GENDER_MALE,
@@ -18,12 +19,10 @@ import {
 
 config();
 
-const app = express();
-app.use(cors({ origin: true }));
+const authApp = express();
+authApp.use(cors({ origin: true }));
 
-const updateOrCreateUser = async (
-  normalizedUser: NormalizedUser
-): Promise<User> => {
+const getAdminApp = () => {
   const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY || "");
 
   const app = !admin.apps.length
@@ -31,6 +30,14 @@ const updateOrCreateUser = async (
         credential: admin.credential.cert(serviceAccountKey),
       })
     : admin.app();
+
+  return app;
+};
+
+const updateOrCreateUser = async (
+  normalizedUser: NormalizedUser
+): Promise<User> => {
+  const app = getAdminApp();
   const auth = admin.auth(app);
 
   const properties = {
@@ -109,7 +116,7 @@ const getToken = async (code: string): Promise<TokenResponse> => {
   return res.data;
 };
 
-app.post("/kakao", async (req, res) => {
+authApp.post("/kakao", async (req, res) => {
   const { code } = req.body;
   if (!code) {
     return res.status(400).json({
@@ -152,7 +159,56 @@ app.post("/kakao", async (req, res) => {
   }
 });
 
-exports.auth = functions
+const questionApp = express();
+questionApp.use(cors({ origin: true }));
+
+questionApp.get("/:date", async (req, res) => {
+  const { date } = req.params;
+
+  try {
+    const app = getAdminApp();
+    const db = admin.firestore(app);
+
+    const questions = await db
+      .collection("questions")
+      .where("createdAt", "==", date)
+      .get();
+
+    if (questions.docs.length === 0) {
+      return res
+        .status(204)
+        .json({ code: 204, message: "오늘의 질문이 존재하지 않습니다." });
+    }
+
+    const question = questions.docs[0].data() as Question;
+    const optionsPromise = question.options.map(
+      async (option) => await db.doc("options/" + option.id).get()
+    );
+    const options = (await Promise.allSettled(optionsPromise)).reduce(
+      (acc: { id: string; text: string }[], result) => {
+        if (result.status === "fulfilled") {
+          const option = result.value.data() as Option;
+          return [...acc, { id: result.value.id, text: option.text }];
+        } else {
+          return acc;
+        }
+      },
+      []
+    );
+
+    return res.status(200).json({
+      ...question,
+      id: questions.docs[0].id,
+      options,
+    });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+const https = functions
   .runWith({ secrets: ["SERVICE_ACCOUNT_KEY"] })
-  .region(SEOUL_CODE)
-  .https.onRequest(app);
+  .region(SEOUL_CODE).https;
+
+exports.auth = https.onRequest(authApp);
+exports.question = https.onRequest(questionApp);
