@@ -95,11 +95,7 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
         <Title />
       </Header>
       <Main question={question} onAnswer={onAnswer} />
-      {isLoading && (
-        <ModalPortal>
-          <Loading.Modal />
-        </ModalPortal>
-      )}
+      <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
     </>
   );
 };
