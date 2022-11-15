@@ -5,6 +5,7 @@ import ExternalLink from "./ExternalLink";
 import { URL_CS } from "../common/constants";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import Footer from "./Footer";
 
 const Default = ({ children }: { children?: React.ReactNode }) => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const Default = ({ children }: { children?: React.ReactNode }) => {
           </article>
         )}
       </main>
-      <footer className="mt-12 flex items-center justify-center gap-x-3">
+      <Footer className="flex items-center justify-center gap-x-3">
         <Button.Colored
           color="yellow"
           className="w-full"
@@ -42,7 +43,7 @@ const Default = ({ children }: { children?: React.ReactNode }) => {
         <Button.Outline className="w-full" onClick={() => navigate(-1)}>
           이전으로
         </Button.Outline>
-      </footer>
+      </Footer>
     </>
   );
 };
