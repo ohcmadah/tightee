@@ -18,7 +18,8 @@ const Nav = () => {
 
   return (
     <nav>
-      <ul className="z-nav fixed bottom-0 left-0 flex h-nav w-full items-center gap-x-5 bg-white bg-primary-peach px-12 py-2">
+      <div className="h-nav" />
+      <ul className="fixed bottom-0 left-0 z-nav flex h-nav w-full items-center gap-x-5 bg-white bg-primary-peach px-12 py-2">
         {pages.map(({ path, icon }) => (
           <li key={path} className="h-full w-full">
             <Link

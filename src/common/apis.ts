@@ -1,10 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 import {
-  addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
+  orderBy,
   query,
   setDoc,
   UpdateData,
@@ -12,9 +12,9 @@ import {
   where,
 } from "firebase/firestore";
 import { auth, db } from "../config";
+import { getLocalTime, getUTCTime } from "./utils";
 
-import { Auth, Question, User } from "../@types";
-import { getLocalTime } from "./utils";
+import { Answer, Auth, Question, User } from "../@types";
 
 export const authKakao = (code: string): Promise<AxiosResponse<Auth>> => {
   return axios.post("/api/auth/kakao", { code });
@@ -34,15 +34,18 @@ export const updateUser = (id: string, data: UpdateData<User>) => {
 
 export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
   const today = getLocalTime().format("YYYYMMDD");
-  return axios.get("/api/question/" + today);
+  return axios.get("/api/questions", { params: { date: today } });
 };
 
-export const getTodayAnswer = async () => {
+const getCurrentUserDoc = () => {
   const userId = auth.currentUser?.uid;
   if (!userId) {
     throw new Error("Unauthorized");
   }
+  return doc(db, "users", userId);
+};
 
+const getTodayQuestionDoc = async () => {
   const today = getLocalTime().format("YYYYMMDD");
   const questions = await getDocs(
     query(collection(db, "questions"), where("createdAt", "==", today))
@@ -50,31 +53,34 @@ export const getTodayAnswer = async () => {
   if (questions.empty) {
     throw new Error("Today's question does not exist.");
   }
+  return questions.docs[0];
+};
 
-  const user = doc(db, "users", userId);
-  const question = questions.docs[0].ref;
+export const getTodayAnswer = async () => {
+  const userId = getCurrentUserDoc().id;
+  const questionId = (await getTodayQuestionDoc()).id;
 
-  const answersQuery = query(
-    collection(db, "answers"),
-    where("user", "==", user),
-    where("question", "==", question)
-  );
-  return await getDocs(answersQuery);
+  return await getDoc(doc(db, "answers", userId + questionId));
 };
 
 export const answer = (questionId: string, optionId: string) => {
-  const userId = auth.currentUser?.uid;
-  if (!userId || !questionId || !optionId) {
-    return;
+  if (!questionId || !optionId) {
+    throw new Error("Please check the parameters.");
   }
   const option = doc(db, "options", optionId);
   const question = doc(db, "questions", questionId);
-  const user = doc(db, "users", userId);
+  const user = getCurrentUserDoc();
 
   const answer = {
     option,
     question,
     user,
+    createdAt: getUTCTime(),
   };
-  return addDoc(collection(db, "answers"), answer);
+  return setDoc(doc(db, "answers", user.id + question.id), answer);
+};
+
+export const getAnswers = async (): Promise<AxiosResponse<Answer[]>> => {
+  const user = getCurrentUserDoc();
+  return axios.get("/api/answers", { params: { user: user.id } });
 };

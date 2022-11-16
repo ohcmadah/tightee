@@ -1,3 +1,4 @@
+import { useState } from "react";
 import moment from "moment";
 import { Navigate } from "react-router-dom";
 import { answer, getTodayAnswer, getTodayQuestion } from "../common/apis";
@@ -10,11 +11,12 @@ import Button from "../components/Button";
 import Loading from "../components/Loading";
 import Error from "../components/Error";
 import ExternalLink from "../components/ExternalLink";
+import Footer from "../components/Footer";
+import ModalPortal from "../components/ModalPortal";
 
 import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
-import { useState } from "react";
-import ModalPortal from "../components/ModalPortal";
+import lightIcon from "../assets/light.png";
 
 const DateBadge = () => (
   <div className="ml-auto inline-block rounded-full bg-primary-peach py-1.5 px-6 text-base font-normal">
@@ -31,6 +33,16 @@ const Title = () => (
       alt="question"
     />
     <span className="align-middle">오늘의 질문</span>
+  </>
+);
+
+const Tip = () => (
+  <>
+    <img width={30} className="inline-block" src={lightIcon} alt="light" />
+    <div className="mt-1.5 text-sm leading-6 text-grayscale-60">
+      질문에 대답하면 MBTI, 성별, 나이별, 지역별 등<br />
+      재미있는 분석 결과를 즉시 확인할 수 있어요 :)
+    </div>
   </>
 );
 
@@ -100,6 +112,9 @@ const ActualQuestion = ({
         <Title />
       </Header>
       <Main question={question} onAnswer={onAnswer} />
+      <Footer className="text-center">
+        <Tip />
+      </Footer>
       <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
     </>
   );
@@ -117,7 +132,7 @@ const Question = () => {
     return <Loading.Full />;
   }
 
-  if (!todayAnswer.data.empty) {
+  if (todayAnswer.data.exists()) {
     return <Navigate to="/answer" />;
   }
 

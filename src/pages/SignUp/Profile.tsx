@@ -9,11 +9,12 @@ import Header from "../../components/Header";
 import Button from "../../components/Button";
 import Form from "../../components/Form";
 import Input from "../../components/Input";
-
-import styles from "../../styles/pages/SignUp.module.scss";
-import lightImage from "../../assets/light.png";
 import RegionSelector from "../../components/RegionSelector";
 import MBTISelector from "../../components/MBTISelector";
+
+import lightImage from "../../assets/light.png";
+
+import styles from "../../styles/pages/SignUp.module.scss";
 
 const Profile = () => {
   const { profile, errors } = useSignUpState();

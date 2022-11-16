@@ -23,6 +23,10 @@ export const getLocalTime = () => {
   return moment.utc().utcOffset(-timezoneOffset);
 };
 
+export const getUTCTime = () => {
+  return moment.utc().valueOf();
+};
+
 export const convertBirthdateToUTC = (birthdate: {
   year?: string;
   month?: string;

@@ -10,6 +10,7 @@ import KakaoLogin from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
 import Question from "./pages/Question";
 import Profile from "./pages/Profile";
+import Answers from "./pages/Answers";
 
 import "./styles/index.scss";
 
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
           <Route index element={<Home />} />
           <Route path="question" element={<Question />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="answer" element={<Answers />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/callback/kakaotalk" element={<KakaoLogin />} />
