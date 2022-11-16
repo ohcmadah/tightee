@@ -77,7 +77,7 @@ app.get("/", async (req, res) => {
         const data = doc.data() as Answer;
         return data.option.id === answer.option.id;
       });
-      const ratio = allAnswers.docs.length / sameAnswers.length;
+      const ratio = sameAnswers.length / allAnswers.docs.length;
 
       return {
         id: doc.id,
