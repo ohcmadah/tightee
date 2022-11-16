@@ -132,7 +132,7 @@ const Question = () => {
     return <Loading.Full />;
   }
 
-  if (!todayAnswer.data.empty) {
+  if (todayAnswer.data.exists()) {
     return <Navigate to="/answer" />;
   }
 
