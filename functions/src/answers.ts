@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import * as express from "express";
 import * as cors from "cors";
-import { Answer } from "../@types";
+import { Answer } from "./@types";
 import { getAdminApp, https } from "./common";
 import { OrderByDirection, WhereFilterOp } from "firebase/firestore";
 

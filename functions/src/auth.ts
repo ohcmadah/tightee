@@ -4,7 +4,7 @@ import * as cors from "cors";
 import axios from "axios";
 import { config } from "dotenv";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
-import { User, NormalizedUser, KakaoUser } from "../@types";
+import { NormalizedUser, KakaoUser } from "./@types";
 import {
   GENDER_FEMALE,
   GENDER_MALE,
@@ -23,7 +23,7 @@ app.use(cors({ origin: true }));
 
 const updateOrCreateUser = async (
   normalizedUser: NormalizedUser
-): Promise<User> => {
+): Promise<UserRecord> => {
   const app = getAdminApp();
   const auth = admin.auth(app);
 

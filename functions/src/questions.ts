@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import * as express from "express";
 import * as cors from "cors";
-import { Question, Option } from "../@types";
+import { Question, Option } from "./@types";
 import { getAdminApp, https } from "./common";
 
 const app = express();
