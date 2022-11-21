@@ -124,14 +124,7 @@ app.post("/kakao", async (req, res) => {
       .auth()
       .createCustomToken(authUser.uid, { KAKAO_PROVIDER });
 
-    const user = await admin
-      .firestore()
-      .collection("users")
-      .doc(authUser.uid)
-      .get();
-
     return res.status(200).json({
-      user: user.data(),
       kakaoUser: normalizedUser,
       firebaseToken,
     });

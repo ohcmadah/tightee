@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth as firebaseAuth } from "../config";
 import { Auth } from "../@types";
-import { authKakao } from "../common/apis";
+import { authKakao, getUser } from "../common/apis";
 
 import Layout from "../components/Layout";
 import Loading from "../components/Loading";
@@ -23,9 +23,14 @@ const KakaoLogin = () => {
     (async () => {
       try {
         const res = await authKakao(code);
-        const { user, firebaseToken } = res.data;
+        const {
+          kakaoUser: { id },
+          firebaseToken,
+        } = res.data;
 
-        if (user) {
+        const user = await getUser(id);
+
+        if (user.exists()) {
           await signInWithCustomToken(firebaseAuth, firebaseToken);
         } else {
           setAuth(res.data);
