@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth as firebaseAuth } from "../config";
-import { AuthResponse } from "../@types";
+import { Auth } from "../@types";
 import { authKakao } from "../common/apis";
 
 import Layout from "../components/Layout";
@@ -10,7 +10,7 @@ import Loading from "../components/Loading";
 
 const KakaoLogin = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [auth, setAuth] = useState<AuthResponse["data"] | null>(null);
+  const [auth, setAuth] = useState<Auth | null>(null);
 
   const searchParams = new URLSearchParams(location.search);
   const code = searchParams.get("code");
