@@ -45,7 +45,7 @@ const getCurrentUserDoc = () => {
   return doc(db, "users", userId);
 };
 
-const getTodayQuestionDoc = async () => {
+export const getTodayQuestionDoc = async () => {
   const today = getLocalTime().format("YYYYMMDD");
   const questions = await getDocs(
     query(collection(db, "questions"), where("createdAt", "==", today))

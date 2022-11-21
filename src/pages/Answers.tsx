@@ -1,6 +1,7 @@
-import { getAnswers } from "../common/apis";
+import { getAnswers, getTodayQuestionDoc } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
+import { getLocalTime } from "../common/utils";
 
 import { Link } from "react-router-dom";
 import Error from "../components/Error";
@@ -48,13 +49,45 @@ const Answer = ({ answer }: { answer: AnswerType }) => {
   );
 };
 
-const Main = ({ answers }: { answers: AnswerType[] }) => (
-  <main>
-    {answers.map((answer) => (
-      <Answer key={answer.id} answer={answer} />
-    ))}
-  </main>
-);
+const TodayQuestion = () => {
+  const { state, data } = useAsyncAPI(getTodayQuestionDoc);
+
+  return (
+    <article className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
+      <DateBadge className="bg-primary-peach">TODAY</DateBadge>
+      <div className="my-6 px-2 text-lg font-medium">
+        {state === "loaded"
+          ? data.data().title
+          : "오늘의 질문을 불러오고 있습니다"}
+      </div>
+      <Link to="/question" className="flex w-full items-center">
+        <img src={replyIcon} alt="reply" className="mr-1.5 inline-block" />
+        <div className="grow text-grayscale-20">대답하러 가기</div>
+        <img src={rightArrowIcon} alt="arrow" />
+      </Link>
+    </article>
+  );
+};
+
+const Main = ({ answers }: { answers: AnswerType[] }) => {
+  const isAnsweredTodayQuestion =
+    answers[0]?.question.createdAt === getLocalTime().format("YYYYMMDD");
+
+  return (
+    <main>
+      <section>{!isAnsweredTodayQuestion && <TodayQuestion />}</section>
+      <section>
+        {answers.length !== 0 ? (
+          answers.map((answer) => <Answer key={answer.id} answer={answer} />)
+        ) : (
+          <div className="mt-12 text-center text-base text-grayscale-80">
+            아직 질문에 응답한 내역이 없어요 :)
+          </div>
+        )}
+      </section>
+    </main>
+  );
+};
 
 const Title = () => (
   <>
