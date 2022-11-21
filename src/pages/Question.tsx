@@ -1,5 +1,4 @@
 import { useState } from "react";
-import moment from "moment";
 import { Navigate } from "react-router-dom";
 import { answer, getTodayAnswer, getTodayQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
@@ -12,17 +11,12 @@ import Loading from "../components/Loading";
 import Error from "../components/Error";
 import ExternalLink from "../components/ExternalLink";
 import Footer from "../components/Footer";
+import DateBadge from "../components/DateBadge";
 import ModalPortal from "../components/ModalPortal";
 
 import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
 import lightIcon from "../assets/light.png";
-
-const DateBadge = () => (
-  <div className="ml-auto inline-block rounded-full bg-primary-peach py-1.5 px-6 text-base font-normal">
-    {moment().format("YY.MM.DD(ddd)")}
-  </div>
-);
 
 const Title = () => (
   <>
@@ -108,7 +102,10 @@ const ActualQuestion = ({
 
   return (
     <>
-      <Header className="flex items-center" optionRenderer={<DateBadge />}>
+      <Header
+        className="flex items-center"
+        optionRenderer={<DateBadge className="ml-auto bg-primary-peach" />}
+      >
         <Title />
       </Header>
       <Main question={question} onAnswer={onAnswer} />
@@ -124,7 +121,7 @@ const Question = () => {
   const todayQuestion = useAsyncAPI(getTodayQuestion);
   const todayAnswer = useAsyncAPI(getTodayAnswer);
 
-  if (todayQuestion.state === "error" || todayAnswer.state === "error") {
+  if (todayQuestion.state === "error") {
     return <Error.Default />;
   }
 
@@ -132,7 +129,7 @@ const Question = () => {
     return <Loading.Full />;
   }
 
-  if (todayAnswer.data.exists()) {
+  if (todayAnswer.state === "loaded" && todayAnswer.data) {
     return <Navigate to="/answer" />;
   }
 

@@ -1,10 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 import {
+  addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
-  orderBy,
   query,
   setDoc,
   UpdateData,
@@ -45,7 +45,7 @@ const getCurrentUserDoc = () => {
   return doc(db, "users", userId);
 };
 
-const getTodayQuestionDoc = async () => {
+export const getTodayQuestionDoc = async () => {
   const today = getLocalTime().format("YYYYMMDD");
   const questions = await getDocs(
     query(collection(db, "questions"), where("createdAt", "==", today))
@@ -57,10 +57,18 @@ const getTodayQuestionDoc = async () => {
 };
 
 export const getTodayAnswer = async () => {
-  const userId = getCurrentUserDoc().id;
-  const questionId = (await getTodayQuestionDoc()).id;
+  const user = getCurrentUserDoc();
+  const question = (await getTodayQuestionDoc()).ref;
 
-  return await getDoc(doc(db, "answers", userId + questionId));
+  const answers = await getDocs(
+    query(
+      collection(db, "answers"),
+      where("user", "==", user),
+      where("question", "==", question)
+    )
+  );
+
+  return answers.docs[0];
 };
 
 export const answer = (questionId: string, optionId: string) => {
@@ -77,7 +85,7 @@ export const answer = (questionId: string, optionId: string) => {
     user,
     createdAt: getUTCTime(),
   };
-  return setDoc(doc(db, "answers", user.id + question.id), answer);
+  return addDoc(collection(db, "answers"), answer);
 };
 
 export const getAnswers = async (): Promise<AxiosResponse<Answer[]>> => {

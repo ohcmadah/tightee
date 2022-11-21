@@ -1,7 +1,6 @@
-import { NormalizedUser, User } from "./User";
+import { NormalizedUser } from "./User";
 
 export interface Auth {
   firebaseToken: string;
-  user: User | null;
   kakaoUser: NormalizedUser;
 }

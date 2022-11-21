@@ -1,6 +1,6 @@
 import { createContext, Dispatch, useContext, useReducer } from "react";
 import { setProperty } from "../common/utils";
-import { AuthResponse } from "../@types";
+import { Auth } from "../@types";
 import { profileValidator } from "../common/validators";
 
 export type AgreementState = {
@@ -91,13 +91,15 @@ export const SignUpContextProvider = ({
   auth,
   children,
 }: {
-  auth: AuthResponse["data"];
+  auth: Auth;
   children: React.ReactNode;
 }) => {
+  const { kakaoUser, firebaseToken } = auth;
+  const month = kakaoUser.birthday?.substring(0, 2);
   const [signUpState, dispatch] = useReducer(signUpReducer, {
-    id: auth.kakaoUser.id,
-    email: auth.kakaoUser.email,
-    token: auth.firebaseToken,
+    id: kakaoUser.id,
+    email: kakaoUser.email,
+    token: firebaseToken,
     step: "AGREEMENT",
     errors: null,
     agreement: {
@@ -107,15 +109,16 @@ export const SignUpContextProvider = ({
       marketing: false,
     },
     profile: {
-      nickname: auth.kakaoUser.nickname || "",
+      nickname: kakaoUser.nickname || "",
       region: "",
       birthdate: {
-        month: auth.kakaoUser.birthday?.substring(0, 2),
-        day: auth.kakaoUser.birthday?.substring(2),
+        month: month?.startsWith("0") ? month.substring(1) : month,
+        day: kakaoUser.birthday?.substring(2),
       },
-      gender: auth.kakaoUser.gender,
+      gender: kakaoUser.gender,
     },
   });
+
   return (
     <SignUpDispatchContext.Provider value={dispatch}>
       <SignUpStateContext.Provider value={signUpState}>
