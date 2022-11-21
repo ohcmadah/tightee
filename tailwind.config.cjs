@@ -15,6 +15,7 @@ module.exports = {
         "system-yellow": "#FFE699",
         "system-dimyellow": "#F8F5D5",
         "kakao-container": "#FEE500",
+        "question-not-today": "#EAE4E9",
       },
       zIndex: {
         popup: "100",

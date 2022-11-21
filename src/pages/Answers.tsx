@@ -2,26 +2,47 @@ import { getAnswers } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
 
+import { Link } from "react-router-dom";
 import Error from "../components/Error";
 import Loading from "../components/Loading";
 import Header from "../components/Header";
+import DateBadge from "../components/DateBadge";
 
 import answerIcon from "../assets/answer.png";
+import replyIcon from "../assets/reply.svg";
+import chartIcon from "../assets/chart.png";
+import rightArrowIcon from "../assets/right_arrow.svg";
 
 const Answer = ({ answer }: { answer: AnswerType }) => {
   const { question, option, ratio } = answer;
   return (
     <ul className="last:mb-0">
-      <li className="mb-8 w-full bg-white p-6 drop-shadow-md">
-        <span className="rounded-full bg-primary-peach p-3">
-          {question.createdAt}
-        </span>
-        <div>{question.title}</div>
-        <div>{option.text}</div>
-        <div>
-          전체 타이티 중에 <span className="text-primary">{ratio * 100}%</span>
-          를 차지하고 있어요.
-        </div>
+      <li className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
+        <DateBadge
+          date={question.createdAt}
+          className="bg-question-not-today"
+        />
+        <article className="my-6 px-2">
+          <div className="mb-1.5 text-lg font-medium">{question.title}</div>
+          <div className="text-primary">
+            <img src={replyIcon} alt="reply" className="mr-1.5 inline-block" />
+            <span className="align-middle">{option.text}</span>
+          </div>
+        </article>
+        <Link to={`${answer.id}/report`} className="flex w-full items-center">
+          <img
+            width={20}
+            src={chartIcon}
+            alt="chart"
+            className="mr-1.5 inline-block"
+          />
+          <div className="grow">
+            전체 타이티 중에{" "}
+            <span className="text-primary">{ratio * 100}%</span>를 차지하고
+            있어요.
+          </div>
+          <img src={rightArrowIcon} alt="arrow" />
+        </Link>
       </li>
     </ul>
   );
