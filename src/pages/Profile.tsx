@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
-import cn from "classnames";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
@@ -234,7 +233,11 @@ const ProfileWrapper = ({ uid }: { uid: string }) => {
 
 const Profile = () => {
   const auth = useAuthState();
-  return auth.user ? <ProfileWrapper uid={auth.user.uid} /> : <Loading.Full />;
+  return auth.state === "loaded" && auth.isAuthentication ? (
+    <ProfileWrapper uid={auth.user.uid} />
+  ) : (
+    <Loading.Full />
+  );
 };
 
 export default Profile;
