@@ -58,7 +58,9 @@ const TodayQuestion = () => {
       <div className="my-6 px-2 text-lg font-medium">
         {state === "loaded"
           ? data.data().title
-          : "오늘의 질문을 불러오고 있습니다"}
+          : state === "loading"
+          ? "오늘의 질문을 불러오고 있어요..."
+          : "에러가 발생했어요 :("}
       </div>
       <Link to="/question" className="flex w-full items-center">
         <img src={replyIcon} alt="reply" className="mr-1.5 inline-block" />
