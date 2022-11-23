@@ -6,6 +6,7 @@ import {
   getDoc,
   getDocs,
   query,
+  QuerySnapshot,
   setDoc,
   UpdateData,
   updateDoc,
@@ -67,7 +68,9 @@ export const getTodayAnswer = async () => {
       where("question", "==", question)
     )
   );
-
+  if (answers.empty) {
+    throw new Error("Today's answer does not exist.");
+  }
   return answers.docs[0];
 };
 

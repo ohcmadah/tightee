@@ -6,6 +6,7 @@ module.exports = {
       colors: {
         primary: "#F4B183",
         "primary-peach": "#FBE5D6",
+        "secondary-question": "#BAABDA",
         "grayscale-100": "#000000",
         "grayscale-80": "#696969",
         "grayscale-60": "#808080",

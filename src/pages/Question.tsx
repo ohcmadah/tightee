@@ -119,7 +119,7 @@ const Question = () => {
     return <Loading.Full />;
   }
 
-  if (todayAnswer.state === "loaded" && todayAnswer.data) {
+  if (todayAnswer.state === "loaded") {
     return <Navigate to="/answer" />;
   }
 
