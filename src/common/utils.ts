@@ -1,4 +1,5 @@
 import moment from "moment";
+import { FormError } from "../@types";
 
 export const setProperty = <T extends Record<string, any>>(
   obj: T,
@@ -10,6 +11,27 @@ export const setProperty = <T extends Record<string, any>>(
     ...obj,
     [head]: rest.length ? setProperty(obj[head], rest.join("."), value) : value,
   };
+};
+
+export const setAll = (obj: object, value: any): {} => {
+  return Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: value }), {});
+};
+
+const isFormError = (error: string | FormError): error is FormError => {
+  return typeof error !== "string";
+};
+
+export const getFormErrorMessage = (
+  error: FormError | string,
+  path: string
+): string => {
+  const [head, ...rest] = path.split(".");
+  if (isFormError(error)) {
+    return head in error
+      ? getFormErrorMessage(error[head], rest.join("."))
+      : "";
+  }
+  return error;
 };
 
 export function* range(start: number, end: number) {

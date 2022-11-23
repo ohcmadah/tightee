@@ -2,18 +2,9 @@ import { useState, useEffect } from "react";
 import useForceUpdate from "./useForceUpdate";
 
 type useAsyncAPIState<T> =
-  | {
-      state: "loading";
-      data: null;
-    }
-  | {
-      state: "loaded";
-      data: T;
-    }
-  | {
-      state: "error";
-      data: unknown;
-    };
+  | { state: "loading"; data: null }
+  | { state: "loaded"; data: T }
+  | { state: "error"; data: unknown };
 
 const useAsyncAPI = <T,>(
   api: (...args: any[]) => Promise<T>,

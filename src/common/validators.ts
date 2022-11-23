@@ -1,4 +1,6 @@
 import moment from "moment";
+import { FormError } from "../@types";
+import { AgreementValues, ProfileValues } from "../contexts/SignUpContext";
 
 const birthdateValidator = (birthdate: {
   year?: string;
@@ -32,7 +34,7 @@ const birthdateValidator = (birthdate: {
   return "";
 };
 
-export const profileValidator = (values: any): {} | null => {
+export const profileValidator = (values: ProfileValues): FormError => {
   const emptyErrorByKeyMap: { [key: string]: string } = {
     nickname: "닉네임이 입력되지 않았어요.",
     region: "지역이 선택되지 않았어요.",
@@ -40,7 +42,7 @@ export const profileValidator = (values: any): {} | null => {
     gender: "성별이 선택되지 않았어요.",
   };
   const emptyErrors = Object.entries(values).reduce((acc, [key, value]) => {
-    if (!value) {
+    if (!value && key !== "MBTI") {
       const errorMsg = emptyErrorByKeyMap[key];
       return { ...acc, [key]: errorMsg };
     }
@@ -57,5 +59,15 @@ export const profileValidator = (values: any): {} | null => {
     return errors;
   }
 
-  return null;
+  return {};
+};
+
+export const agreementValidator = (values: AgreementValues): FormError => {
+  const { age, personal, terms } = values;
+
+  if (!age || !personal || !terms) {
+    return { agreement: "서비스 이용을 위해 필수 약관에 동의해 주세요!" };
+  }
+
+  return {};
 };

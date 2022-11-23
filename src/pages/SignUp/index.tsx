@@ -20,9 +20,6 @@ const Main = () => {
 
     case "SUBMITTING":
       return <Submitting />;
-
-    default:
-      return <div></div>;
   }
 };
 

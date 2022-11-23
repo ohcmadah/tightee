@@ -1,17 +1,25 @@
-import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth as firebaseAuth } from "../config";
-import { Auth } from "../@types";
 import { authKakao, getUser } from "../common/apis";
 
-import Layout from "../components/Layout";
 import Loading from "../components/Loading";
+import useAsyncAPI from "../hooks/useAsyncAPI";
+import Error from "../components/Error";
+
+const authorize = async (code: string) => {
+  const { data } = await authKakao(code);
+  const user = await getUser(data.kakaoUser.id);
+
+  if (user.exists()) {
+    await signInWithCustomToken(firebaseAuth, data.firebaseToken);
+    return { isLoggedIn: true, auth: data };
+  }
+
+  return { isLoggedIn: false, auth: data };
+};
 
 const KakaoLogin = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [auth, setAuth] = useState<Auth | null>(null);
-
   const searchParams = new URLSearchParams(location.search);
   const code = searchParams.get("code");
 
@@ -19,41 +27,22 @@ const KakaoLogin = () => {
     return <Navigate to="/login" />;
   }
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await authKakao(code);
-        const {
-          kakaoUser: { id },
-          firebaseToken,
-        } = res.data;
+  const auth = useAsyncAPI(authorize, code);
 
-        const user = await getUser(id);
+  switch (auth.state) {
+    case "loading":
+      return <Loading.Full />;
 
-        if (user.exists()) {
-          await signInWithCustomToken(firebaseAuth, firebaseToken);
-        } else {
-          setAuth(res.data);
-        }
+    case "error":
+      return <Error.Default />;
 
-        setIsLoading(false);
-      } catch (error) {}
-    })();
-  }, []);
-
-  if (isLoading) {
-    return <Loading.Full />;
+    case "loaded":
+      if (auth.data.isLoggedIn) {
+        return <Navigate to="/" replace />;
+      } else {
+        return <Navigate to="/signup" state={auth.data.auth} />;
+      }
   }
-
-  return (
-    <Layout>
-      {auth ? (
-        <Navigate to="/signup" state={auth} />
-      ) : (
-        <Navigate to="/" replace />
-      )}
-    </Layout>
-  );
 };
 
 export default KakaoLogin;
