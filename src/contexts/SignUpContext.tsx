@@ -1,16 +1,16 @@
 import { createContext, Dispatch, useContext, useReducer } from "react";
 import { setProperty } from "../common/utils";
-import { Auth } from "../@types";
-import { profileValidator } from "../common/validators";
+import { Auth, FormError } from "../@types";
+import { agreementValidator, profileValidator } from "../common/validators";
 
-export type AgreementState = {
+export type AgreementValues = {
   age: boolean;
   personal: boolean;
   terms: boolean;
   marketing: boolean;
 };
 
-export type ProfileState = {
+export type ProfileValues = {
   nickname: string;
   region: string;
   birthdate: { year?: string; month?: string; day?: string };
@@ -18,58 +18,56 @@ export type ProfileState = {
   MBTI?: string;
 };
 
-type Error = string;
-export type Errors = {
-  agreement?: Error;
-  profile?: Record<string, Error>;
-} | null;
-
 export type SignUpState = {
   token: string;
   id: string;
   email?: string;
   step: "AGREEMENT" | "PROFILE" | "SUBMITTING";
-  errors: Errors;
-  agreement: AgreementState;
-  profile: ProfileState;
+  errors: FormError;
+  agreement: AgreementValues;
+  profile: ProfileValues;
 };
 
 const SignUpStateContext = createContext<SignUpState | undefined>(undefined);
 
 type Action =
-  | { type: "UPDATE"; key: string; value: any }
+  | { type: "UPDATE"; payload: { key: string; value: any } }
   | { type: "NEXT" }
-  | { type: "PREV" }
-  | { type: "SUBMIT" };
+  | { type: "PREV" };
 
 type SignUpDispatch = Dispatch<Action>;
 const SignUpDispatchContext = createContext<SignUpDispatch | undefined>(
   undefined
 );
 
-const agreementValidator = (values: SignUpState): Errors => {
-  const {
-    agreement: { age, personal, terms },
-  } = values;
-  if (!age || !personal || !terms) {
-    return { agreement: "서비스 이용을 위해 필수 약관에 동의해 주세요!" };
-  }
-
-  return null;
-};
+const isValid = (errors: object) => Object.keys(errors).length === 0;
 
 const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
   switch (action.type) {
     case "UPDATE":
-      return setProperty<SignUpState>(state, action.key, action.value);
+      return setProperty<SignUpState>(
+        state,
+        action.payload.key,
+        action.payload.value
+      );
 
     case "NEXT":
       if (state.step === "AGREEMENT") {
-        const errors = agreementValidator(state);
-        return { ...state, errors, step: errors ? state.step : "PROFILE" };
-      } else {
-        return state;
+        const errors = agreementValidator(state.agreement);
+        return {
+          ...state,
+          errors,
+          step: isValid(errors) ? "PROFILE" : "AGREEMENT",
+        };
+      } else if (state.step === "PROFILE") {
+        const errors = profileValidator(state.profile);
+        return {
+          ...state,
+          errors: { profile: errors },
+          step: isValid(errors) ? "SUBMITTING" : "PROFILE",
+        };
       }
+      return state;
 
     case "PREV":
       if (state.step === "PROFILE") {
@@ -77,10 +75,6 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
       } else {
         return state;
       }
-
-    case "SUBMIT":
-      const errors = profileValidator(state.profile);
-      return { ...state, errors, step: errors ? state.step : "SUBMITTING" };
 
     default:
       throw new Error("Unhandled action");
@@ -101,7 +95,7 @@ export const SignUpContextProvider = ({
     email: kakaoUser.email,
     token: firebaseToken,
     step: "AGREEMENT",
-    errors: null,
+    errors: {},
     agreement: {
       age: false,
       personal: false,

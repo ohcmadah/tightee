@@ -1,11 +1,12 @@
 import cn from "classnames";
 import { useNavigate } from "react-router-dom";
 import {
-  AgreementState,
+  SignUpState,
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
 import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
+import { getFormErrorMessage, setAll } from "../../common/utils";
 
 import Header from "../../components/Header";
 import Input from "../../components/Input";
@@ -40,8 +41,10 @@ const Agreement = () => {
   const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
       type: "UPDATE",
-      key: `agreement.${evt.target.name}`,
-      value: evt.target.checked,
+      payload: {
+        key: `agreement.${evt.target.name}`,
+        value: evt.target.checked,
+      },
     });
   };
 
@@ -54,17 +57,12 @@ const Agreement = () => {
   };
 
   const isAllChecked = age && personal && terms && marketing;
-  const checkAll = (obj: AgreementState, value: boolean): AgreementState => {
-    return Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: value }), {
-      ...agreement,
-    });
-  };
+
   const onCheckAll = () => {
-    const newValues = checkAll(agreement, !isAllChecked);
+    const newValues = setAll(agreement, !isAllChecked);
     dispatch({
       type: "UPDATE",
-      key: "agreement",
-      value: newValues,
+      payload: { key: "agreement", value: newValues },
     });
   };
 
@@ -121,7 +119,7 @@ const Agreement = () => {
 
       <footer className={cn(styles.footer, "mt-10 flex flex-col")}>
         <div className="h-6 text-center text-base text-system-alert">
-          {errors?.agreement}
+          {getFormErrorMessage(errors, "agreement")}
         </div>
         <Button.Colored color="yellow" onClick={onClickNext}>
           다음

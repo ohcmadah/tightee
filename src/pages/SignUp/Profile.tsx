@@ -4,6 +4,7 @@ import {
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
+import { getFormErrorMessage } from "../../common/utils";
 
 import Header from "../../components/Header";
 import Button from "../../components/Button";
@@ -23,8 +24,7 @@ const Profile = () => {
   const updateValue = (key: string, value: any) => {
     dispatch({
       type: "UPDATE",
-      key: `profile.${key}`,
-      value,
+      payload: { key: `profile.${key}`, value },
     });
   };
 
@@ -33,7 +33,7 @@ const Profile = () => {
   };
 
   const onClickSubmit = () => {
-    dispatch({ type: "SUBMIT" });
+    dispatch({ type: "NEXT" });
   };
 
   const onClickPrev = () => {
@@ -49,7 +49,11 @@ const Profile = () => {
       </Header>
 
       <main>
-        <Form.Section required label="닉네임" error={errors?.profile?.nickname}>
+        <Form.Section
+          required
+          label="닉네임"
+          error={getFormErrorMessage(errors, "profile.nickname")}
+        >
           <Input.Basic
             type="text"
             name="nickname"
@@ -60,20 +64,28 @@ const Profile = () => {
             placeholder="닉네임을 입력해 주세요."
           />
         </Form.Section>
-        <Form.Section required label="지역" error={errors?.profile?.region}>
+        <Form.Section
+          required
+          label="지역"
+          error={getFormErrorMessage(errors, "profile.region")}
+        >
           <RegionSelector value={profile.region} onChange={onSelect} />
         </Form.Section>
         <Form.Section
           required
           label="생년월일"
-          error={errors?.profile?.birthdate}
+          error={getFormErrorMessage(errors, "profile.birthdate")}
         >
           <Form.BirthdateInput
             values={profile.birthdate}
             onChange={(name, value) => updateValue(`birthdate.${name}`, value)}
           />
         </Form.Section>
-        <Form.Section required label="성별" error={errors?.profile?.gender}>
+        <Form.Section
+          required
+          label="성별"
+          error={getFormErrorMessage(errors, "profile.gender")}
+        >
           <Button.GenderToggle
             value={profile.gender}
             onChange={(gender) => updateValue("gender", gender)}

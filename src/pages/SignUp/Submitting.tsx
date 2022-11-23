@@ -11,21 +11,21 @@ import Loading from "../../components/Loading";
 import Error from "../../components/Error";
 
 const convertStateToUser = (state: SignUpState): User | null => {
-  const { gender } = state.profile;
-  const birthdate = convertBirthdateToUTC(state.profile.birthdate);
+  const { profile } = state;
+  const birthdate = convertBirthdateToUTC(profile.birthdate);
 
-  if (!gender || !birthdate) {
+  if (!profile.gender || !birthdate) {
     return null;
   }
 
-  const user: User = {
+  const user = {
     id: state.id,
     email: state.email || null,
-    nickname: state.profile.nickname,
-    region: state.profile.region,
+    nickname: profile.nickname,
+    region: profile.region,
     birthdate: birthdate,
-    gender: gender,
-    MBTI: state.profile.MBTI || null,
+    gender: profile.gender,
+    MBTI: profile.MBTI || null,
     subscribe: {
       marketing: state.agreement.marketing,
     },
@@ -44,14 +44,14 @@ const register = async (state: SignUpState) => {
 
 const Submitting = () => {
   const signUpState = useSignUpState();
-  const { state } = useAsyncAPI(register, signUpState);
+  const { state, data } = useAsyncAPI(register, signUpState);
 
   switch (state) {
     case "loading":
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return <Error.Default>{`${data}`}</Error.Default>;
 
     case "loaded":
       return <Navigate to="/" replace />;

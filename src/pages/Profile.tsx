@@ -14,8 +14,12 @@ import {
   URL_TERMS,
 } from "../common/constants";
 import { auth as firebaseAuth } from "../config";
-import { ProfileState } from "../contexts/SignUpContext";
-import { convertBirthdateToUTC, convertUTCToBirthdate } from "../common/utils";
+import {
+  convertBirthdateToUTC,
+  convertUTCToBirthdate,
+  getFormErrorMessage,
+} from "../common/utils";
+import { ProfileValues } from "../contexts/SignUpContext";
 
 import Button from "../components/Button";
 import Form from "../components/Form";
@@ -100,20 +104,20 @@ const ProfileForm = ({
     [user]
   );
 
-  const { values, errors, handleChange, handleSubmit } = useForm<ProfileState>({
-    initialValues,
-    onSubmit: (values) => {
-      const newProfile = {
-        ...values,
-        birthdate: convertBirthdateToUTC(values.birthdate),
-      };
-      onUpdateUser(newProfile);
-    },
-    validator: (values) => {
-      const errors = profileValidator(values);
-      return errors ? errors : {};
-    },
-  });
+  const { values, errors, handleChange, handleSubmit } = useForm<ProfileValues>(
+    {
+      initialValues,
+      onSubmit: (values) => {
+        const newProfile = {
+          ...values,
+          birthdate: convertBirthdateToUTC(values.birthdate),
+          MBTI: values.MBTI || null,
+        };
+        onUpdateUser(newProfile);
+      },
+      validator: profileValidator,
+    }
+  );
 
   const onSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
     handleChange(evt.target.name, evt.target.value);
@@ -121,7 +125,11 @@ const ProfileForm = ({
 
   return (
     <>
-      <Form.Section required label="닉네임" error={errors?.nickname}>
+      <Form.Section
+        required
+        label="닉네임"
+        error={getFormErrorMessage(errors, "nickname")}
+      >
         <Input.Basic
           type="text"
           value={values.nickname}
@@ -131,16 +139,28 @@ const ProfileForm = ({
           placeholder="닉네임을 입력해 주세요."
         />
       </Form.Section>
-      <Form.Section required label="지역" error={errors?.region}>
+      <Form.Section
+        required
+        label="지역"
+        error={getFormErrorMessage(errors, "region")}
+      >
         <RegionSelector value={values.region} onChange={onSelect} />
       </Form.Section>
-      <Form.Section required label="생년월일" error={errors?.birthdate}>
+      <Form.Section
+        required
+        label="생년월일"
+        error={getFormErrorMessage(errors, "birthdate")}
+      >
         <Form.BirthdateInput
           values={values.birthdate}
           onChange={(name, value) => handleChange(`birthdate.${name}`, value)}
         />
       </Form.Section>
-      <Form.Section required label="성별" error={errors?.gender}>
+      <Form.Section
+        required
+        label="성별"
+        error={getFormErrorMessage(errors, "gender")}
+      >
         <Button.GenderToggle
           value={values.gender}
           onChange={(gender) => handleChange("gender", gender)}
