@@ -210,12 +210,9 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
   return (
     <>
       <Header>
-        <img
-          src={eyesIcon}
-          alt="eyes"
-          className="mr-4 inline-block h-[40px] w-[40px]"
-        />
-        나의 프로필
+        <Header.Title iconSrc={eyesIcon} alt="eyes">
+          나의 프로필
+        </Header.Title>
       </Header>
       <ProfileForm user={user} onUpdateUser={onUpdateUser} />
       <Settings
