@@ -91,22 +91,12 @@ const Main = ({ answers }: { answers: AnswerType[] }) => {
   );
 };
 
-const Title = () => (
-  <>
-    <img
-      width={40}
-      className="mr-4 inline-block"
-      src={answerIcon}
-      alt="answer"
-    />
-    <span className="align-middle">나의 대답</span>
-  </>
-);
-
 const ActualAnswers = ({ answers }: { answers: AnswerType[] }) => (
   <>
     <Header className="flex items-center">
-      <Title />
+      <Header.Title iconSrc={answerIcon} alt="answer">
+        나의 대답
+      </Header.Title>
     </Header>
     <Main answers={answers} />
   </>

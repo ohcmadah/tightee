@@ -18,18 +18,6 @@ import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
 import lightIcon from "../assets/light.png";
 
-const Title = () => (
-  <>
-    <img
-      width={40}
-      className="mr-4 inline-block"
-      src={questionIcon}
-      alt="question"
-    />
-    <span className="align-middle">오늘의 질문</span>
-  </>
-);
-
 const Tip = () => (
   <>
     <img width={30} className="inline-block" src={lightIcon} alt="light" />
@@ -106,7 +94,9 @@ const ActualQuestion = ({
         className="flex items-center"
         optionRenderer={<DateBadge className="ml-auto bg-primary-peach" />}
       >
-        <Title />
+        <Header.Title iconSrc={questionIcon} alt="question">
+          오늘의 질문
+        </Header.Title>
       </Header>
       <Main question={question} onAnswer={onAnswer} />
       <Footer className="text-center">
@@ -129,7 +119,7 @@ const Question = () => {
     return <Loading.Full />;
   }
 
-  if (todayAnswer.state === "loaded" && todayAnswer.data) {
+  if (todayAnswer.state === "loaded") {
     return <Navigate to="/answer" />;
   }
 

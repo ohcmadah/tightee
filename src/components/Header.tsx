@@ -1,5 +1,22 @@
 import cn from "classnames";
 
+import React from "react";
+
+const Title = ({
+  iconSrc,
+  alt,
+  children,
+}: {
+  iconSrc: string;
+  alt?: string;
+  children?: React.ReactNode;
+}) => (
+  <>
+    <img width={40} className="mr-4 inline-block" src={iconSrc} alt={alt} />
+    <span className="align-middle">{children}</span>
+  </>
+);
+
 const Header = ({
   className,
   optionRenderer,
@@ -15,4 +32,4 @@ const Header = ({
   </header>
 );
 
-export default Header;
+export default Object.assign(Header, { Title: Title });

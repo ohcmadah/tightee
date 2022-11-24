@@ -43,3 +43,11 @@ export const useAuthState = () => {
   if (!authState) throw new Error("AuthProvider not found");
   return authState;
 };
+
+export const useAuthenticatedState = () => {
+  const authState = useAuthState();
+  if (authState.state === "loaded" && authState.isAuthentication) {
+    return authState;
+  }
+  throw new Error("Unauthorized");
+};
