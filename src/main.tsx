@@ -2,7 +2,6 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthContextProvider } from "./contexts/AuthContext";
 
-import WithAuthentication from "./components/WithAuthentication";
 import Main from "./pages/Main";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -18,14 +17,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <BrowserRouter>
     <AuthContextProvider>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <WithAuthentication>
-              <Main />
-            </WithAuthentication>
-          }
-        >
+        <Route path="/" element={<Main />}>
           <Route index element={<Home />} />
           <Route path="question" element={<Question />} />
           <Route path="profile" element={<Profile />} />

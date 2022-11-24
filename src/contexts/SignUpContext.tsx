@@ -1,6 +1,6 @@
 import { createContext, Dispatch, useContext, useReducer } from "react";
 import { setProperty } from "../common/utils";
-import { Auth, FormError } from "../@types";
+import { Auth, FormError, MBTI } from "../@types";
 import { agreementValidator, profileValidator } from "../common/validators";
 
 export type AgreementValues = {
@@ -15,7 +15,7 @@ export type ProfileValues = {
   region: string;
   birthdate: { year?: string; month?: string; day?: string };
   gender?: string;
-  MBTI?: string;
+  MBTI?: MBTI;
 };
 
 export type SignUpState = {

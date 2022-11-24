@@ -1,3 +1,22 @@
+export type MBTI =
+  | "ISTJ"
+  | "ISFJ"
+  | "INFJ"
+  | "INTJ"
+  | "ISTP"
+  | "ISFP"
+  | "INFP"
+  | "INTP"
+  | "ESTP"
+  | "ESFP"
+  | "ENFP"
+  | "ENTP"
+  | "ESTJ"
+  | "ESFJ"
+  | "ENFJ"
+  | "ENTJ"
+  | null;
+
 export interface User {
   id: string;
   email: string | null;
@@ -5,7 +24,7 @@ export interface User {
   region: string;
   birthdate: number;
   gender: string;
-  MBTI: string | null;
+  MBTI: MBTI;
   subscribe: {
     marketing: boolean;
   };

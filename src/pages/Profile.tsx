@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
-import { useAuthState } from "../contexts/AuthContext";
+import { useAuthenticatedState, useAuthState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
 import { getUser, updateUser } from "../common/apis";
 import { User } from "../@types";
@@ -249,12 +249,19 @@ const ProfileWrapper = ({ uid }: { uid: string }) => {
 };
 
 const Profile = () => {
-  const auth = useAuthState();
-  return auth.state === "loaded" && auth.isAuthentication ? (
-    <ProfileWrapper uid={auth.user.uid} />
-  ) : (
-    <Loading.Full />
-  );
+  const auth = useAuthenticatedState();
+  const { state, data, forceUpdate } = useAsyncAPI(getUser, auth.user.uid);
+
+  switch (state) {
+    case "loading":
+      return <Loading.Full />;
+
+    case "error":
+      return <Error.Default />;
+
+    case "loaded":
+      return <ActualProfile init={forceUpdate} user={data.data() as User} />;
+  }
 };
 
 export default Profile;

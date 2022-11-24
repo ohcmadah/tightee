@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Layout from "../components/Layout";
 import Nav from "../components/Nav";
+import withAuth from "../hocs/withAuth";
 
 const Home = () => {
   return (
@@ -13,4 +14,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default withAuth(Home);

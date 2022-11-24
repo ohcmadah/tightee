@@ -4,7 +4,10 @@ import {
   getAnswerCount,
   getTodayAnswer,
   getTodayQuestionDoc,
+  getUser,
 } from "../common/apis";
+import { useAuthenticatedState } from "../contexts/AuthContext";
+import { MBTI, User } from "../@types";
 
 import { Link, To } from "react-router-dom";
 import Header from "../components/Header";
@@ -13,6 +16,8 @@ import Error from "../components/Error";
 
 import homeIcon from "../assets/home.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
+import settingIcon from "../assets/setting.svg";
+import { getMBTIName } from "../common/utils";
 
 const Content = ({
   iconSrc = rightArrowIcon,
@@ -57,9 +62,11 @@ const LinkItem = ({ to, children }: { to: To; children: React.ReactNode }) => (
 const Main = ({
   question,
   answer,
+  MBTI,
 }: {
   question: string;
   answer: { id?: string; count: number };
+  MBTI: MBTI;
 }) => {
   return (
     <main>
@@ -78,10 +85,12 @@ const Main = ({
           </Content>
         </LinkItem>
 
-        <LinkItem to="">
+        <LinkItem to="/profile">
           <Badge className="bg-secondary-mbti">나의 MBTI</Badge>
-          <Content iconSrc={rightArrowIcon} alt="right arrow">
-            TODO:
+          <Content iconSrc={settingIcon} alt="setting">
+            {MBTI
+              ? MBTI + " - " + getMBTIName(MBTI)
+              : "MBTI를 설정하면 더욱 재미있는 정보를 확인할 수 있어요 :)"}
           </Content>
         </LinkItem>
       </ul>
@@ -89,16 +98,21 @@ const Main = ({
   );
 };
 
+const getHomeData = async (uid: string) => {
+  const question = await getTodayQuestionDoc();
+  const answerCount = await getAnswerCount();
+  const user = await getUser(uid);
+  const res = { question, answerCount, MBTI: (user.data() as User).MBTI };
+  try {
+    return { ...res, answer: await getTodayAnswer() };
+  } catch (error) {
+    return { ...res, answer: undefined };
+  }
+};
+
 const Home = () => {
-  const { state, data } = useAsyncAPI(async () => {
-    const question = await getTodayQuestionDoc();
-    const answerCount = await getAnswerCount();
-    try {
-      return { question, answerCount, answer: await getTodayAnswer() };
-    } catch (error) {
-      return { question, answerCount, answer: undefined };
-    }
-  });
+  const { user } = useAuthenticatedState();
+  const { state, data } = useAsyncAPI(getHomeData, user.uid);
 
   switch (state) {
     case "loading":
@@ -120,6 +134,7 @@ const Home = () => {
           <Main
             question={data.question.data().title}
             answer={{ id: data.answer?.id, count: data.answerCount }}
+            MBTI={data.MBTI}
           />
         </>
       );
