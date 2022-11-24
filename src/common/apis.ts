@@ -95,3 +95,11 @@ export const getAnswers = async (): Promise<AxiosResponse<Answer[]>> => {
   const user = getCurrentUserDoc();
   return axios.get("/api/answers", { params: { user: user.id } });
 };
+
+export const getAnswerCount = async () => {
+  const user = getCurrentUserDoc();
+  const answers = await getDocs(
+    query(collection(db, "answers"), where("user", "==", user))
+  );
+  return answers.size;
+};

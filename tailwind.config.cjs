@@ -7,6 +7,8 @@ module.exports = {
         primary: "#F4B183",
         "primary-peach": "#FBE5D6",
         "secondary-question": "#BAABDA",
+        "secondary-answer": "#D77FA1",
+        "secondary-mbti": "#ACCFFF",
         "grayscale-100": "#000000",
         "grayscale-80": "#696969",
         "grayscale-60": "#808080",
