@@ -6,11 +6,10 @@ type useAsyncAPIState<T> =
   | { state: "loaded"; data: T }
   | { state: "error"; data: unknown };
 
-const useAsyncAPI = <T,>(
-  api: (...args: any[]) => Promise<T>,
-  ...args: any[]
-) => {
-  const [state, setState] = useState<useAsyncAPIState<T>>({
+type API = (...args: any[]) => Promise<any>;
+
+const useAsyncAPI = <F extends API>(api: F, ...args: Parameters<F>) => {
+  const [state, setState] = useState<useAsyncAPIState<Awaited<ReturnType<F>>>>({
     state: "loading",
     data: null,
   });

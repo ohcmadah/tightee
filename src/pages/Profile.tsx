@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
-import { useAuthenticatedState, useAuthState } from "../contexts/AuthContext";
+import { useAuthenticatedState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
 import { getUser, updateUser } from "../common/apis";
 import { User } from "../@types";
@@ -227,25 +227,6 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
       )}
     </>
   );
-};
-
-const ProfileWrapper = ({ uid }: { uid: string }) => {
-  const { state, data, forceUpdate } = useAsyncAPI(getUser, uid);
-
-  switch (state) {
-    case "loading":
-      return (
-        <ModalPortal>
-          <Loading.Modal />
-        </ModalPortal>
-      );
-
-    case "error":
-      return <Error.Default />;
-
-    case "loaded":
-      return <ActualProfile init={forceUpdate} user={data.data() as User} />;
-  }
 };
 
 const Profile = () => {

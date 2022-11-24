@@ -103,7 +103,7 @@ const ActualAnswers = ({ answers }: { answers: AnswerType[] }) => (
 );
 
 const Answers = () => {
-  const { state, data, forceUpdate } = useAsyncAPI(getAnswers);
+  const { state, data } = useAsyncAPI(getAnswers);
 
   switch (state) {
     case "loading":
