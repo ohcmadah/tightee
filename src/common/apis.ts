@@ -33,6 +33,15 @@ export const updateUser = (id: string, data: UpdateData<User>) => {
   return updateDoc(doc(db, "users", id), data);
 };
 
+export const getNicknames = async (): Promise<string[]> => {
+  const users = await axios.get("/api/users", {
+    params: { fields: ["nickname"] },
+  });
+  return users.data.map(
+    (user: { id: string; nickname: string }) => user.nickname
+  );
+};
+
 export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
   const today = getLocalTime().format("YYYYMMDD");
   return axios.get("/api/questions", { params: { date: today } });
