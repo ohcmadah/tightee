@@ -1,7 +1,6 @@
 import { createContext, Dispatch, useContext, useReducer } from "react";
-import { setProperty } from "../common/utils";
+import { isValidForm, setProperty } from "../common/utils";
 import { Auth, FormError, MBTI } from "../@types";
-import { agreementValidator, profileValidator } from "../common/validators";
 
 export type AgreementValues = {
   age: boolean;
@@ -32,15 +31,13 @@ const SignUpStateContext = createContext<SignUpState | undefined>(undefined);
 
 type Action =
   | { type: "UPDATE"; payload: { key: string; value: any } }
-  | { type: "NEXT" }
+  | { type: "NEXT"; payload: { errors: FormError } }
   | { type: "PREV" };
 
 type SignUpDispatch = Dispatch<Action>;
 const SignUpDispatchContext = createContext<SignUpDispatch | undefined>(
   undefined
 );
-
-const isValid = (errors: object) => Object.keys(errors).length === 0;
 
 const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
   switch (action.type) {
@@ -52,22 +49,14 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
       );
 
     case "NEXT":
-      if (state.step === "AGREEMENT") {
-        const errors = agreementValidator(state.agreement);
-        return {
-          ...state,
-          errors,
-          step: isValid(errors) ? "PROFILE" : "AGREEMENT",
-        };
-      } else if (state.step === "PROFILE") {
-        const errors = profileValidator(state.profile);
-        return {
-          ...state,
-          errors: { profile: errors },
-          step: isValid(errors) ? "SUBMITTING" : "PROFILE",
-        };
-      }
-      return state;
+      const { errors } = action.payload;
+      const currentStep = state.step;
+      const nextStep = currentStep === "AGREEMENT" ? "PROFILE" : "SUBMITTING";
+      return {
+        ...state,
+        errors,
+        step: isValidForm(errors) ? nextStep : currentStep,
+      };
 
     case "PREV":
       if (state.step === "PROFILE") {

@@ -4,7 +4,7 @@ import { UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
-import { getUser, updateUser } from "../common/apis";
+import { getNicknames, getUser, updateUser } from "../common/apis";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -89,9 +89,11 @@ const Settings = ({
 const ProfileForm = ({
   user,
   onUpdateUser,
+  existentNicknameSet,
 }: {
   user: User;
   onUpdateUser: (data: UpdateData<User>) => any;
+  existentNicknameSet: Set<string>;
 }) => {
   const initialValues = useMemo(
     () => ({
@@ -115,7 +117,7 @@ const ProfileForm = ({
         };
         onUpdateUser(newProfile);
       },
-      validator: profileValidator,
+      validator: (values) => profileValidator(values, existentNicknameSet),
     }
   );
 
@@ -185,7 +187,15 @@ const ProfileForm = ({
   );
 };
 
-const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
+const ActualProfile = ({
+  init,
+  user,
+  existentNicknameSet,
+}: {
+  init: Function;
+  user: User;
+  existentNicknameSet: Set<string>;
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -214,7 +224,11 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
           나의 프로필
         </Header.Title>
       </Header>
-      <ProfileForm user={user} onUpdateUser={onUpdateUser} />
+      <ProfileForm
+        user={user}
+        onUpdateUser={onUpdateUser}
+        existentNicknameSet={existentNicknameSet}
+      />
       <Settings
         subscribe={user.subscribe.marketing}
         onUpdateUser={onUpdateUser}
@@ -229,9 +243,19 @@ const ActualProfile = ({ init, user }: { init: Function; user: User }) => {
   );
 };
 
+const getProfileData = async (id: string) => {
+  const user = await getUser(id);
+  const nicknames = await getNicknames();
+
+  return { user, nicknames };
+};
+
 const Profile = () => {
   const auth = useAuthenticatedState();
-  const { state, data, forceUpdate } = useAsyncAPI(getUser, auth.user.uid);
+  const { state, data, forceUpdate } = useAsyncAPI(
+    getProfileData,
+    auth.user.uid
+  );
 
   switch (state) {
     case "loading":
@@ -241,7 +265,13 @@ const Profile = () => {
       return <Error.Default />;
 
     case "loaded":
-      return <ActualProfile init={forceUpdate} user={data.data() as User} />;
+      return (
+        <ActualProfile
+          init={forceUpdate}
+          user={data.user.data() as User}
+          existentNicknameSet={new Set(data.nicknames)}
+        />
+      );
   }
 };
 
