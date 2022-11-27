@@ -6,6 +6,7 @@ import { authKakao, getUser } from "../common/apis";
 import Loading from "../components/Loading";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import Error from "../components/Error";
+import Layout from "../components/Layout";
 
 const authorize = async (code: string) => {
   const { data } = await authKakao(code);
@@ -34,7 +35,11 @@ const KakaoLogin = () => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return (
+        <Layout className="pt-12">
+          <Error.Default />
+        </Layout>
+      );
 
     case "loaded":
       if (auth.data.isLoggedIn) {
