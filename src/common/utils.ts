@@ -17,6 +17,10 @@ export const setAll = (obj: object, value: any): {} => {
   return Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: value }), {});
 };
 
+export const isValidForm = (error: FormError) => {
+  return Object.keys(error).length === 0;
+};
+
 const isFormError = (error: string | FormError): error is FormError => {
   return typeof error !== "string";
 };

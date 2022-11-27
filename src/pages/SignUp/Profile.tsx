@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import cn from "classnames";
 import {
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
-import { getFormErrorMessage } from "../../common/utils";
+import { getFormErrorMessage, isValidForm } from "../../common/utils";
+import { profileValidator } from "../../common/validators";
+import { getNicknames } from "../../common/apis";
 
 import Header from "../../components/Header";
 import Button from "../../components/Button";
@@ -12,12 +14,15 @@ import Form from "../../components/Form";
 import Input from "../../components/Input";
 import RegionSelector from "../../components/RegionSelector";
 import MBTISelector from "../../components/MBTISelector";
+import Loading from "../../components/Loading";
+import ModalPortal from "../../components/ModalPortal";
 
 import lightImage from "../../assets/light.png";
 
 import styles from "../../styles/pages/SignUp.module.scss";
 
 const Profile = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { profile, errors } = useSignUpState();
   const dispatch = useSignUpDispatch();
 
@@ -32,8 +37,17 @@ const Profile = () => {
     updateValue(evt.target.name, evt.target.value);
   };
 
-  const onClickSubmit = () => {
-    dispatch({ type: "NEXT" });
+  const onClickSubmit = async () => {
+    try {
+      setIsLoading(true);
+      const nicknames = await getNicknames();
+      setIsLoading(false);
+      const errors = profileValidator(profile, new Set(nicknames));
+      dispatch({
+        type: "NEXT",
+        payload: { errors: isValidForm(errors) ? {} : { profile: errors } },
+      });
+    } catch (error) {}
   };
 
   const onClickPrev = () => {
@@ -106,6 +120,8 @@ const Profile = () => {
         </Button.Colored>
         <Button.Outline onClick={onClickPrev}>이전으로</Button.Outline>
       </footer>
+
+      <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
     </>
   );
 };

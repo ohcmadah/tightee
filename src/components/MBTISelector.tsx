@@ -1,4 +1,5 @@
 import Input from "./Input";
+import { MBTI } from "../@types";
 
 const MBTIS = [
   "ISTJ",
@@ -23,12 +24,12 @@ const MBTISelector = ({
   value,
   onChange,
 }: {
-  value?: string;
+  value?: MBTI;
   onChange: React.FormEventHandler<HTMLSelectElement>;
 }) => (
   <Input.Select
     name="MBTI"
-    value={value}
+    value={value ?? ""}
     onChange={onChange}
     placeholder="MBTI를 선택해 주세요."
   >

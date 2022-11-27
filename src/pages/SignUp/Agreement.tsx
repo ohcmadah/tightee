@@ -1,12 +1,12 @@
 import cn from "classnames";
 import { useNavigate } from "react-router-dom";
 import {
-  SignUpState,
   useSignUpDispatch,
   useSignUpState,
 } from "../../contexts/SignUpContext";
 import { URL_PERSONAL_AGREEMENT, URL_TERMS } from "../../common/constants";
 import { getFormErrorMessage, setAll } from "../../common/utils";
+import { agreementValidator } from "../../common/validators";
 
 import Header from "../../components/Header";
 import Input from "../../components/Input";
@@ -49,7 +49,8 @@ const Agreement = () => {
   };
 
   const onClickNext = () => {
-    dispatch({ type: "NEXT" });
+    const errors = agreementValidator(agreement);
+    dispatch({ type: "NEXT", payload: { errors } });
   };
 
   const onClickPrev = () => {
