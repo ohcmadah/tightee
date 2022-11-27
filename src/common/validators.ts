@@ -2,12 +2,45 @@ import moment from "moment";
 import { FormError } from "../@types";
 import { AgreementValues, ProfileValues } from "../contexts/SignUpContext";
 
-const birthdateValidator = (birthdate: {
-  year?: string;
-  month?: string;
-  day?: string;
-}): string => {
+const isEmpty = (value: any) => {
+  switch (typeof value) {
+    case "undefined":
+      return true;
+
+    case "string":
+      return value === "";
+
+    case "object":
+      if (!value) return true;
+      return Array.isArray(value)
+        ? value.length === 0
+        : Object.keys(value).length === 0;
+
+    default:
+      return false;
+  }
+};
+
+const nicknameValidator = (
+  existentNicknameSet: Set<string>,
+  nickname: string
+) => {
+  if (isEmpty(nickname)) {
+    return "닉네임이 입력되지 않았어요.";
+  }
+
+  if (nickname.length > 20) {
+    return "20자 이내로 입력해 주세요.";
+  }
+
+  if (existentNicknameSet.has(nickname)) {
+    return "이미 존재하는 닉네임입니다.";
+  }
+};
+
+const birthdateValidator = (birthdate: ProfileValues["birthdate"]) => {
   const { year, month, day } = birthdate;
+
   if (!year || !month || !day) {
     return "생년월일을 모두 입력해 주세요.";
   }
@@ -30,36 +63,48 @@ const birthdateValidator = (birthdate: {
   if (!date.isSameOrBefore(today.subtract(14, "years"))) {
     return "만 14세 이상만 가입이 가능합니다.";
   }
-
-  return "";
 };
 
-export const profileValidator = (values: ProfileValues): FormError => {
-  const emptyErrorByKeyMap: { [key: string]: string } = {
-    nickname: "닉네임이 입력되지 않았어요.",
-    region: "지역이 선택되지 않았어요.",
-    birthdate: "생년월일을 모두 입력해 주세요.",
-    gender: "성별이 선택되지 않았어요.",
-  };
-  const emptyErrors = Object.entries(values).reduce((acc, [key, value]) => {
-    if (!value && key !== "MBTI") {
-      const errorMsg = emptyErrorByKeyMap[key];
-      return { ...acc, [key]: errorMsg };
-    }
-    return acc;
-  }, {});
-
-  const birthdateError = birthdateValidator(values.birthdate);
-  const errors = {
-    ...emptyErrors,
-    ...(birthdateError === "" ? {} : { birthdate: birthdateError }),
-  };
-
-  if (Object.keys(errors).length !== 0) {
-    return errors;
+const emptyValidator = (value: any, msg?: string) => {
+  if (isEmpty(value)) {
+    return msg || true;
   }
+  return false;
+};
 
-  return {};
+export const profileValidator = (
+  values: ProfileValues,
+  existentNicknameSet: Set<string>
+): FormError => {
+  const validators: Record<string, Function> = {
+    region: (value: ProfileValues["region"]) =>
+      emptyValidator(value, "지역이 선택되지 않았어요."),
+
+    gender: (value: ProfileValues["gender"]) =>
+      emptyValidator(value, "성별이 선택되지 않았어요."),
+
+    birthdate: birthdateValidator,
+
+    nickname: (value: ProfileValues["nickname"]) =>
+      nicknameValidator(existentNicknameSet, value),
+
+    MBTI: () => false,
+  };
+
+  const errors: FormError = Object.entries(values).reduce(
+    (acc, [key, value]) => {
+      const validator = validators[key];
+      const error = validator(value);
+
+      if (error) {
+        return { ...acc, [key]: error };
+      }
+      return acc;
+    },
+    {}
+  );
+
+  return errors;
 };
 
 export const agreementValidator = (values: AgreementValues): FormError => {
