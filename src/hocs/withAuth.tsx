@@ -5,7 +5,12 @@ import Error from "../components/Error";
 import Loading from "../components/Loading";
 import { useAuthState } from "../contexts/AuthContext";
 
-const withAuth = (Component: React.FC<{ auth?: User }>) => {
+type Props = { auth?: User };
+
+const withAuth = (
+  Component: React.FC<Props>,
+  option: "auth" | "guest" = "auth"
+) => {
   return () => {
     const auth = useAuthState();
 
@@ -14,10 +19,18 @@ const withAuth = (Component: React.FC<{ auth?: User }>) => {
         return <Loading.Full />;
 
       case "loaded":
-        if (auth.isAuthentication) {
-          return <Component auth={auth.user} />;
+        if (option === "guest") {
+          return auth.isAuthentication ? (
+            <Navigate to="/" replace />
+          ) : (
+            <Component />
+          );
         } else {
-          return <Navigate to="/login" replace />;
+          return auth.isAuthentication ? (
+            <Component auth={auth.user} />
+          ) : (
+            <Navigate to="/login" replace />
+          );
         }
 
       case "error":

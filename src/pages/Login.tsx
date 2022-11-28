@@ -6,6 +6,7 @@ import {
 } from "../common/constants";
 
 import Layout from "../components/Layout";
+import withAuth from "../hocs/withAuth";
 
 import kakaoSymbol from "../assets/kakao.svg";
 import tightee from "../../public/tightee.svg";
@@ -68,4 +69,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default withAuth(Login, "guest");
