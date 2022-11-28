@@ -7,6 +7,7 @@ import Loading from "../components/Loading";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import Error from "../components/Error";
 import Layout from "../components/Layout";
+import withAuth from "../hocs/withAuth";
 
 const authorize = async (code: string) => {
   const { data } = await authKakao(code);
@@ -50,4 +51,4 @@ const KakaoLogin = () => {
   }
 };
 
-export default KakaoLogin;
+export default withAuth(KakaoLogin, "guest");
