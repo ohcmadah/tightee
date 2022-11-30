@@ -4,7 +4,7 @@ import { Option } from "./Option";
 import { Question } from "./Question";
 
 export interface Answer {
-  user: DocumentReference<User>;
+  user: User;
   question: DocumentReference<Question>;
   option: DocumentReference<Option>;
 }

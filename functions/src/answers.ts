@@ -23,8 +23,12 @@ const createQuery = (
   const queries: Query[] = [];
 
   if (userId) {
-    const user = db.doc("users/" + userId);
-    queries.push({ type: "where", path: "user", operation: "==", value: user });
+    queries.push({
+      type: "where",
+      path: "user.id",
+      operation: "==",
+      value: userId,
+    });
   }
   if (questionId) {
     const question = db.doc("questions/" + questionId);
@@ -66,7 +70,6 @@ app.get("/", async (req, res) => {
 
     const answersPromise = docs.map(async (doc) => {
       const answer = doc.data() as Answer;
-      const user = await db.doc("users/" + answer.question.id).get();
       const question = await db.doc("questions/" + answer.question.id).get();
       const option = await db.doc("options/" + answer.option.id).get();
 
@@ -81,7 +84,7 @@ app.get("/", async (req, res) => {
 
       return {
         id: doc.id,
-        user: user.data(),
+        user: answer.user,
         question: question.data(),
         option: option.data(),
         ratio,

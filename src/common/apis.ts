@@ -6,7 +6,6 @@ import {
   getDoc,
   getDocs,
   query,
-  QuerySnapshot,
   setDoc,
   UpdateData,
   updateDoc,
@@ -73,7 +72,7 @@ export const getTodayAnswer = async () => {
   const answers = await getDocs(
     query(
       collection(db, "answers"),
-      where("user", "==", user),
+      where("user.id", "==", user.id),
       where("question", "==", question)
     )
   );
@@ -83,21 +82,24 @@ export const getTodayAnswer = async () => {
   return answers.docs[0];
 };
 
-export const answer = (questionId: string, optionId: string) => {
+export const answer = async (questionId: string, optionId: string) => {
   if (!questionId || !optionId) {
     throw new Error("Please check the parameters.");
   }
   const option = doc(db, "options", optionId);
   const question = doc(db, "questions", questionId);
-  const user = getCurrentUserDoc();
+  const user = await getDoc(getCurrentUserDoc());
 
   const answer = {
     option,
     question,
-    user,
+    user: {
+      id: user.id,
+      ...user.data(),
+    },
     createdAt: getUTCTime(),
   };
-  return addDoc(collection(db, "answers"), answer);
+  return await addDoc(collection(db, "answers"), answer);
 };
 
 export const getAnswers = async (): Promise<AxiosResponse<Answer[]>> => {
