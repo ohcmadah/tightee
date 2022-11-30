@@ -67,7 +67,9 @@ const Settings = ({
       <section className="mb-6 flex items-center">
         <Button.Outline className="mr-8 min-w-[200px]">회원탈퇴</Button.Outline>
         <span className="text-base">
-          지금까지 쌓은 소중한 기록들이 모두 사라져요 :(
+          지금까지 쌓은 소중한 기록들이
+          <br />
+          모두 사라져요 :(
         </span>
       </section>
 
