@@ -10,6 +10,7 @@ import {
   UpdateData,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { auth, db } from "../config";
 import { getLocalTime, getUTCTime } from "./utils";
@@ -30,6 +31,33 @@ export const getUser = (id: string) => {
 
 export const updateUser = (id: string, data: UpdateData<User>) => {
   return updateDoc(doc(db, "users", id), data);
+};
+
+export const deleteUser = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    await user.delete();
+  } catch (error: any) {
+    if (error.code == "auth/requires-recent-login") {
+      await auth.signOut();
+      setTimeout(() => {
+        alert("Please sign in again to delete your account.");
+      }, 1);
+    }
+    return;
+  }
+
+  const batch = writeBatch(db);
+  const answers = await getDocs(
+    query(collection(db, "answers"), where("user.id", "==", user.uid))
+  );
+  answers.forEach((answer) => batch.update(answer.ref, { "user.id": null }));
+  batch.delete(doc(db, "users", user.uid));
+  await batch.commit();
 };
 
 export const getNicknames = async (): Promise<string[]> => {

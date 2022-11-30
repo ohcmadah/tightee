@@ -4,7 +4,7 @@ import { UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
-import { getNicknames, getUser, updateUser } from "../common/apis";
+import { deleteUser, getNicknames, getUser, updateUser } from "../common/apis";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -43,6 +43,8 @@ const Settings = ({
   onUpdateUser: (data: UpdateData<User>) => any;
   onLogout: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
+  const navigate = useNavigate();
+
   const toggleSubscribe = () => {
     onUpdateUser({ subscribe: { marketing: !subscribe } });
   };
@@ -64,8 +66,13 @@ const Settings = ({
         <span className="text-base">다음에 또 만나요!</span>
       </section>
 
-      <section className="mb-6 flex items-center">
-        <Button.Outline className="mr-8 min-w-[200px]">회원탈퇴</Button.Outline>
+      <section className="mb-12 flex items-center">
+        <Button.Outline
+          className="mr-8 min-w-[200px]"
+          onClick={() => navigate("/delete-account")}
+        >
+          회원탈퇴
+        </Button.Outline>
         <span className="text-base">
           지금까지 쌓은 소중한 기록들이
           <br />
