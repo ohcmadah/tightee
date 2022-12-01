@@ -8,16 +8,18 @@ import {
 } from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { MBTI, User } from "../@types";
+import { getMBTIName } from "../common/utils";
 
 import { Link, To } from "react-router-dom";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
 import Error from "../components/Error";
+import Badge from "../components/Badge";
 
 import homeIcon from "../assets/home.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
 import settingIcon from "../assets/setting.svg";
-import { getMBTIName } from "../common/utils";
+import Box from "../components/Box";
 
 const Content = ({
   iconSrc = rightArrowIcon,
@@ -34,31 +36,6 @@ const Content = ({
   </div>
 );
 
-const Badge = ({
-  className,
-  children,
-}: {
-  className?: string | string[];
-  children: React.ReactNode;
-}) => (
-  <span
-    className={cn(
-      "rounded-full py-1.5 px-5 text-base font-bold text-white",
-      className
-    )}
-  >
-    {children}
-  </span>
-);
-
-const LinkItem = ({ to, children }: { to: To; children: React.ReactNode }) => (
-  <li className="mb-8 rounded-2xl border border-grayscale-20 bg-white text-base drop-shadow-lg">
-    <Link className="flex w-full flex-col items-start p-6" to={to}>
-      {children}
-    </Link>
-  </li>
-);
-
 const Main = ({
   question,
   answer,
@@ -70,30 +47,40 @@ const Main = ({
 }) => {
   return (
     <main>
-      <ul className="last:0">
-        <LinkItem to={answer.id ? `/answer/${answer.id}/report` : "/question"}>
-          <Badge className="bg-secondary-question">오늘의 질문</Badge>
+      <Link to={answer.id ? `/answer/${answer.id}/report` : "/question"}>
+        <Box>
+          <Badge className="bg-secondary-question font-bold text-white">
+            오늘의 질문
+          </Badge>
           <Content iconSrc={rightArrowIcon} alt="right arrow">
             {question}
           </Content>
-        </LinkItem>
+        </Box>
+      </Link>
 
-        <LinkItem to="/answer">
-          <Badge className="bg-secondary-answer">나의 대답</Badge>
+      <Link to="/answer">
+        <Box>
+          <Badge className="bg-secondary-answer font-bold text-white">
+            나의 대답
+          </Badge>
           <Content iconSrc={rightArrowIcon} alt="right arrow">
             총 {answer?.count}개의 질문에 대답했어요.
           </Content>
-        </LinkItem>
+        </Box>
+      </Link>
 
-        <LinkItem to="/profile">
-          <Badge className="bg-secondary-mbti">나의 MBTI</Badge>
+      <Link to="/profile">
+        <Box className="mb-0">
+          <Badge className="bg-secondary-mbti font-bold text-white">
+            나의 MBTI
+          </Badge>
           <Content iconSrc={settingIcon} alt="setting">
             {MBTI
               ? MBTI + " - " + getMBTIName(MBTI)
               : "MBTI를 설정하면 더욱 재미있는 정보를 확인할 수 있어요 :)"}
           </Content>
-        </LinkItem>
-      </ul>
+        </Box>
+      </Link>
     </main>
   );
 };

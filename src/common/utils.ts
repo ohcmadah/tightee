@@ -53,6 +53,10 @@ export const getUTCTime = () => {
   return moment.utc().valueOf();
 };
 
+export const getFormattedDate = (date?: moment.MomentInput) => {
+  return moment(date).format("YY.MM.DD(ddd)");
+};
+
 export const convertBirthdateToUTC = (birthdate: {
   year?: string;
   month?: string;

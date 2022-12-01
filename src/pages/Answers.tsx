@@ -1,13 +1,14 @@
 import { getAnswers, getTodayQuestionDoc } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
-import { getLocalTime } from "../common/utils";
+import { getFormattedDate, getLocalTime } from "../common/utils";
 
 import { Link } from "react-router-dom";
 import Error from "../components/Error";
 import Loading from "../components/Loading";
 import Header from "../components/Header";
-import DateBadge from "../components/DateBadge";
+import Badge from "../components/Badge";
+import Box from "../components/Box";
 
 import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
@@ -17,12 +18,11 @@ import rightArrowIcon from "../assets/right_arrow.svg";
 const Answer = ({ answer }: { answer: AnswerType }) => {
   const { question, option, ratio } = answer;
   return (
-    <ul className="last:mb-0">
-      <li className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
-        <DateBadge
-          date={question.createdAt}
-          className="bg-question-not-today"
-        />
+    <Box.Container>
+      <Box>
+        <Badge className="bg-question-not-today">
+          {getFormattedDate(question.createdAt)}
+        </Badge>
         <article className="my-6 px-2">
           <div className="mb-1.5 text-lg font-medium">{question.title}</div>
           <div className="text-primary">
@@ -44,8 +44,8 @@ const Answer = ({ answer }: { answer: AnswerType }) => {
           </div>
           <img src={rightArrowIcon} alt="arrow" />
         </Link>
-      </li>
-    </ul>
+      </Box>
+    </Box.Container>
   );
 };
 
@@ -54,7 +54,7 @@ const TodayQuestion = () => {
 
   return (
     <article className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
-      <DateBadge className="bg-primary-peach">TODAY</DateBadge>
+      <Badge className="bg-primary-peach">TODAY</Badge>
       <div className="my-6 px-2 text-lg font-medium">
         {state === "loaded"
           ? data.data().title
