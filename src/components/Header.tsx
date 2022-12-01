@@ -1,6 +1,7 @@
 import cn from "classnames";
 
-import React from "react";
+import React, { MouseEventHandler } from "react";
+import leftArrowIcon from "../assets/left_arrow.svg";
 
 const Title = ({
   iconSrc,
@@ -17,6 +18,26 @@ const Title = ({
   </>
 );
 
+const Back = ({
+  onClick,
+  children,
+}: {
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  children: React.ReactNode;
+}) => (
+  <>
+    <button className="mr-4" onClick={onClick}>
+      <img
+        width={40}
+        className="inline-block"
+        src={leftArrowIcon}
+        alt={"back"}
+      />
+    </button>
+    <span className="align-middle">{children}</span>
+  </>
+);
+
 const Header = ({
   className,
   optionRenderer,
@@ -27,9 +48,9 @@ const Header = ({
   children: React.ReactNode;
 }) => (
   <header className={cn("mb-12", className)}>
-    <h1 className="text-3xl font-bold">{children}</h1>
+    <h1 className="select-none text-3xl font-bold">{children}</h1>
     {optionRenderer}
   </header>
 );
 
-export default Object.assign(Header, { Title: Title });
+export default Object.assign(Header, { Title: Title, Back: Back });

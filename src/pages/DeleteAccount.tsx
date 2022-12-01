@@ -1,0 +1,68 @@
+import { useState } from "react";
+import { deleteUser } from "../common/apis";
+import { useNavigate } from "react-router-dom";
+
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Button from "../components/Button";
+import ModalPortal from "../components/ModalPortal";
+import Loading from "../components/Loading";
+
+import leftArrowIcon from "../assets/left_arrow.svg";
+import cryingIcon from "../assets/crying.png";
+
+const DeleteAccount = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const onDeleteUser = async () => {
+    setIsLoading(true);
+    try {
+      await deleteUser();
+    } catch (error) {}
+    setIsLoading(false);
+  };
+
+  return (
+    <>
+      <Header>
+        <Header.Back onClick={() => navigate("/profile")}>회원탈퇴</Header.Back>
+      </Header>
+      <main className="text-center text-base">
+        <img
+          width={30}
+          className="mb-2 inline-block"
+          src={cryingIcon}
+          alt="crying face"
+        />
+        <article>
+          <div className="mb-4 text-xl font-bold">
+            정말 타이티를 탈퇴하시겠어요?
+          </div>
+          <div className="leading-8">
+            타이티를 탈퇴하시면 지금까지 쌓은 소중한 기록들이 모두 사라져요 :(
+            <br />
+            <span className="text-system-alert">
+              탈퇴 후에는 계정을 다시 복구할 수 없으니 이 점 유의해 주세요.
+            </span>
+          </div>
+        </article>
+      </main>
+      <Footer className="flex items-center justify-center gap-x-3">
+        <Button.Outline
+          className="w-full text-grayscale-100"
+          onClick={() => navigate(-1)}
+        >
+          아니요
+        </Button.Outline>
+        <Button.Outline className="w-full" onClick={onDeleteUser}>
+          탈퇴할래요
+        </Button.Outline>
+      </Footer>
+
+      <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
+    </>
+  );
+};
+
+export default DeleteAccount;
