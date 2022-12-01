@@ -69,17 +69,17 @@ export const getNicknames = async (): Promise<string[]> => {
   );
 };
 
-export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
-  const today = getLocalTime().format("YYYYMMDD");
-  return axios.get("/api/questions", { params: { date: today } });
-};
-
 const getCurrentUserDoc = () => {
   const userId = auth.currentUser?.uid;
   if (!userId) {
     throw new Error("Unauthorized");
   }
   return doc(db, "users", userId);
+};
+
+export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
+  const today = getLocalTime().format("YYYYMMDD");
+  return axios.get("/api/questions", { params: { date: today } });
 };
 
 export const getTodayQuestionDoc = async () => {
@@ -91,6 +91,10 @@ export const getTodayQuestionDoc = async () => {
     throw new Error("Today's question does not exist.");
   }
   return questions.docs[0];
+};
+
+export const getQuestion = (questionId: string) => {
+  return getDoc(doc(db, "questions", questionId));
 };
 
 export const getTodayAnswer = async () => {
@@ -130,9 +134,15 @@ export const answer = async (questionId: string, optionId: string) => {
   return await addDoc(collection(db, "answers"), answer);
 };
 
-export const getAnswers = async (): Promise<AxiosResponse<Answer[]>> => {
-  const user = getCurrentUserDoc();
-  return axios.get("/api/answers", { params: { user: user.id } });
+export const getAnswers = async (params: {
+  user?: string;
+  question?: string;
+}): Promise<AxiosResponse<Answer[]>> => {
+  return axios.get("/api/answers", { params });
+};
+
+export const getAnswer = (answerId: string) => {
+  return getDoc(doc(db, "answers", answerId));
 };
 
 export const getAnswerCount = async () => {
@@ -141,4 +151,8 @@ export const getAnswerCount = async () => {
     query(collection(db, "answers"), where("user", "==", user))
   );
   return answers.size;
+};
+
+export const getOption = (optionId: string) => {
+  return getDoc(doc(db, "options", optionId));
 };

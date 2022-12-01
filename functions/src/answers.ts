@@ -85,8 +85,8 @@ app.get("/", async (req, res) => {
       return {
         id: doc.id,
         user: answer.user,
-        question: question.data(),
-        option: option.data(),
+        question: { id: question.id, ...question.data() },
+        option: { id: option.id, ...option.data() },
         ratio,
       };
     });

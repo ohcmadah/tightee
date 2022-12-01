@@ -2,6 +2,7 @@ import { getAnswers, getTodayQuestionDoc } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
 import { getFormattedDate, getLocalTime } from "../common/utils";
+import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import { Link } from "react-router-dom";
 import Error from "../components/Error";
@@ -103,7 +104,10 @@ const ActualAnswers = ({ answers }: { answers: AnswerType[] }) => (
 );
 
 const Answers = () => {
-  const { state, data } = useAsyncAPI(getAnswers);
+  const {
+    user: { uid },
+  } = useAuthenticatedState();
+  const { state, data } = useAsyncAPI(getAnswers, { user: uid });
 
   switch (state) {
     case "loading":
