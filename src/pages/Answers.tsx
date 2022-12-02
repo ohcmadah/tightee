@@ -1,7 +1,12 @@
 import { getAnswers, getTodayQuestionDoc } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
-import { formatPercent, getFormattedDate, getLocalTime } from "../common/utils";
+import {
+  getFormattedDate,
+  getLocalTime,
+  getProperty,
+  groupBy,
+} from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import { Link } from "react-router-dom";
@@ -10,6 +15,7 @@ import Loading from "../components/Loading";
 import Header from "../components/Header";
 import Badge from "../components/Badge";
 import Box from "../components/Box";
+import Chart from "../components/Chart";
 
 import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
@@ -17,7 +23,7 @@ import chartIcon from "../assets/chart.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
 
 const Answer = ({ answer }: { answer: AnswerType }) => {
-  const { question, option, ratio } = answer;
+  const { question, option } = answer;
   return (
     <Box.Container>
       <Box>
@@ -39,9 +45,9 @@ const Answer = ({ answer }: { answer: AnswerType }) => {
             className="mr-1.5 inline-block"
           />
           <div className="grow">
-            전체 타이티 중에{" "}
-            <span className="text-primary">{formatPercent(ratio)}</span>를
-            차지하고 있어요.
+            <Chart.Summary value="TODO:">
+              {"전체 타이티 중에 {value}를 차지하고 있어요."}
+            </Chart.Summary>
           </div>
           <img src={rightArrowIcon} alt="arrow" />
         </Link>
@@ -92,7 +98,13 @@ const Main = ({ answers }: { answers: AnswerType[] }) => {
   );
 };
 
-const ActualAnswers = ({ answers }: { answers: AnswerType[] }) => (
+const ActualAnswers = ({
+  answers,
+  myAnswers,
+}: {
+  answers: AnswerType[];
+  myAnswers: AnswerType[];
+}) => (
   <>
     <Header className="flex items-center">
       <Header.Title iconSrc={answerIcon} alt="answer">
@@ -107,7 +119,7 @@ const Answers = () => {
   const {
     user: { uid },
   } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getAnswers, { user: uid });
+  const { state, data } = useAsyncAPI(getAnswers);
 
   switch (state) {
     case "loading":
@@ -117,7 +129,15 @@ const Answers = () => {
       return <Error.Default />;
 
     case "loaded":
-      return <ActualAnswers answers={data.data} />;
+      const answersByUserIdMap = groupBy(data.data, (answer) =>
+        getProperty(answer, "user.id")
+      );
+      return (
+        <ActualAnswers
+          answers={data.data}
+          myAnswers={answersByUserIdMap.get(uid) || []}
+        />
+      );
   }
 };
 

@@ -17,7 +17,7 @@ export const setAll = (obj: object, value: any): {} => {
   return Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: value }), {});
 };
 
-const getProperty = <T extends Record<string, any>>(
+export const getProperty = <T extends Record<string, any>>(
   obj: T,
   path: string
 ): any => {
@@ -29,16 +29,18 @@ const getProperty = <T extends Record<string, any>>(
     );
 };
 
-export const groupBy = <T extends Record<string, any>>(
-  arr: T[],
-  path: string
-) => {
-  return arr.reduce((acc: Record<string, T[]>, x) => {
-    const val = getProperty(x, path);
-    const key = typeof val === "string" ? val : JSON.stringify(val);
-    (acc[key] = acc[key] || []).push(x);
-    return acc;
-  }, {});
+export const groupBy = <K, V>(arr: Array<V>, keyGetter: (item: V) => K) => {
+  const map = new Map<K, Array<V>>();
+  arr.forEach((item) => {
+    const key = keyGetter(item);
+    const collection = map.get(key);
+    if (!collection) {
+      map.set(key, [item]);
+    } else {
+      collection.push(item);
+    }
+  });
+  return map;
 };
 
 export const isValidForm = (error: FormError) => {

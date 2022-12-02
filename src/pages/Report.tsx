@@ -7,8 +7,13 @@ import {
   getUser,
 } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { Answer, Question, User } from "../@types";
-import { formatPercent, getFormattedDate, groupBy } from "../common/utils";
+import { Answer, MBTI, Question, User } from "../@types";
+import {
+  formatPercent,
+  getFormattedDate,
+  getProperty,
+  groupBy,
+} from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import {
   ReportContextProvider,
@@ -25,21 +30,20 @@ import Chart from "../components/Chart";
 import replyIcon from "../assets/reply.svg";
 import rankIcon from "../assets/rank.png";
 
-const calcRatio = (
-  group: Record<string, Answer[]>,
-  total: number,
-  target: any
-) => {
-  const key = typeof target === "string" ? target : JSON.stringify(target);
-  return key in group ? group[key].length / total : 0;
+const calcRatio = <K,>(group: Map<K, Answer[]>, total: number, key: K) => {
+  const target = group.get(key);
+  if (!target) return 0;
+  return key in group ? target.length / total : 0;
 };
 
-const calcMBTIrank = (group: Record<string, Answer[]>) => {
-  return Object.entries(group)
-    .filter(([mbti, _]) => mbti !== "null")
+const calcMBTIrank = (group: Map<MBTI, Answer[]>) => {
+  return Array.from(group)
+    .filter(([mbti, _]) => mbti !== null)
     .map(([mbti, answers]) => {
-      const answersByOptionTextMap = groupBy(answers, "option.text");
-      const [option, selected] = Object.entries(answersByOptionTextMap).sort(
+      const answersByOptionTextMap = groupBy(answers, (answer) =>
+        getProperty(answer, "option.text")
+      );
+      const [option, selected] = Array.from(answersByOptionTextMap).sort(
         (a, b) => a[1].length - b[1].length
       )[0];
       return { mbti, option, ratio: selected.length / answers.length };

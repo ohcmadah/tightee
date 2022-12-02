@@ -134,7 +134,7 @@ export const answer = async (questionId: string, optionId: string) => {
   return await addDoc(collection(db, "answers"), answer);
 };
 
-export const getAnswers = async (params: {
+export const getAnswers = async (params?: {
   user?: string;
   question?: string;
 }): Promise<AxiosResponse<Answer[]>> => {

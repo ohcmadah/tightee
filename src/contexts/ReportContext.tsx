@@ -1,8 +1,8 @@
 import { createContext, useContext, useMemo } from "react";
-import { Answer, Option, Question, User } from "../@types";
-import { groupBy } from "../common/utils";
+import { Answer, MBTI, Option, Question, User } from "../@types";
+import { getProperty, groupBy } from "../common/utils";
 
-type Group = ReturnType<typeof groupBy<Answer>>;
+type Group<K> = ReturnType<typeof groupBy<K, Answer>>;
 
 type Data = {
   answer: {
@@ -14,15 +14,18 @@ type Data = {
 };
 type ReportState = Data & {
   groups: {
-    option: Group;
+    option: Group<string>;
     user: {
-      mbti: Group;
-      region: Group;
+      mbti: Group<MBTI>;
+      region: Group<string>;
     };
   };
 };
 
 const ReportStateContext = createContext<ReportState | undefined>(undefined);
+
+const genKeyGetter = (path: string) => (answer: Answer) =>
+  getProperty(answer, path);
 
 export const ReportContextProvider = ({
   data,
@@ -34,10 +37,10 @@ export const ReportContextProvider = ({
   const { answers } = data;
   const groups = useMemo(
     () => ({
-      option: groupBy(answers, "option.id"),
+      option: groupBy(answers, genKeyGetter("option.id")),
       user: {
-        mbti: groupBy(answers, "user.MBTI"),
-        region: groupBy(answers, "user.region"),
+        mbti: groupBy(answers, genKeyGetter("user.MBTI")),
+        region: groupBy(answers, genKeyGetter("user.region")),
       },
     }),
     [answers]
