@@ -47,40 +47,42 @@ const Main = ({
 }) => {
   return (
     <main>
-      <Link to={answer.id ? `/answer/${answer.id}/report` : "/question"}>
-        <Box>
-          <Badge className="bg-secondary-question font-bold text-white">
-            오늘의 질문
-          </Badge>
-          <Content iconSrc={rightArrowIcon} alt="right arrow">
-            {question}
-          </Content>
-        </Box>
-      </Link>
+      <Box.Container>
+        <Link to={answer.id ? `/answer/${answer.id}/report` : "/question"}>
+          <Box>
+            <Badge className="bg-secondary-question font-bold text-white">
+              오늘의 질문
+            </Badge>
+            <Content iconSrc={rightArrowIcon} alt="right arrow">
+              {question}
+            </Content>
+          </Box>
+        </Link>
 
-      <Link to="/answer">
-        <Box>
-          <Badge className="bg-secondary-answer font-bold text-white">
-            나의 대답
-          </Badge>
-          <Content iconSrc={rightArrowIcon} alt="right arrow">
-            총 {answer?.count}개의 질문에 대답했어요.
-          </Content>
-        </Box>
-      </Link>
+        <Link to="/answer">
+          <Box>
+            <Badge className="bg-secondary-answer font-bold text-white">
+              나의 대답
+            </Badge>
+            <Content iconSrc={rightArrowIcon} alt="right arrow">
+              총 {answer?.count}개의 질문에 대답했어요.
+            </Content>
+          </Box>
+        </Link>
 
-      <Link to="/profile">
-        <Box className="mb-0">
-          <Badge className="bg-secondary-mbti font-bold text-white">
-            나의 MBTI
-          </Badge>
-          <Content iconSrc={settingIcon} alt="setting">
-            {MBTI
-              ? MBTI + " - " + getMBTIName(MBTI)
-              : "MBTI를 설정하면 더욱 재미있는 정보를 확인할 수 있어요 :)"}
-          </Content>
-        </Box>
-      </Link>
+        <Link to="/profile">
+          <Box className="mb-0">
+            <Badge className="bg-secondary-mbti font-bold text-white">
+              나의 MBTI
+            </Badge>
+            <Content iconSrc={settingIcon} alt="setting">
+              {MBTI
+                ? MBTI + " - " + getMBTIName(MBTI)
+                : "MBTI를 설정하면 더욱 재미있는 정보를 확인할 수 있어요 :)"}
+            </Content>
+          </Box>
+        </Link>
+      </Box.Container>
     </main>
   );
 };

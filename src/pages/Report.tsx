@@ -30,10 +30,10 @@ import Chart from "../components/Chart";
 import replyIcon from "../assets/reply.svg";
 import rankIcon from "../assets/rank.png";
 
-const calcRatio = <K,>(group: Map<K, Answer[]>, total: number, key: K) => {
+const calcRatio = <K,>(group: Map<K, Answer[]>, key: K, total: number) => {
   const target = group.get(key);
   if (!target) return 0;
-  return key in group ? target.length / total : 0;
+  return target.length / total;
 };
 
 const calcMBTIrank = (group: Map<MBTI, Answer[]>) => {
@@ -76,7 +76,7 @@ const DetailReport = () => {
           <Box>
             <Reply>{answer.option.text}</Reply>
             <Chart.Summary
-              value={calcRatio(groups.user.mbti, answers.length, user.MBTI)}
+              value={calcRatio(groups.user.mbti, user.MBTI, answers.length)}
             >
               {`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}
             </Chart.Summary>
@@ -84,7 +84,7 @@ const DetailReport = () => {
           <Box>
             <Reply>{answer.option.text}</Reply>
             <Chart.Summary
-              value={calcRatio(groups.user.region, answers.length, user.region)}
+              value={calcRatio(groups.user.region, user.region, answers.length)}
             >{`'${user.region}'에 사는 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
           </Box>
         </Box.Container>
@@ -108,7 +108,7 @@ const BasicReport = () => {
         <Box>
           <Reply>{answer.option.text}</Reply>
           <Chart.Summary
-            value={calcRatio(groups.option, answers.length, answer.option.id)}
+            value={calcRatio(groups.option, answer.option.id, answers.length)}
           >
             {`전체 타이티 중에 {value}를 차지하고 있어요.`}
           </Chart.Summary>

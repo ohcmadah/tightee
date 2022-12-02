@@ -22,9 +22,9 @@ const Summary = ({
     <div className={cn("flex items-center text-grayscale-80", className)}>
       <img width={20} src={chartIcon} alt="chart" className="mr-1.5" />
       <div>
-        {elements?.map((element) =>
+        {elements?.map((element, index) =>
           element.match(regex) ? (
-            <span className="text-primary">
+            <span key={index} className="text-primary">
               {typeof value === "number" ? formatPercent(value) : value}
             </span>
           ) : (

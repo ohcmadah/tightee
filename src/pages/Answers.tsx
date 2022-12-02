@@ -21,38 +21,47 @@ import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
 import chartIcon from "../assets/chart.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
+import { useMemo } from "react";
 
-const Answer = ({ answer }: { answer: AnswerType }) => {
-  const { question, option } = answer;
+const genKeyGetter = (path: string) => (answer: AnswerType) =>
+  getProperty(answer, path);
+
+const Answer = ({
+  answer,
+  answers,
+}: {
+  answer: AnswerType;
+  answers: AnswerType[];
+}) => {
+  const { id, question, option } = answer;
+
+  const sameAnswers = groupBy(answers, genKeyGetter("option.id")).get(
+    option.id
+  );
+  const ratio = (sameAnswers?.length || 0) / answers.length;
+
   return (
-    <Box.Container>
-      <Box>
-        <Badge className="bg-question-not-today">
-          {getFormattedDate(question.createdAt)}
-        </Badge>
-        <article className="my-6 px-2">
-          <div className="mb-1.5 text-lg font-medium">{question.title}</div>
-          <div className="text-primary">
-            <img src={replyIcon} alt="reply" className="mr-1.5 inline-block" />
-            <span className="align-middle">{option.text}</span>
-          </div>
-        </article>
-        <Link to={`${answer.id}/report`} className="flex w-full items-center">
-          <img
-            width={20}
-            src={chartIcon}
-            alt="chart"
-            className="mr-1.5 inline-block"
-          />
-          <div className="grow">
-            <Chart.Summary value="TODO:">
-              {"전체 타이티 중에 {value}를 차지하고 있어요."}
-            </Chart.Summary>
-          </div>
-          <img src={rightArrowIcon} alt="arrow" />
-        </Link>
-      </Box>
-    </Box.Container>
+    <Box>
+      <Badge className="bg-question-not-today">
+        {getFormattedDate(question.createdAt)}
+      </Badge>
+      <article className="my-6 px-2">
+        <div className="mb-1.5 text-lg font-medium">{question.title}</div>
+        <div className="text-primary">
+          <img src={replyIcon} alt="reply" className="mr-1.5 inline-block" />
+          <span className="align-middle">{option.text}</span>
+        </div>
+      </article>
+      <Link
+        to={`${id}/report`}
+        className="flex w-full items-center justify-between"
+      >
+        <Chart.Summary value={ratio}>
+          {"전체 타이티 중에 {value}를 차지하고 있어요."}
+        </Chart.Summary>
+        <img src={rightArrowIcon} alt="arrow" />
+      </Link>
+    </Box>
   );
 };
 
@@ -78,21 +87,46 @@ const TodayQuestion = () => {
   );
 };
 
-const Main = ({ answers }: { answers: AnswerType[] }) => {
+const Main = ({
+  answers,
+  myAnswers,
+}: {
+  answers: AnswerType[];
+  myAnswers: AnswerType[];
+}) => {
   const isAnsweredTodayQuestion =
-    answers[0]?.question.createdAt === getLocalTime().format("YYYYMMDD");
+    myAnswers[0]?.question.createdAt === getLocalTime().format("YYYYMMDD");
+
+  const answersByQuestionIdMap = useMemo(
+    () => groupBy(answers, genKeyGetter("question.id")),
+    [answers]
+  );
 
   return (
     <main>
-      <section>{!isAnsweredTodayQuestion && <TodayQuestion />}</section>
+      {!isAnsweredTodayQuestion && (
+        <section>
+          <TodayQuestion />
+        </section>
+      )}
       <section>
-        {answers.length !== 0 ? (
-          answers.map((answer) => <Answer key={answer.id} answer={answer} />)
-        ) : (
-          <div className="mt-12 text-center text-base text-grayscale-80">
-            아직 질문에 응답한 내역이 없어요 :)
-          </div>
-        )}
+        <Box.Container>
+          {myAnswers.length !== 0 ? (
+            myAnswers.map((answer) => (
+              <Answer
+                key={answer.id}
+                answer={answer}
+                answers={
+                  answersByQuestionIdMap.get(answer.question.id) || [answer]
+                }
+              />
+            ))
+          ) : (
+            <div className="mt-12 text-center text-base text-grayscale-80">
+              아직 질문에 응답한 내역이 없어요 :)
+            </div>
+          )}
+        </Box.Container>
       </section>
     </main>
   );
@@ -111,7 +145,7 @@ const ActualAnswers = ({
         나의 대답
       </Header.Title>
     </Header>
-    <Main answers={answers} />
+    <Main answers={answers} myAnswers={myAnswers} />
   </>
 );
 
@@ -129,9 +163,7 @@ const Answers = () => {
       return <Error.Default />;
 
     case "loaded":
-      const answersByUserIdMap = groupBy(data.data, (answer) =>
-        getProperty(answer, "user.id")
-      );
+      const answersByUserIdMap = groupBy(data.data, genKeyGetter("user.id"));
       return (
         <ActualAnswers
           answers={data.data}
