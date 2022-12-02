@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import {
   getAnswer,
@@ -9,21 +8,22 @@ import {
 } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer, Question, User } from "../@types";
-import { getFormattedDate, groupBy } from "../common/utils";
+import { formatPercent, getFormattedDate, groupBy } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
+import {
+  ReportContextProvider,
+  useReportState,
+} from "../contexts/ReportContext";
 
 import Header from "../components/Header";
 import Loading from "../components/Loading";
 import Error from "../components/Error";
 import Box from "../components/Box";
 import Badge from "../components/Badge";
+import Chart from "../components/Chart";
 
 import replyIcon from "../assets/reply.svg";
-import chartIcon from "../assets/chart.png";
-import {
-  ReportContextProvider,
-  useReportState,
-} from "../contexts/ReportContext";
+import rankIcon from "../assets/rank.png";
 
 const calcRatio = (
   group: Record<string, Answer[]>,
@@ -31,38 +31,31 @@ const calcRatio = (
   target: any
 ) => {
   const key = typeof target === "string" ? target : JSON.stringify(target);
-  return key in group ? Math.round((group[key].length / total) * 100) : 0;
+  return key in group ? group[key].length / total : 0;
 };
 
 const calcMBTIrank = (group: Record<string, Answer[]>) => {
   return Object.entries(group)
     .filter(([mbti, _]) => mbti !== "null")
     .map(([mbti, answers]) => {
-      const answersByOptionIdMap = groupBy(answers, "option.id");
-      const ratio =
-        Math.max(...Object.values(answersByOptionIdMap).map((v) => v.length)) /
-        answers.length;
-      return { mbti, ratio };
+      const answersByOptionTextMap = groupBy(answers, "option.text");
+      const [option, selected] = Object.entries(answersByOptionTextMap).sort(
+        (a, b) => a[1].length - b[1].length
+      )[0];
+      return { mbti, option, ratio: selected.length / answers.length };
     })
     .sort((a, b) => b.ratio - a.ratio);
 };
 
 const Reply = ({ children }: { children?: React.ReactNode }) => (
-  <div className="flex items-center text-primary">
+  <div className="mb-5 flex items-center text-primary">
     <img src={replyIcon} alt="reply" className="mr-1.5" />
     {children}
   </div>
 );
 
-const Chart = ({ children }: { children?: React.ReactNode }) => (
-  <div className="mt-5 flex items-center text-grayscale-80">
-    <img width={20} src={chartIcon} alt="chart" className="mr-1.5" />
-    {children}
-  </div>
-);
-
 const Title = ({ icon, children }: { icon: string; children: string }) => (
-  <Badge className="m-auto flex items-center bg-system-yellow text-base font-normal">
+  <Badge className="m-auto mb-5 flex items-center bg-system-yellow text-base font-normal">
     <img src={icon} alt={children} className="mr-1.5" width={20} />
     {children}
   </Badge>
@@ -78,23 +71,17 @@ const DetailReport = () => {
         <Box.Container>
           <Box>
             <Reply>{answer.option.text}</Reply>
-            <Chart>
-              '{user.MBTI ?? "MBTI 없음"}' 유형의 타이티 중에&nbsp;
-              <span className="text-primary">
-                {calcRatio(groups.user.mbti, answers.length, user.MBTI)}%
-              </span>
-              가 같은 응답을 했어요.
-            </Chart>
+            <Chart.Summary
+              value={calcRatio(groups.user.mbti, answers.length, user.MBTI)}
+            >
+              {`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}
+            </Chart.Summary>
           </Box>
           <Box>
             <Reply>{answer.option.text}</Reply>
-            <Chart>
-              '{user.region}'에 사는 타이티 중에&nbsp;
-              <span className="text-primary">
-                {calcRatio(groups.user.region, answers.length, user.region)}%
-              </span>
-              가 같은 응답을 했어요.
-            </Chart>
+            <Chart.Summary
+              value={calcRatio(groups.user.region, answers.length, user.region)}
+            >{`'${user.region}'에 사는 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
           </Box>
         </Box.Container>
       </section>
@@ -116,22 +103,27 @@ const BasicReport = () => {
         </Box>
         <Box>
           <Reply>{answer.option.text}</Reply>
-          <Chart>
-            전체 타이티 중에&nbsp;
-            <span className="text-primary">
-              {calcRatio(groups.option, answers.length, answer.option.id)}%
-            </span>
-            를 차지하고 있어요.
-          </Chart>
+          <Chart.Summary
+            value={calcRatio(groups.option, answers.length, answer.option.id)}
+          >
+            {`전체 타이티 중에 {value}를 차지하고 있어요.`}
+          </Chart.Summary>
         </Box>
         <Box>
-          <Title icon={chartIcon}>MBTI 순위</Title>
-          <Chart>16개 MBTI 중에서 N등으로 대답이 일치해요.</Chart>
-          {calcMBTIrank(groups.user.mbti).map(({ mbti, ratio }) => (
-            <div key={mbti}>
-              {mbti}: {Math.round(ratio * 100)}%
-            </div>
-          ))}
+          <Title icon={rankIcon}>MBTI 순위</Title>
+          <Chart.Summary value="TODO:">
+            {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
+          </Chart.Summary>
+          {calcMBTIrank(groups.user.mbti).map(
+            ({ mbti, option, ratio }, index) => (
+              <div key={mbti} className="mt-5">
+                {index + 1} {mbti}{" "}
+                <span className="text-grayscale-60">
+                  ({option}, {formatPercent(ratio)})
+                </span>
+              </div>
+            )
+          )}
         </Box>
       </Box.Container>
     </section>

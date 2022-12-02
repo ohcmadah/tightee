@@ -1,7 +1,7 @@
 import { getAnswers, getTodayQuestionDoc } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
-import { getFormattedDate, getLocalTime } from "../common/utils";
+import { formatPercent, getFormattedDate, getLocalTime } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import { Link } from "react-router-dom";
@@ -40,8 +40,8 @@ const Answer = ({ answer }: { answer: AnswerType }) => {
           />
           <div className="grow">
             전체 타이티 중에{" "}
-            <span className="text-primary">{ratio * 100}%</span>를 차지하고
-            있어요.
+            <span className="text-primary">{formatPercent(ratio)}</span>를
+            차지하고 있어요.
           </div>
           <img src={rightArrowIcon} alt="arrow" />
         </Link>

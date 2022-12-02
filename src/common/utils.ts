@@ -68,6 +68,10 @@ export function* range(start: number, end: number) {
   }
 }
 
+export const formatPercent = (number: number) => {
+  return parseFloat((number * 100).toFixed(2)) + "%";
+};
+
 export const getLocalTime = () => {
   const timezoneOffset = new Date().getTimezoneOffset();
   return moment.utc().utcOffset(-timezoneOffset);
