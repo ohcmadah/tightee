@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { getAnswers, getTodayQuestionDoc } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
@@ -19,9 +20,7 @@ import Chart from "../components/Chart";
 
 import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
-import chartIcon from "../assets/chart.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
-import { useMemo } from "react";
 
 const genKeyGetter = (path: string) => (answer: AnswerType) =>
   getProperty(answer, path);

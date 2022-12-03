@@ -36,4 +36,54 @@ const Summary = ({
   );
 };
 
-export default { Summary };
+const DEFAULT_COLORS = ["#ED7D31", "#4472C4"];
+
+const Pie = ({
+  className,
+  size,
+  data,
+  colors = DEFAULT_COLORS,
+}: {
+  className?: React.SVGAttributes<SVGSVGElement>["className"];
+  size: string | number;
+  data: number[];
+  colors?: string[];
+}) => {
+  let filled = 0;
+  const radius = 25;
+  const circumference = 2 * Math.PI * radius;
+
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 100 100"
+      height={size}
+      width={size}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {data.map((ratio, index) => {
+        const strokeLength = circumference * ratio;
+        const spaceLength = circumference - strokeLength;
+        const offset = filled * circumference;
+
+        filled += ratio;
+        return (
+          <circle
+            key={index}
+            r={radius}
+            cx="50%"
+            cy="50%"
+            fill="transparent"
+            stroke={colors[index]}
+            strokeWidth={radius * 2}
+            strokeDasharray={`${strokeLength} ${spaceLength}`}
+            strokeDashoffset={-offset}
+            transform={`rotate(-90) translate(${-100})`}
+          ></circle>
+        );
+      })}
+    </svg>
+  );
+};
+
+export default { Summary, Pie };

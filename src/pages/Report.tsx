@@ -112,6 +112,7 @@ const BasicReport = () => {
           >
             {`전체 타이티 중에 {value}를 차지하고 있어요.`}
           </Chart.Summary>
+          <Chart.Pie className="m-auto" size="50%" data={[0.3, 0.7]} />
         </Box>
         <Box>
           <Title icon={rankIcon}>MBTI 순위</Title>
