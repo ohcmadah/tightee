@@ -37,17 +37,30 @@ const Summary = ({
   );
 };
 
-type ChartData = { id: string; title: string; ratio: number; color: string }[];
+const calcXY = (isSelected: boolean, ratio: number) => {
+  if (!isSelected || ratio === 1) {
+    return { x: 0, y: 0 };
+  }
+  return { x: 5, y: ratio === 0.5 ? 0 : ratio < 0.5 ? 5 : -5 };
+};
+
+type ChartData = {
+  id: string;
+  title: string;
+  ratio: number;
+  color: string;
+  isSelected: boolean;
+}[];
 const ChartContext = createContext<ChartData | undefined>(undefined);
 
 const DEFAULT_COLORS = ["#ED7D31", "#4472C4"];
 
 const Pie = ({
-  className,
   size,
+  className,
 }: {
-  className?: React.SVGAttributes<SVGSVGElement>["className"];
   size: string | number;
+  className?: React.SVGAttributes<SVGSVGElement>["className"];
 }) => {
   const data = useContext(ChartContext);
 
@@ -55,9 +68,11 @@ const Pie = ({
     return <>ChartProvider not found.</>;
   }
 
+  const RADIUS = 22.5;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
   let filled = 0;
-  const radius = 25;
-  const circumference = 2 * Math.PI * radius;
+  const sortedData = data.sort((a, _) => (a.isSelected ? -1 : 0));
 
   return (
     <svg
@@ -67,24 +82,26 @@ const Pie = ({
       width={size}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {data.map(({ title, ratio, color }) => {
-        const strokeLength = circumference * ratio;
-        const spaceLength = circumference - strokeLength;
-        const offset = filled * circumference;
+      {sortedData.map(({ title, ratio, color, isSelected }) => {
+        const strokeLength = CIRCUMFERENCE * ratio;
+        const spaceLength = CIRCUMFERENCE - strokeLength;
+        const offset = filled * CIRCUMFERENCE;
+
+        const { x, y } = calcXY(isSelected, ratio);
 
         filled += ratio;
         return (
           <circle
             key={title}
-            r={radius}
+            r={RADIUS}
             cx="50%"
             cy="50%"
             fill="transparent"
             stroke={color}
-            strokeWidth={radius * 2}
+            strokeWidth={RADIUS * 2}
             strokeDasharray={`${strokeLength} ${spaceLength}`}
             strokeDashoffset={-offset}
-            transform={`rotate(-90) translate(${-100})`}
+            transform={`rotate(-90) translate(${-100 + y} ${x})`}
           ></circle>
         );
       })}
@@ -92,7 +109,7 @@ const Pie = ({
   );
 };
 
-const Regend = ({ selectedId }: { selectedId: string }) => {
+const Regend = () => {
   const data = useContext(ChartContext);
 
   if (!data) {
@@ -103,11 +120,11 @@ const Regend = ({ selectedId }: { selectedId: string }) => {
     <div className="last:mb-0">
       {data
         .sort((a, b) => a.ratio - b.ratio)
-        .map(({ id, title, ratio, color }) => (
+        .map(({ title, ratio, color, isSelected }) => (
           <div
             key={title}
             className={cn("mb-3 flex items-center", {
-              "font-bold": selectedId === id,
+              "font-bold": isSelected,
             })}
           >
             <span
@@ -124,15 +141,22 @@ const Regend = ({ selectedId }: { selectedId: string }) => {
 
 const Chart = ({
   data,
+  id,
   children,
 }: {
   data: { [id: string]: { title: string; ratio: number } };
+  id: string;
   children: React.ReactNode;
 }) => {
   const value = Object.entries(data).reduce(
-    (acc: ChartData, [id, value], index) => [
+    (acc: ChartData, [currentId, value], index) => [
       ...acc,
-      { ...value, id, color: DEFAULT_COLORS[index] },
+      {
+        ...value,
+        id,
+        color: DEFAULT_COLORS[index],
+        isSelected: currentId === id,
+      },
     ],
     []
   );
