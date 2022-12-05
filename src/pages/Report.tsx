@@ -118,8 +118,9 @@ const BasicReport = () => {
           <Chart.Summary value={optionData[answer.option.id].ratio}>
             {`전체 타이티 중에 {value}를 차지하고 있어요.`}
           </Chart.Summary>
-          <Chart data={Object.values(optionData)}>
+          <Chart data={optionData}>
             <Chart.Pie className="m-auto my-7" size="33%" />
+            <Chart.Regend selectedId={answer.option.id} />
           </Chart>
         </Box>
         <Box>

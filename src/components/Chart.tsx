@@ -37,24 +37,22 @@ const Summary = ({
   );
 };
 
-type ChartState = { title: string; ratio: number }[];
-const ChartContext = createContext<ChartState | undefined>(undefined);
+type ChartData = { id: string; title: string; ratio: number; color: string }[];
+const ChartContext = createContext<ChartData | undefined>(undefined);
 
 const DEFAULT_COLORS = ["#ED7D31", "#4472C4"];
 
 const Pie = ({
   className,
   size,
-  colors = DEFAULT_COLORS,
 }: {
   className?: React.SVGAttributes<SVGSVGElement>["className"];
   size: string | number;
-  colors?: string[];
 }) => {
   const data = useContext(ChartContext);
 
   if (!data) {
-    return <>ChartProvider not found</>;
+    return <>ChartProvider not found.</>;
   }
 
   let filled = 0;
@@ -69,7 +67,7 @@ const Pie = ({
       width={size}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {data.map(({ ratio }, index) => {
+      {data.map(({ title, ratio, color }) => {
         const strokeLength = circumference * ratio;
         const spaceLength = circumference - strokeLength;
         const offset = filled * circumference;
@@ -77,12 +75,12 @@ const Pie = ({
         filled += ratio;
         return (
           <circle
-            key={index}
+            key={title}
             r={radius}
             cx="50%"
             cy="50%"
             fill="transparent"
-            stroke={colors[index]}
+            stroke={color}
             strokeWidth={radius * 2}
             strokeDasharray={`${strokeLength} ${spaceLength}`}
             strokeDashoffset={-offset}
@@ -94,12 +92,53 @@ const Pie = ({
   );
 };
 
+const Regend = ({ selectedId }: { selectedId: string }) => {
+  const data = useContext(ChartContext);
+
+  if (!data) {
+    return <>ChartProvider not found.</>;
+  }
+
+  return (
+    <div className="last:mb-0">
+      {data
+        .sort((a, b) => a.ratio - b.ratio)
+        .map(({ id, title, ratio, color }) => (
+          <div
+            key={title}
+            className={cn("mb-3 flex items-center", {
+              "font-bold": selectedId === id,
+            })}
+          >
+            <span
+              className="mr-1.5 inline-block h-[16px] w-[24px] rounded-xl"
+              style={{ backgroundColor: color }}
+            />
+            {title}&nbsp;
+            <span className="text-grayscale-40">({formatPercent(ratio)})</span>
+          </div>
+        ))}
+    </div>
+  );
+};
+
 const Chart = ({
   data,
   children,
 }: {
-  data: ChartState;
+  data: { [id: string]: { title: string; ratio: number } };
   children: React.ReactNode;
-}) => <ChartContext.Provider value={data}>{children}</ChartContext.Provider>;
+}) => {
+  const value = Object.entries(data).reduce(
+    (acc: ChartData, [id, value], index) => [
+      ...acc,
+      { ...value, id, color: DEFAULT_COLORS[index] },
+    ],
+    []
+  );
+  return (
+    <ChartContext.Provider value={value}>{children}</ChartContext.Provider>
+  );
+};
 
-export default Object.assign(Chart, { Summary, Pie });
+export default Object.assign(Chart, { Summary, Pie, Regend });
