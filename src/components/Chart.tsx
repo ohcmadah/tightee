@@ -1,3 +1,4 @@
+import React, { createContext, useContext } from "react";
 import cn from "classnames";
 import { formatPercent } from "../common/utils";
 
@@ -36,19 +37,26 @@ const Summary = ({
   );
 };
 
+type ChartState = { title: string; ratio: number }[];
+const ChartContext = createContext<ChartState | undefined>(undefined);
+
 const DEFAULT_COLORS = ["#ED7D31", "#4472C4"];
 
 const Pie = ({
   className,
   size,
-  data,
   colors = DEFAULT_COLORS,
 }: {
   className?: React.SVGAttributes<SVGSVGElement>["className"];
   size: string | number;
-  data: number[];
   colors?: string[];
 }) => {
+  const data = useContext(ChartContext);
+
+  if (!data) {
+    return <>ChartProvider not found</>;
+  }
+
   let filled = 0;
   const radius = 25;
   const circumference = 2 * Math.PI * radius;
@@ -61,7 +69,7 @@ const Pie = ({
       width={size}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {data.map((ratio, index) => {
+      {data.map(({ ratio }, index) => {
         const strokeLength = circumference * ratio;
         const spaceLength = circumference - strokeLength;
         const offset = filled * circumference;
@@ -86,4 +94,12 @@ const Pie = ({
   );
 };
 
-export default { Summary, Pie };
+const Chart = ({
+  data,
+  children,
+}: {
+  data: ChartState;
+  children: React.ReactNode;
+}) => <ChartContext.Provider value={data}>{children}</ChartContext.Provider>;
+
+export default Object.assign(Chart, { Summary, Pie });

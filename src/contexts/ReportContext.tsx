@@ -14,7 +14,6 @@ type Data = {
 };
 type ReportState = Data & {
   groups: {
-    option: Group<string>;
     user: {
       mbti: Group<MBTI>;
       region: Group<string>;
@@ -23,9 +22,6 @@ type ReportState = Data & {
 };
 
 const ReportStateContext = createContext<ReportState | undefined>(undefined);
-
-const genKeyGetter = (path: string) => (answer: Answer) =>
-  getProperty(answer, path);
 
 export const ReportContextProvider = ({
   data,
@@ -37,10 +33,9 @@ export const ReportContextProvider = ({
   const { answers } = data;
   const groups = useMemo(
     () => ({
-      option: groupBy(answers, genKeyGetter("option.id")),
       user: {
-        mbti: groupBy(answers, genKeyGetter("user.MBTI")),
-        region: groupBy(answers, genKeyGetter("user.region")),
+        mbti: groupBy(answers, (answer) => answer.user.MBTI),
+        region: groupBy(answers, (answer) => answer.user.region),
       },
     }),
     [answers]

@@ -30,23 +30,27 @@ import Chart from "../components/Chart";
 import replyIcon from "../assets/reply.svg";
 import rankIcon from "../assets/rank.png";
 
-const calcRatio = <K,>(group: Map<K, Answer[]>, key: K, total: number) => {
-  const target = group.get(key);
-  if (!target) return 0;
-  return target.length / total;
+const genChartData = (
+  answers: Answer[]
+): { [optionId: string]: { title: string; ratio: number } } => {
+  const total = answers.length;
+  const group = groupBy(answers, (answer) => answer.option.id);
+
+  return Array.from(group).reduce((acc, [optionId, answers]) => {
+    const ratio = answers.length / total;
+    return { ...acc, [optionId]: { title: answers[0].option.text, ratio } };
+  }, {});
 };
 
 const calcMBTIrank = (group: Map<MBTI, Answer[]>) => {
   return Array.from(group)
     .filter(([mbti, _]) => mbti !== null)
     .map(([mbti, answers]) => {
-      const answersByOptionTextMap = groupBy(answers, (answer) =>
-        getProperty(answer, "option.text")
-      );
-      const [option, selected] = Array.from(answersByOptionTextMap).sort(
-        (a, b) => a[1].length - b[1].length
+      const data = genChartData(answers);
+      const { title, ratio } = Object.values(data).sort(
+        (a, b) => a.ratio - b.ratio
       )[0];
-      return { mbti, option, ratio: selected.length / answers.length };
+      return { mbti, option: title, ratio };
     })
     .sort((a, b) => b.ratio - a.ratio);
 };
@@ -66,7 +70,10 @@ const Title = ({ icon, children }: { icon: string; children: string }) => (
 );
 
 const DetailReport = () => {
-  const { answer, answers, user, groups } = useReportState();
+  const { answer, user, groups } = useReportState();
+
+  const mbti = genChartData(groups.user.mbti.get(user.MBTI) || []);
+  const region = genChartData(groups.user.region.get(user.region) || []);
 
   return (
     <>
@@ -75,16 +82,14 @@ const DetailReport = () => {
         <Box.Container>
           <Box>
             <Reply>{answer.option.text}</Reply>
-            <Chart.Summary
-              value={calcRatio(groups.user.mbti, user.MBTI, answers.length)}
-            >
+            <Chart.Summary value={mbti[answer.option.id].ratio}>
               {`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}
             </Chart.Summary>
           </Box>
           <Box>
             <Reply>{answer.option.text}</Reply>
             <Chart.Summary
-              value={calcRatio(groups.user.region, user.region, answers.length)}
+              value={region[answer.option.id].ratio}
             >{`'${user.region}'에 사는 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
           </Box>
         </Box.Container>
@@ -94,7 +99,10 @@ const DetailReport = () => {
 };
 
 const BasicReport = () => {
-  const { answer, answers, groups } = useReportState();
+  const { answer, answers, groups, user } = useReportState();
+
+  const optionData = genChartData(answers || []);
+  const mbtiRank = calcMBTIrank(groups.user.mbti);
 
   return (
     <section>
@@ -107,28 +115,30 @@ const BasicReport = () => {
         </Box>
         <Box>
           <Reply>{answer.option.text}</Reply>
-          <Chart.Summary
-            value={calcRatio(groups.option, answer.option.id, answers.length)}
-          >
+          <Chart.Summary value={optionData[answer.option.id].ratio}>
             {`전체 타이티 중에 {value}를 차지하고 있어요.`}
           </Chart.Summary>
-          <Chart.Pie className="m-auto" size="50%" data={[0.3, 0.7]} />
+          <Chart data={Object.values(optionData)}>
+            <Chart.Pie className="m-auto my-7" size="33%" />
+          </Chart>
         </Box>
         <Box>
           <Title icon={rankIcon}>MBTI 순위</Title>
-          <Chart.Summary value="TODO:">
+          <Chart.Summary
+            value={
+              mbtiRank.map((value) => value.mbti).indexOf(user.MBTI) + 1 + "등"
+            }
+          >
             {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
           </Chart.Summary>
-          {calcMBTIrank(groups.user.mbti).map(
-            ({ mbti, option, ratio }, index) => (
-              <div key={mbti} className="mt-5">
-                {index + 1} {mbti}{" "}
-                <span className="text-grayscale-60">
-                  ({option}, {formatPercent(ratio)})
-                </span>
-              </div>
-            )
-          )}
+          {mbtiRank.map(({ mbti, option, ratio }, index) => (
+            <div key={mbti} className="mt-5">
+              {index + 1} {mbti}{" "}
+              <span className="text-grayscale-60">
+                ({option}, {formatPercent(ratio)})
+              </span>
+            </div>
+          ))}
         </Box>
       </Box.Container>
     </section>

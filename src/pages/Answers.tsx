@@ -22,9 +22,6 @@ import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
 import rightArrowIcon from "../assets/right_arrow.svg";
 
-const genKeyGetter = (path: string) => (answer: AnswerType) =>
-  getProperty(answer, path);
-
 const Answer = ({
   answer,
   answers,
@@ -34,7 +31,7 @@ const Answer = ({
 }) => {
   const { id, question, option } = answer;
 
-  const sameAnswers = groupBy(answers, genKeyGetter("option.id")).get(
+  const sameAnswers = groupBy(answers, (answer) => answer.option.id).get(
     option.id
   );
   const ratio = (sameAnswers?.length || 0) / answers.length;
@@ -97,7 +94,7 @@ const Main = ({
     myAnswers[0]?.question.createdAt === getLocalTime().format("YYYYMMDD");
 
   const answersByQuestionIdMap = useMemo(
-    () => groupBy(answers, genKeyGetter("question.id")),
+    () => groupBy(answers, (answer) => answer.question.id),
     [answers]
   );
 
@@ -162,7 +159,7 @@ const Answers = () => {
       return <Error.Default />;
 
     case "loaded":
-      const answersByUserIdMap = groupBy(data.data, genKeyGetter("user.id"));
+      const answersByUserIdMap = groupBy(data.data, (answer) => answer.user.id);
       return (
         <ActualAnswers
           answers={data.data}
