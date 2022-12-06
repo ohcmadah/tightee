@@ -128,7 +128,7 @@ const Regend = () => {
   return (
     <div className="last:mb-0">
       {data
-        .sort((a, b) => a.ratio - b.ratio)
+        .sort((a, b) => b.ratio - a.ratio)
         .map(({ title, ratio, color, isSelected }) => (
           <div
             key={title}

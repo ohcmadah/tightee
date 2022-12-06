@@ -114,7 +114,7 @@ export const calcAgeGroup = (date: number) => {
   const { year } = convertUTCToBirthdate(date);
   const currentYear = getLocalTime().year();
   const age = currentYear - parseInt(year) + 1;
-  return age.toString().slice(0, 1);
+  return age.toString().slice(0, 1) + "0";
 };
 
 export const getMBTIName = (mbti: MBTI) => {

@@ -99,9 +99,8 @@ const DetailReport = () => {
   const regionData = genChartData(
     groups.user.region.get(answer.user.region) || []
   );
-  const ageData = genChartData(
-    groups.user.age.get(calcAgeGroup(answer.user.birthdate)) || []
-  );
+  const ageGroup = calcAgeGroup(answer.user.birthdate);
+  const ageData = genChartData(groups.user.age.get(ageGroup) || []);
 
   return (
     <>
@@ -140,7 +139,9 @@ const DetailReport = () => {
             <Title icon={hourglassIcon}>나이별 분석</Title>
             <Reply>{answer.option.text}</Reply>
             <Chart data={ageData} id={answer.option.id}>
-              TODO:
+              <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
+              <Chart.Pie className="m-auto my-7" size="33%" />
+              <Chart.Regend />
             </Chart>
           </Box>
         </Box.Container>
