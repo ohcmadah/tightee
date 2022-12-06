@@ -15,7 +15,7 @@ import {
 import { auth, db } from "../config";
 import { getLocalTime, getUTCTime } from "./utils";
 
-import { Answer, Auth, Question, User } from "../@types";
+import { Answer, Auth, Option, Question, User } from "../@types";
 
 export const authKakao = (code: string): Promise<AxiosResponse<Auth>> => {
   return axios.post("/api/auth/kakao", { code });
@@ -141,8 +141,20 @@ export const getAnswers = async (params?: {
   return axios.get("/api/answers", { params });
 };
 
-export const getAnswer = (answerId: string) => {
-  return getDoc(doc(db, "answers", answerId));
+export const getAnswer = async (answerId: string) => {
+  const answer = await getDoc(doc(db, "answers", answerId));
+
+  const user = answer.get("user") as User;
+
+  const questionId = answer.get("question").id;
+  const questionDoc = await getQuestion(questionId);
+  const question = { ...questionDoc.data(), id: questionId } as Question;
+
+  const optionId = answer.get("option").id;
+  const optionDoc = await getOption(optionId);
+  const option = { ...optionDoc.data(), id: optionId } as Option;
+
+  return { id: answerId, user, question, option } as Answer;
 };
 
 export const getAnswerCount = async () => {

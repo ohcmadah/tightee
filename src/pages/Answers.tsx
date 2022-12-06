@@ -2,12 +2,7 @@ import { useMemo } from "react";
 import { getAnswers, getTodayQuestionDoc } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
-import {
-  getFormattedDate,
-  getLocalTime,
-  getProperty,
-  groupBy,
-} from "../common/utils";
+import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import { Link } from "react-router-dom";
@@ -17,6 +12,7 @@ import Header from "../components/Header";
 import Badge from "../components/Badge";
 import Box from "../components/Box";
 import Chart from "../components/Chart";
+import Icon from "../components/Icon";
 
 import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
@@ -44,7 +40,7 @@ const Answer = ({
       <article className="my-6 px-2">
         <div className="mb-1.5 text-lg font-medium">{question.title}</div>
         <div className="text-primary">
-          <img src={replyIcon} alt="reply" className="mr-1.5 inline-block" />
+          <Icon src={replyIcon} alt="reply" />
           <span className="align-middle">{option.text}</span>
         </div>
       </article>
@@ -75,7 +71,7 @@ const TodayQuestion = () => {
           : "에러가 발생했어요 :("}
       </div>
       <Link to="/question" className="flex w-full items-center">
-        <img src={replyIcon} alt="reply" className="mr-1.5 inline-block" />
+        <Icon src={replyIcon} alt="reply" />
         <div className="grow text-grayscale-20">대답하러 가기</div>
         <img src={rightArrowIcon} alt="arrow" />
       </Link>

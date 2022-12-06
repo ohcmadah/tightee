@@ -1,16 +1,12 @@
 import { createContext, useContext, useMemo } from "react";
-import { Answer, MBTI, Option, Question, User } from "../@types";
-import { getProperty, groupBy } from "../common/utils";
+import { Answer, MBTI } from "../@types";
+import { groupBy } from "../common/utils";
 
 type Group<K> = ReturnType<typeof groupBy<K, Answer>>;
 
 type Data = {
-  answer: {
-    question: Question & { id: string };
-    option: Option & { id: string };
-  };
+  answer: Answer;
   answers: Answer[];
-  user: User;
 };
 type ReportState = Data & {
   groups: {

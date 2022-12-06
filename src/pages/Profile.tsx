@@ -254,7 +254,9 @@ const ActualProfile = ({
 
 const getProfileData = async (id: string) => {
   const user = await getUser(id);
-  const nicknames = await getNicknames();
+  const nicknames = (await getNicknames()).filter(
+    (nickame) => nickame !== user.get("nickname")
+  );
 
   return { user, nicknames };
 };

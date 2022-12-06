@@ -2,6 +2,8 @@ import React, { createContext, useContext } from "react";
 import cn from "classnames";
 import { formatPercent } from "../common/utils";
 
+import Icon from "./Icon";
+
 import chartIcon from "../assets/chart.png";
 
 /**
@@ -21,7 +23,7 @@ const Summary = ({
 
   return (
     <div className={cn("flex items-center text-grayscale-80", className)}>
-      <img width={20} src={chartIcon} alt="chart" className="mr-1.5" />
+      <Icon src={chartIcon} alt="chart" />
       <div>
         {elements?.map((element, index) =>
           element.match(regex) ? (
