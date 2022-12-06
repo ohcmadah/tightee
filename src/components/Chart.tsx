@@ -6,6 +6,15 @@ import Icon from "./Icon";
 
 import chartIcon from "../assets/chart.png";
 
+type ChartData = {
+  id: string;
+  title: string;
+  ratio: number;
+  color: string;
+  isSelected: boolean;
+}[];
+const ChartContext = createContext<ChartData | undefined>(undefined);
+
 /**
  * string 타입의 `children`을 받아 그 안에 입력된 **{value} 문자열**을 <span className="text-primary">{`props.value`}</span>로 치환합니다.
  */
@@ -14,12 +23,15 @@ const Summary = ({
   className,
   children,
 }: {
-  value: number | string;
+  value?: number | string;
   className?: cn.Argument;
   children?: string;
 }) => {
   const regex = /(\{value\})/;
   const elements = children?.split(regex);
+
+  const data = useContext(ChartContext);
+  const ratio = data?.filter((value) => value.isSelected)[0].ratio;
 
   return (
     <div className={cn("flex items-center text-grayscale-80", className)}>
@@ -28,7 +40,11 @@ const Summary = ({
         {elements?.map((element, index) =>
           element.match(regex) ? (
             <span key={index} className="text-primary">
-              {typeof value === "number" ? formatPercent(value) : value}
+              {value
+                ? typeof value === "number"
+                  ? formatPercent(value)
+                  : value
+                : formatPercent(ratio || 0)}
             </span>
           ) : (
             element
@@ -45,15 +61,6 @@ const calcXY = (isSelected: boolean, ratio: number) => {
   }
   return { x: 5, y: ratio <= 0.5 ? 3 : -3 };
 };
-
-type ChartData = {
-  id: string;
-  title: string;
-  ratio: number;
-  color: string;
-  isSelected: boolean;
-}[];
-const ChartContext = createContext<ChartData | undefined>(undefined);
 
 const DEFAULT_COLORS = ["#ED7D31", "#4472C4"];
 

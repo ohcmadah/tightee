@@ -2,7 +2,13 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { getAnswer, getAnswers } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer, MBTI } from "../@types";
-import { formatPercent, getFormattedDate, groupBy } from "../common/utils";
+import {
+  calcAgeGroup,
+  convertRegionCodeToReadable,
+  formatPercent,
+  getFormattedDate,
+  groupBy,
+} from "../common/utils";
 import {
   ReportContextProvider,
   useReportState,
@@ -21,6 +27,10 @@ import rankIcon from "../assets/rank.png";
 import goldIcon from "../assets/gold.png";
 import silverIcon from "../assets/silver.png";
 import bronzeIcon from "../assets/bronze.png";
+import genieIcon from "../assets/genie.png";
+import locationIcon from "../assets/location.png";
+import hourglassIcon from "../assets/hourglass.png";
+import lightIcon from "../assets/light.png";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
@@ -34,7 +44,7 @@ const genChartData = (
     const ratio = answers.length / total;
     return {
       ...acc,
-      [optionId]: { title: answers[0].option.text, ratio: ratio },
+      [optionId]: { title: answers[0].option.text, ratio },
     };
   }, {});
 };
@@ -45,7 +55,7 @@ const calcMBTIrank = (group: Map<MBTI, Answer[]>) => {
     .map(([mbti, answers]) => {
       const data = genChartData(answers);
       const { title, ratio } = Object.values(data).sort(
-        (a, b) => a.ratio - b.ratio
+        (a, b) => b.ratio - a.ratio
       )[0];
       return { mbti, option: title, ratio };
     })
@@ -66,28 +76,72 @@ const Title = ({ icon, children }: { icon: string; children: string }) => (
   </Badge>
 );
 
+const EmptyMBTI = () => (
+  <div className="flex items-start">
+    <Icon src={lightIcon} alt="tip" />
+    <div>
+      <div className="mb-3 leading-7 text-grayscale-80">
+        MBTI 정보가 없어 분석할 수 없어요 :(
+        <br />
+        MBTI 설정 후 다음 날 질문부터 정보를 확인할 수 있어요!
+      </div>
+      <Link to="/profile" className="font-medium text-grayscale-100">
+        {"MBTI 설정하기 >"}
+      </Link>
+    </div>
+  </div>
+);
+
 const DetailReport = () => {
   const { answer, groups } = useReportState();
 
-  const mbti = genChartData(groups.user.mbti.get(answer.user.MBTI) || []);
-  const region = genChartData(groups.user.region.get(answer.user.region) || []);
+  const mbtiData = genChartData(groups.user.mbti.get(answer.user.MBTI) || []);
+  const regionData = genChartData(
+    groups.user.region.get(answer.user.region) || []
+  );
+  const ageData = genChartData(
+    groups.user.age.get(calcAgeGroup(answer.user.birthdate)) || []
+  );
 
   return (
     <>
-      <h2>상세 리포트</h2>
+      <h2 className="mt-10 mb-7 select-none text-2xl font-bold">상세 리포트</h2>
       <section>
         <Box.Container>
           <Box>
+            <Title icon={genieIcon}>MBTI별 분석</Title>
             <Reply>{answer.option.text}</Reply>
-            <Chart.Summary value={mbti[answer.option.id].ratio}>
-              {`'${answer.user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}
-            </Chart.Summary>
+            {answer.user.MBTI ? (
+              <Chart data={mbtiData} id={answer.option.id}>
+                <Chart.Summary>{`'${answer.user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
+                <Chart.Pie className="m-auto my-7" size="33%" />
+                <Chart.Regend />
+              </Chart>
+            ) : (
+              <EmptyMBTI />
+            )}
           </Box>
+
           <Box>
+            <Title icon={locationIcon}>지역별 분석</Title>
             <Reply>{answer.option.text}</Reply>
-            <Chart.Summary
-              value={region[answer.option.id].ratio}
-            >{`'${answer.user.region}'에 사는 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
+            <Chart data={regionData} id={answer.option.id}>
+              <Chart.Summary>
+                {"'" +
+                  convertRegionCodeToReadable(answer.user.region) +
+                  "'에 사는 타이티 중에 {value}가 같은 응답을 했어요."}
+              </Chart.Summary>
+              <Chart.Pie className="m-auto my-7" size="33%" />
+              <Chart.Regend />
+            </Chart>
+          </Box>
+
+          <Box>
+            <Title icon={hourglassIcon}>나이별 분석</Title>
+            <Reply>{answer.option.text}</Reply>
+            <Chart data={ageData} id={answer.option.id}>
+              TODO:
+            </Chart>
           </Box>
         </Box.Container>
       </section>
@@ -102,14 +156,7 @@ const MBTIRankReport = () => {
     return (
       <Box>
         <Title icon={rankIcon}>MBTI 순위</Title>
-        <div className="text-grayscale-80">
-          아직 MBTI를 입력하지 않았어요.
-          <br />
-          MBTI를 입력하고 지금 바로 결과를 확인하세요 :)
-        </div>
-        <Link to="/profile" className="mt-3 font-medium text-primary">
-          {"바로가기 >"}
-        </Link>
+        <EmptyMBTI />
       </Box>
     );
   }
@@ -139,8 +186,6 @@ const MBTIRankReport = () => {
 const BasicReport = () => {
   const { answer, answers } = useReportState();
 
-  const optionData = genChartData(answers || []);
-
   return (
     <section>
       <Box.Container>
@@ -153,10 +198,8 @@ const BasicReport = () => {
 
         <Box>
           <Reply>{answer.option.text}</Reply>
-          <Chart.Summary value={optionData[answer.option.id].ratio}>
-            {`전체 타이티 중에 {value}를 차지하고 있어요.`}
-          </Chart.Summary>
-          <Chart data={optionData} id={answer.option.id}>
+          <Chart data={genChartData(answers || [])} id={answer.option.id}>
+            <Chart.Summary>{`전체 타이티 중에 {value}를 차지하고 있어요.`}</Chart.Summary>
             <Chart.Pie className="m-auto my-7" size="33%" />
             <Chart.Regend />
           </Chart>

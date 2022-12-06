@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo } from "react";
 import { Answer, MBTI } from "../@types";
-import { groupBy } from "../common/utils";
+import { calcAgeGroup, groupBy } from "../common/utils";
 
 type Group<K> = ReturnType<typeof groupBy<K, Answer>>;
 
@@ -13,6 +13,7 @@ type ReportState = Data & {
     user: {
       mbti: Group<MBTI>;
       region: Group<string>;
+      age: Group<string>;
     };
   };
 };
@@ -32,6 +33,7 @@ export const ReportContextProvider = ({
       user: {
         mbti: groupBy(answers, (answer) => answer.user.MBTI),
         region: groupBy(answers, (answer) => answer.user.region),
+        age: groupBy(answers, (answer) => calcAgeGroup(answer.user.birthdate)),
       },
     }),
     [answers]
