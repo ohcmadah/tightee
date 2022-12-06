@@ -41,7 +41,7 @@ const calcXY = (isSelected: boolean, ratio: number) => {
   if (!isSelected || ratio === 1) {
     return { x: 0, y: 0 };
   }
-  return { x: 5, y: ratio === 0.5 ? 0 : ratio < 0.5 ? 5 : -5 };
+  return { x: 5, y: ratio <= 0.5 ? 3 : -3 };
 };
 
 type ChartData = {
