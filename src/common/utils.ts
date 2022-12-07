@@ -162,3 +162,7 @@ export const convertRegionCodeToReadable = (code: string) => {
   };
   return map[code] || "";
 };
+
+export const convertGenderCodeToReadable = (code: string) => {
+  return code === constants.GENDER_MALE ? "남성" : "여성";
+};

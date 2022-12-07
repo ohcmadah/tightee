@@ -4,6 +4,7 @@ import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer, MBTI } from "../@types";
 import {
   calcAgeGroup,
+  convertGenderCodeToReadable,
   convertRegionCodeToReadable,
   formatPercent,
   getFormattedDate,
@@ -31,6 +32,7 @@ import genieIcon from "../assets/genie.png";
 import locationIcon from "../assets/location.png";
 import hourglassIcon from "../assets/hourglass.png";
 import lightIcon from "../assets/light.png";
+import heartIcon from "../assets/heart.png";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
@@ -101,6 +103,9 @@ const DetailReport = () => {
   );
   const ageGroup = calcAgeGroup(answer.user.birthdate);
   const ageData = genChartData(groups.user.age.get(ageGroup) || []);
+  const genderData = genChartData(
+    groups.user.gender.get(answer.user.gender) || []
+  );
 
   return (
     <>
@@ -140,6 +145,20 @@ const DetailReport = () => {
             <Reply>{answer.option.text}</Reply>
             <Chart data={ageData} id={answer.option.id}>
               <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
+              <Chart.Pie className="m-auto my-7" size="33%" />
+              <Chart.Regend />
+            </Chart>
+          </Box>
+
+          <Box>
+            <Title icon={heartIcon}>성별 분석</Title>
+            <Reply>{answer.option.text}</Reply>
+            <Chart data={genderData} id={answer.option.id}>
+              <Chart.Summary>
+                {`성별이 '${convertGenderCodeToReadable(
+                  answer.user.gender
+                )}'인 타이티 중에 {value}가 같은 응답을 했어요.`}
+              </Chart.Summary>
               <Chart.Pie className="m-auto my-7" size="33%" />
               <Chart.Regend />
             </Chart>

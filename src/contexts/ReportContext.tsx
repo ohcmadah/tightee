@@ -14,6 +14,7 @@ type ReportState = Data & {
       mbti: Group<MBTI>;
       region: Group<string>;
       age: Group<string>;
+      gender: Group<string>;
     };
   };
 };
@@ -34,6 +35,7 @@ export const ReportContextProvider = ({
         mbti: groupBy(answers, (answer) => answer.user.MBTI),
         region: groupBy(answers, (answer) => answer.user.region),
         age: groupBy(answers, (answer) => calcAgeGroup(answer.user.birthdate)),
+        gender: groupBy(answers, (answer) => answer.user.gender),
       },
     }),
     [answers]
