@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   doc,
+  DocumentReference,
   getDoc,
   getDocs,
   query,
@@ -15,7 +16,7 @@ import {
 import { auth, db } from "../config";
 import { getLocalTime, getUTCTime } from "./utils";
 
-import { Answer, Auth, Question, User } from "../@types";
+import { Answer, Auth, Option, Question, User } from "../@types";
 
 export const authKakao = (code: string): Promise<AxiosResponse<Auth>> => {
   return axios.post("/api/auth/kakao", { code });
@@ -69,17 +70,17 @@ export const getNicknames = async (): Promise<string[]> => {
   );
 };
 
-export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
-  const today = getLocalTime().format("YYYYMMDD");
-  return axios.get("/api/questions", { params: { date: today } });
-};
-
 const getCurrentUserDoc = () => {
   const userId = auth.currentUser?.uid;
   if (!userId) {
     throw new Error("Unauthorized");
   }
   return doc(db, "users", userId);
+};
+
+export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
+  const today = getLocalTime().format("YYYYMMDD");
+  return axios.get("/api/questions", { params: { date: today } });
 };
 
 export const getTodayQuestionDoc = async () => {
@@ -91,6 +92,10 @@ export const getTodayQuestionDoc = async () => {
     throw new Error("Today's question does not exist.");
   }
   return questions.docs[0];
+};
+
+export const getQuestion = (questionId: string) => {
+  return getDoc(doc(db, "questions", questionId));
 };
 
 export const getTodayAnswer = async () => {
@@ -130,9 +135,41 @@ export const answer = async (questionId: string, optionId: string) => {
   return await addDoc(collection(db, "answers"), answer);
 };
 
-export const getAnswers = async (): Promise<AxiosResponse<Answer[]>> => {
-  const user = getCurrentUserDoc();
-  return axios.get("/api/answers", { params: { user: user.id } });
+export const getAnswers = async (params?: {
+  user?: string;
+  question?: string;
+}): Promise<AxiosResponse<Answer[]>> => {
+  return axios.get("/api/answers", { params });
+};
+
+export const getAnswer = async (answerId: string) => {
+  const answer = await getDoc(doc(db, "answers", answerId));
+
+  const user = answer.get("user") as User;
+
+  const questionId = answer.get("question").id;
+  const questionDoc = await getQuestion(questionId);
+  const optionDocs = questionDoc
+    .get("options")
+    .map((option: DocumentReference) => getOption(option.id));
+  const options = (await Promise.allSettled(optionDocs)).reduce(
+    (options: Option[], result) =>
+      result.status === "fulfilled"
+        ? [...options, { ...result.value.data(), id: result.value.id }]
+        : options,
+    []
+  );
+  const question = {
+    ...questionDoc.data(),
+    options,
+    id: questionId,
+  } as Question;
+
+  const optionId = answer.get("option").id;
+  const optionDoc = await getOption(optionId);
+  const option = { ...optionDoc.data(), id: optionId } as Option;
+
+  return { id: answerId, user, question, option } as Answer;
 };
 
 export const getAnswerCount = async () => {
@@ -141,4 +178,8 @@ export const getAnswerCount = async () => {
     query(collection(db, "answers"), where("user", "==", user))
   );
   return answers.size;
+};
+
+export const getOption = (optionId: string) => {
+  return getDoc(doc(db, "options", optionId));
 };

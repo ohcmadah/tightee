@@ -4,6 +4,7 @@ import { answer, getTodayAnswer, getTodayQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Option as OptionType, Question as QuestionType } from "../@types";
+import { getFormattedDate } from "../common/utils";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -11,7 +12,7 @@ import Loading from "../components/Loading";
 import Error from "../components/Error";
 import ExternalLink from "../components/ExternalLink";
 import Footer from "../components/Footer";
-import DateBadge from "../components/DateBadge";
+import Badge from "../components/Badge";
 import ModalPortal from "../components/ModalPortal";
 
 import questionIcon from "../assets/question.png";
@@ -92,7 +93,11 @@ const ActualQuestion = ({
     <>
       <Header
         className="flex items-center"
-        optionRenderer={<DateBadge className="ml-auto bg-primary-peach" />}
+        optionRenderer={
+          <Badge className="ml-auto bg-primary-peach">
+            {getFormattedDate()}
+          </Badge>
+        }
       >
         <Header.Title iconSrc={questionIcon} alt="question">
           오늘의 질문

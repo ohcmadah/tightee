@@ -7,5 +7,4 @@ export interface Answer {
   user: User;
   question: Question;
   option: Option;
-  ratio: number;
 }

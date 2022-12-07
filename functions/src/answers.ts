@@ -73,21 +73,11 @@ app.get("/", async (req, res) => {
       const question = await db.doc("questions/" + answer.question.id).get();
       const option = await db.doc("options/" + answer.option.id).get();
 
-      const allAnswers = await createQuery(db, {
-        question: answer.question.id,
-      }).get();
-      const sameAnswers = allAnswers.docs.filter((doc) => {
-        const data = doc.data() as Answer;
-        return data.option.id === answer.option.id;
-      });
-      const ratio = sameAnswers.length / allAnswers.docs.length;
-
       return {
         id: doc.id,
         user: answer.user,
-        question: question.data(),
-        option: option.data(),
-        ratio,
+        question: { id: question.id, ...question.data() },
+        option: { id: option.id, ...option.data() },
       };
     });
 

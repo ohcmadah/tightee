@@ -1,5 +1,6 @@
 import moment from "moment";
 import { FormError, MBTI } from "../@types";
+import * as constants from "../common/constants";
 
 export const setProperty = <T extends Record<string, any>>(
   obj: T,
@@ -15,6 +16,32 @@ export const setProperty = <T extends Record<string, any>>(
 
 export const setAll = (obj: object, value: any): {} => {
   return Object.keys(obj).reduce((acc, key) => ({ ...acc, [key]: value }), {});
+};
+
+export const getProperty = <T extends Record<string, any>>(
+  obj: T,
+  path: string
+): any => {
+  return path
+    .split(".")
+    .reduce(
+      (acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined),
+      obj
+    );
+};
+
+export const groupBy = <K, V>(arr: Array<V>, keyGetter: (item: V) => K) => {
+  const map = new Map<K, Array<V>>();
+  arr.forEach((item) => {
+    const key = keyGetter(item);
+    const collection = map.get(key);
+    if (!collection) {
+      map.set(key, [item]);
+    } else {
+      collection.push(item);
+    }
+  });
+  return map;
 };
 
 export const isValidForm = (error: FormError) => {
@@ -44,6 +71,10 @@ export function* range(start: number, end: number) {
   }
 }
 
+export const formatPercent = (number: number) => {
+  return parseFloat((number * 100).toFixed(2)) + "%";
+};
+
 export const getLocalTime = () => {
   const timezoneOffset = new Date().getTimezoneOffset();
   return moment.utc().utcOffset(-timezoneOffset);
@@ -51,6 +82,10 @@ export const getLocalTime = () => {
 
 export const getUTCTime = () => {
   return moment.utc().valueOf();
+};
+
+export const getFormattedDate = (date?: moment.MomentInput) => {
+  return moment(date).format("YY.MM.DD(ddd)");
 };
 
 export const convertBirthdateToUTC = (birthdate: {
@@ -75,6 +110,13 @@ export const convertUTCToBirthdate = (utctime: number) => {
   };
 };
 
+export const calcAgeGroup = (date: number) => {
+  const { year } = convertUTCToBirthdate(date);
+  const currentYear = getLocalTime().year();
+  const age = currentYear - parseInt(year) + 1;
+  return age.toString().slice(0, 1) + "0";
+};
+
 export const getMBTIName = (mbti: MBTI) => {
   if (!mbti) return "";
   const nameByMBTIMap = {
@@ -96,4 +138,31 @@ export const getMBTIName = (mbti: MBTI) => {
     ENTJ: "지도자형",
   };
   return nameByMBTIMap[mbti];
+};
+
+export const convertRegionCodeToReadable = (code: string) => {
+  const map: Record<string, string> = {
+    [constants.REGION_SEOUL]: "서울특별시",
+    [constants.REGION_BUSAN]: "부산광역시",
+    [constants.REGION_DAEGU]: "대구광역시",
+    [constants.REGION_INCHEON]: "인천광역시",
+    [constants.REGION_GWANGJU]: "광주광역시",
+    [constants.REGION_DAEJEON]: "대전광역시",
+    [constants.REGION_ULSAN]: "울산광역시",
+    [constants.REGION_SEJONG]: "세종특별자치시",
+    [constants.REGION_GYEONGGIDO]: "경기도",
+    [constants.REGION_GANGWONDO]: "강원도",
+    [constants.REGION_CHUNGCHEONGBUKDO]: "충청북도",
+    [constants.REGION_CHUNGCHEONGNAMDO]: "충청남도",
+    [constants.REGION_JEOLLABUKDO]: "전라북도",
+    [constants.REGION_JEOLLANAMDO]: "전라남도",
+    [constants.REGION_GYEONGSANGNAMDO]: "경상북도",
+    [constants.REGION_GYEONGSANGBUKDO]: "경상남도",
+    [constants.REGION_JEJUDO]: "제주도",
+  };
+  return map[code] || "";
+};
+
+export const convertGenderCodeToReadable = (code: string) => {
+  return code === constants.GENDER_MALE ? "남성" : "여성";
 };
