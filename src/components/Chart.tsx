@@ -62,7 +62,7 @@ const calcXY = (isSelected: boolean, ratio: number) => {
   return { x: 5, y: ratio <= 0.5 ? 3 : -3 };
 };
 
-const DEFAULT_COLORS = ["#ED7D31", "#4472C4"];
+const DEFAULT_COLORS = ["#30A9DE", "#EFDC05", "#E53A40", "#090707"];
 
 const Pie = ({
   size,
