@@ -1,7 +1,7 @@
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { getAnswer, getAnswers } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { Answer, MBTI } from "../@types";
+import { Answer, MBTI, Option } from "../@types";
 import {
   calcAgeGroup,
   convertGenderCodeToReadable,
@@ -37,25 +37,25 @@ import heartIcon from "../assets/heart.png";
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
 const genChartData = (
-  answers: Answer[]
+  answers: Answer[],
+  options: Option[]
 ): { [optionId: string]: { title: string; ratio: number } } => {
   const total = answers.length;
   const group = groupBy(answers, (answer) => answer.option.id);
 
-  return Array.from(group).reduce((acc, [optionId, answers]) => {
-    const ratio = answers.length / total;
-    return {
-      ...acc,
-      [optionId]: { title: answers[0].option.text, ratio },
-    };
+  return options.reduce((acc, option) => {
+    const answers = group.get(option.id);
+
+    const ratio = (answers?.length || 0) / total;
+    return { ...acc, [option.id]: { title: option.text, ratio } };
   }, {});
 };
 
-const calcMBTIrank = (group: Map<MBTI, Answer[]>) => {
+const calcMBTIrank = (group: Map<MBTI, Answer[]>, options: Option[]) => {
   return Array.from(group)
     .filter(([mbti, _]) => mbti !== null)
     .map(([mbti, answers]) => {
-      const data = genChartData(answers);
+      const data = genChartData(answers, options);
       const { title, ratio } = Object.values(data).sort(
         (a, b) => b.ratio - a.ratio
       )[0];
@@ -95,16 +95,27 @@ const EmptyMBTI = () => (
 );
 
 const DetailReport = () => {
-  const { answer, groups } = useReportState();
+  const {
+    answer: { user, question, option },
+    groups,
+  } = useReportState();
 
-  const mbtiData = genChartData(groups.user.mbti.get(answer.user.MBTI) || []);
-  const regionData = genChartData(
-    groups.user.region.get(answer.user.region) || []
+  const mbtiData = genChartData(
+    groups.user.mbti.get(user.MBTI) || [],
+    question.options
   );
-  const ageGroup = calcAgeGroup(answer.user.birthdate);
-  const ageData = genChartData(groups.user.age.get(ageGroup) || []);
+  const regionData = genChartData(
+    groups.user.region.get(user.region) || [],
+    question.options
+  );
+  const ageGroup = calcAgeGroup(user.birthdate);
+  const ageData = genChartData(
+    groups.user.age.get(ageGroup) || [],
+    question.options
+  );
   const genderData = genChartData(
-    groups.user.gender.get(answer.user.gender) || []
+    groups.user.gender.get(user.gender) || [],
+    question.options
   );
 
   return (
@@ -114,10 +125,10 @@ const DetailReport = () => {
         <Box.Container>
           <Box>
             <Title icon={genieIcon}>MBTI별 분석</Title>
-            <Reply>{answer.option.text}</Reply>
-            {answer.user.MBTI ? (
-              <Chart data={mbtiData} id={answer.option.id}>
-                <Chart.Summary>{`'${answer.user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
+            <Reply>{option.text}</Reply>
+            {user.MBTI ? (
+              <Chart data={mbtiData} id={option.id}>
+                <Chart.Summary>{`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
                 <Chart.Pie className="m-auto my-7" size="33%" />
                 <Chart.Regend />
               </Chart>
@@ -128,11 +139,11 @@ const DetailReport = () => {
 
           <Box>
             <Title icon={locationIcon}>지역별 분석</Title>
-            <Reply>{answer.option.text}</Reply>
-            <Chart data={regionData} id={answer.option.id}>
+            <Reply>{option.text}</Reply>
+            <Chart data={regionData} id={option.id}>
               <Chart.Summary>
                 {"'" +
-                  convertRegionCodeToReadable(answer.user.region) +
+                  convertRegionCodeToReadable(user.region) +
                   "'에 사는 타이티 중에 {value}가 같은 응답을 했어요."}
               </Chart.Summary>
               <Chart.Pie className="m-auto my-7" size="33%" />
@@ -142,8 +153,8 @@ const DetailReport = () => {
 
           <Box>
             <Title icon={hourglassIcon}>나이별 분석</Title>
-            <Reply>{answer.option.text}</Reply>
-            <Chart data={ageData} id={answer.option.id}>
+            <Reply>{option.text}</Reply>
+            <Chart data={ageData} id={option.id}>
               <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
               <Chart.Pie className="m-auto my-7" size="33%" />
               <Chart.Regend />
@@ -152,11 +163,11 @@ const DetailReport = () => {
 
           <Box>
             <Title icon={heartIcon}>성별 분석</Title>
-            <Reply>{answer.option.text}</Reply>
-            <Chart data={genderData} id={answer.option.id}>
+            <Reply>{option.text}</Reply>
+            <Chart data={genderData} id={option.id}>
               <Chart.Summary>
                 {`성별이 '${convertGenderCodeToReadable(
-                  answer.user.gender
+                  user.gender
                 )}'인 타이티 중에 {value}가 같은 응답을 했어요.`}
               </Chart.Summary>
               <Chart.Pie className="m-auto my-7" size="33%" />
@@ -181,7 +192,7 @@ const MBTIRankReport = () => {
     );
   }
 
-  const rank = calcMBTIrank(groups.user.mbti);
+  const rank = calcMBTIrank(groups.user.mbti, answer.question.options);
   const myRank = rank.map((value) => value.mbti).indexOf(answer.user.MBTI) + 1;
 
   return (
@@ -218,7 +229,10 @@ const BasicReport = () => {
 
         <Box>
           <Reply>{answer.option.text}</Reply>
-          <Chart data={genChartData(answers || [])} id={answer.option.id}>
+          <Chart
+            data={genChartData(answers || [], answer.question.options)}
+            id={answer.option.id}
+          >
             <Chart.Summary>{`전체 타이티 중에 {value}를 차지하고 있어요.`}</Chart.Summary>
             <Chart.Pie className="m-auto my-7" size="33%" />
             <Chart.Regend />

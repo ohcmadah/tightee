@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   doc,
+  DocumentReference,
   getDoc,
   getDocs,
   query,
@@ -148,7 +149,21 @@ export const getAnswer = async (answerId: string) => {
 
   const questionId = answer.get("question").id;
   const questionDoc = await getQuestion(questionId);
-  const question = { ...questionDoc.data(), id: questionId } as Question;
+  const optionDocs = questionDoc
+    .get("options")
+    .map((option: DocumentReference) => getOption(option.id));
+  const options = (await Promise.allSettled(optionDocs)).reduce(
+    (options: Option[], result) =>
+      result.status === "fulfilled"
+        ? [...options, { ...result.value.data(), id: result.value.id }]
+        : options,
+    []
+  );
+  const question = {
+    ...questionDoc.data(),
+    options,
+    id: questionId,
+  } as Question;
 
   const optionId = answer.get("option").id;
   const optionDoc = await getOption(optionId);
