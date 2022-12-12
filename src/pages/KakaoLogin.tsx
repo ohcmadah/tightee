@@ -13,7 +13,7 @@ const authorize = async (code: string) => {
   const { data } = await authKakao(code);
   const user = await getUser(data.kakaoUser.id);
 
-  if (user.exists()) {
+  if (user) {
     await signInWithCustomToken(firebaseAuth, data.firebaseToken);
     return { isLoggedIn: true, auth: data };
   }

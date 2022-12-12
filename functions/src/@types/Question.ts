@@ -2,7 +2,7 @@ import { DocumentReference } from "firebase/firestore";
 import { Option } from "./Option";
 
 export interface Question {
-  createdAt: number;
+  createdAt: string;
   options: [DocumentReference<Option>];
   title: string;
 }

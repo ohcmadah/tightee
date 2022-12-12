@@ -201,15 +201,17 @@ const MBTIRankReport = () => {
       <Chart.Summary value={myRank + "등"}>
         {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
       </Chart.Summary>
-      {rank.map(({ mbti, option, ratio }, index) => (
-        <div key={mbti} className="mt-5">
-          <Icon src={RANK_ICONS[index]} alt={`${index + 1}등`} />
-          {mbti}{" "}
-          <span className="text-grayscale-60">
-            ({option}, {formatPercent(ratio)})
-          </span>
-        </div>
-      ))}
+      <div className="mt-5 last:mb-0">
+        {rank.map(({ mbti, option, ratio }, index) => (
+          <div key={mbti} className="mb-3">
+            <Icon src={RANK_ICONS[index]} alt={`${index + 1}등`} />
+            {mbti}{" "}
+            <span className="text-grayscale-60">
+              ({option}, {formatPercent(ratio)})
+            </span>
+          </div>
+        ))}
+      </div>
     </Box>
   );
 };
@@ -263,10 +265,10 @@ const ActualReport = () => {
 
 const getMyAnswerAndAnswers = async (answerId: string) => {
   const answer = await getAnswer(answerId);
-  const answers = await getAnswers({ question: answer.question.id });
+  const answers = await getAnswers({ question: answer.data.question.id });
 
   return {
-    answer,
+    answer: answer.data,
     answers: answers.data,
   };
 };

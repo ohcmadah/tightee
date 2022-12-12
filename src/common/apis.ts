@@ -1,64 +1,40 @@
 import axios, { AxiosResponse } from "axios";
-import {
-  addDoc,
-  collection,
-  doc,
-  DocumentReference,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  UpdateData,
-  updateDoc,
-  where,
-  writeBatch,
-} from "firebase/firestore";
-import { auth, db } from "../config";
-import { getLocalTime, getUTCTime } from "./utils";
+import { UpdateData } from "firebase/firestore";
+import { auth } from "../config";
+import { getLocalTime } from "./utils";
 
 import { Answer, Auth, Option, Question, User } from "../@types";
+
+const getCurrentUserId = () => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  return userId;
+};
 
 export const authKakao = (code: string): Promise<AxiosResponse<Auth>> => {
   return axios.post("/api/auth/kakao", { code });
 };
 
 export const createUser = (user: User) => {
-  return setDoc(doc(db, "users", user.id), user);
+  return axios.post("/api/users/" + user.id, { ...user });
 };
 
-export const getUser = (id: string) => {
-  return getDoc(doc(db, "users", id));
+export const getUser = async (id: string): Promise<User | null> => {
+  const res = await axios.get("/api/users/" + id);
+  if (res.status === 204) {
+    return null;
+  }
+  return res.data;
 };
 
 export const updateUser = (id: string, data: UpdateData<User>) => {
-  return updateDoc(doc(db, "users", id), data);
+  return axios.patch("/api/users/" + id, { ...data });
 };
 
 export const deleteUser = async () => {
-  const user = auth.currentUser;
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  try {
-    await user.delete();
-  } catch (error: any) {
-    if (error.code == "auth/requires-recent-login") {
-      await auth.signOut();
-      setTimeout(() => {
-        alert("Please sign in again to delete your account.");
-      }, 1);
-    }
-    return;
-  }
-
-  const batch = writeBatch(db);
-  const answers = await getDocs(
-    query(collection(db, "answers"), where("user.id", "==", user.uid))
-  );
-  answers.forEach((answer) => batch.update(answer.ref, { "user.id": null }));
-  batch.delete(doc(db, "users", user.uid));
-  await batch.commit();
+  return axios.delete("/api/users/" + getCurrentUserId());
 };
 
 export const getNicknames = async (): Promise<string[]> => {
@@ -70,116 +46,43 @@ export const getNicknames = async (): Promise<string[]> => {
   );
 };
 
-const getCurrentUserDoc = () => {
-  const userId = auth.currentUser?.uid;
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-  return doc(db, "users", userId);
-};
-
 export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
   const today = getLocalTime().format("YYYYMMDD");
   return axios.get("/api/questions", { params: { date: today } });
 };
 
-export const getTodayQuestionDoc = async () => {
-  const today = getLocalTime().format("YYYYMMDD");
-  const questions = await getDocs(
-    query(collection(db, "questions"), where("createdAt", "==", today))
-  );
-  if (questions.empty) {
-    throw new Error("Today's question does not exist.");
-  }
-  return questions.docs[0];
+export const getQuestion = (id: string) => {
+  return axios.get("/api/questions/" + id);
 };
 
-export const getQuestion = (questionId: string) => {
-  return getDoc(doc(db, "questions", questionId));
-};
-
-export const getTodayAnswer = async () => {
-  const user = getCurrentUserDoc();
-  const question = (await getTodayQuestionDoc()).ref;
-
-  const answers = await getDocs(
-    query(
-      collection(db, "answers"),
-      where("user.id", "==", user.id),
-      where("question", "==", question)
-    )
-  );
-  if (answers.empty) {
-    throw new Error("Today's answer does not exist.");
-  }
-  return answers.docs[0];
-};
-
-export const answer = async (questionId: string, optionId: string) => {
-  if (!questionId || !optionId) {
-    throw new Error("Please check the parameters.");
-  }
-  const option = doc(db, "options", optionId);
-  const question = doc(db, "questions", questionId);
-  const user = await getDoc(getCurrentUserDoc());
-
-  const answer = {
-    option,
-    question,
-    user: {
-      id: user.id,
-      ...user.data(),
-    },
-    createdAt: getUTCTime(),
-  };
-  return await addDoc(collection(db, "answers"), answer);
+export const answer = (questionId: string, optionId: string) => {
+  return axios.post("/api/answers", {
+    question: questionId,
+    option: optionId,
+    user: getCurrentUserId(),
+  });
 };
 
 export const getAnswers = async (params?: {
   user?: string;
   question?: string;
+  date?: string;
 }): Promise<AxiosResponse<Answer[]>> => {
   return axios.get("/api/answers", { params });
 };
 
-export const getAnswer = async (answerId: string) => {
-  const answer = await getDoc(doc(db, "answers", answerId));
-
-  const user = answer.get("user") as User;
-
-  const questionId = answer.get("question").id;
-  const questionDoc = await getQuestion(questionId);
-  const optionDocs = questionDoc
-    .get("options")
-    .map((option: DocumentReference) => getOption(option.id));
-  const options = (await Promise.allSettled(optionDocs)).reduce(
-    (options: Option[], result) =>
-      result.status === "fulfilled"
-        ? [...options, { ...result.value.data(), id: result.value.id }]
-        : options,
-    []
-  );
-  const question = {
-    ...questionDoc.data(),
-    options,
-    id: questionId,
-  } as Question;
-
-  const optionId = answer.get("option").id;
-  const optionDoc = await getOption(optionId);
-  const option = { ...optionDoc.data(), id: optionId } as Option;
-
-  return { id: answerId, user, question, option } as Answer;
+export const getAnswer = (answerId: string): Promise<AxiosResponse<Answer>> => {
+  return axios.get("/api/answers/" + answerId);
 };
 
 export const getAnswerCount = async () => {
-  const user = getCurrentUserDoc();
-  const answers = await getDocs(
-    query(collection(db, "answers"), where("user", "==", user))
-  );
-  return answers.size;
+  const user = getCurrentUserId();
+  const answers = await getAnswers({ user });
+  return answers.data.length;
 };
 
-export const getOption = (optionId: string) => {
-  return getDoc(doc(db, "options", optionId));
+export const getOptions = (params?: {
+  ids: string[];
+}): Promise<AxiosResponse<Option[]>> => {
+  return axios.get("/api/options", { params });
 };

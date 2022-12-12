@@ -7,4 +7,5 @@ export interface Answer {
   user: User;
   question: DocumentReference<Question>;
   option: DocumentReference<Option>;
+  createdAt: number;
 }
