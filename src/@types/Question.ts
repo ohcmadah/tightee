@@ -3,6 +3,6 @@ import { Option } from "./Option";
 export interface Question {
   id: string;
   createdAt: string;
-  options: [Option];
+  options: Option["id"][];
   title: string;
 }

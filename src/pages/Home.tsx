@@ -1,25 +1,20 @@
-import cn from "classnames";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import {
-  getAnswerCount,
-  getTodayAnswer,
-  getTodayQuestionDoc,
-  getUser,
-} from "../common/apis";
+import { getAnswers, getTodayQuestion, getUser } from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
-import { MBTI, User } from "../@types";
-import { getMBTIName } from "../common/utils";
+import { MBTI } from "../@types";
+import { getLocalTime, getMBTIName } from "../common/utils";
 
-import { Link, To } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
-import Error from "../components/Error";
+import ErrorView from "../components/Error";
 import Badge from "../components/Badge";
 
 import homeIcon from "../assets/home.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
 import settingIcon from "../assets/setting.svg";
 import Box from "../components/Box";
+import { auth } from "../config";
 
 const Content = ({
   iconSrc = rightArrowIcon,
@@ -88,15 +83,26 @@ const Main = ({
 };
 
 const getHomeData = async (uid: string) => {
-  const question = await getTodayQuestionDoc();
-  const answerCount = await getAnswerCount();
+  const question = await getTodayQuestion();
+  const answers = await getAnswers({ user: uid });
+
+  const answerCount = answers.data.length;
+  const today = getLocalTime().format("YYYYMMDD");
+  const todayAnswer = answers.data.filter(
+    (answer) => answer.question.createdAt === today
+  );
+
   const user = await getUser(uid);
-  const res = { question, answerCount, MBTI: (user.data() as User).MBTI };
-  try {
-    return { ...res, answer: await getTodayAnswer() };
-  } catch (error) {
-    return { ...res, answer: undefined };
+  if (!user) {
+    await auth.signOut();
+    throw new Error("다시 로그인해 주세요.");
   }
+  return {
+    question,
+    answerCount,
+    MBTI: user.MBTI,
+    answer: todayAnswer.length !== 0 ? todayAnswer[0] : null,
+  };
 };
 
 const Home = () => {
@@ -109,9 +115,9 @@ const Home = () => {
 
     case "error":
       return (
-        <Error.Default>
+        <ErrorView.Default>
           <div>{`${data}`}</div>
-        </Error.Default>
+        </ErrorView.Default>
       );
 
     case "loaded":
@@ -121,7 +127,11 @@ const Home = () => {
             <Header.Title iconSrc={homeIcon}>타이티입니다 :)</Header.Title>
           </Header>
           <Main
-            question={data.question.data().title}
+            question={
+              data.question.status === 204
+                ? "오늘의 질문이 존재하지 않습니다."
+                : data.question.data.title
+            }
             answer={{ id: data.answer?.id, count: data.answerCount }}
             MBTI={data.MBTI}
           />

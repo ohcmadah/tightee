@@ -4,7 +4,7 @@ import { UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
-import { deleteUser, getNicknames, getUser, updateUser } from "../common/apis";
+import { getNicknames, getUser, updateUser } from "../common/apis";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -13,13 +13,14 @@ import {
   URL_PERSONAL_AGREEMENT,
   URL_TERMS,
 } from "../common/constants";
-import { auth as firebaseAuth } from "../config";
+import { auth, auth as firebaseAuth } from "../config";
 import {
   convertBirthdateToUTC,
   convertUTCToBirthdate,
   getFormErrorMessage,
 } from "../common/utils";
 import { ProfileValues } from "../contexts/SignUpContext";
+import useAsyncAPI from "../hooks/useAsyncAPI";
 
 import Button from "../components/Button";
 import Form from "../components/Form";
@@ -28,12 +29,10 @@ import Input from "../components/Input";
 import RegionSelector from "../components/RegionSelector";
 import MBTISelector from "../components/MBTISelector";
 import ModalPortal from "../components/ModalPortal";
+import ExternalLink from "../components/ExternalLink";
+import ErrorView from "../components/Error";
 
 import eyesIcon from "../assets/eyes.png";
-import useAsyncAPI from "../hooks/useAsyncAPI";
-import ExternalLink from "../components/ExternalLink";
-import Error from "../components/Error";
-
 const Settings = ({
   subscribe,
   onUpdateUser,
@@ -254,8 +253,12 @@ const ActualProfile = ({
 
 const getProfileData = async (id: string) => {
   const user = await getUser(id);
+  if (!user) {
+    await auth.signOut();
+    throw new Error("다시 로그인해 주세요.");
+  }
   const nicknames = (await getNicknames()).filter(
-    (nickame) => nickame !== user.get("nickname")
+    (nickame) => nickame !== user.nickname
   );
 
   return { user, nicknames };
@@ -273,13 +276,13 @@ const Profile = () => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return <ErrorView.Default />;
 
     case "loaded":
       return (
         <ActualProfile
           init={forceUpdate}
-          user={data.user.data() as User}
+          user={data.user}
           existentNicknameSet={new Set(data.nicknames)}
         />
       );

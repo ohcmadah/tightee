@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { answer, getTodayAnswer, getTodayQuestion } from "../common/apis";
+import {
+  answer,
+  getAnswers,
+  getOptions,
+  getTodayQuestion,
+} from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
-import { Option as OptionType, Question as QuestionType } from "../@types";
+import { Option as OptionType } from "../@types";
 import { getFormattedDate } from "../common/utils";
 
 import Header from "../components/Header";
@@ -59,15 +64,17 @@ const QuestionSection = ({ title }: { title: string }) => {
 };
 
 const Main = ({
-  question,
+  title,
+  options,
   onAnswer,
 }: {
-  question: QuestionType;
+  title: string;
+  options: OptionType[];
   onAnswer: (id: string) => any;
 }) => (
   <main>
-    <QuestionSection title={question.title} />
-    <OptionSection options={question.options} onAnswer={onAnswer} />
+    <QuestionSection title={title} />
+    <OptionSection options={options} onAnswer={onAnswer} />
   </main>
 );
 
@@ -75,7 +82,12 @@ const ActualQuestion = ({
   question,
   forceUpdate,
 }: {
-  question: QuestionType;
+  question: {
+    id: string;
+    createdAt: string;
+    title: string;
+    options: OptionType[];
+  };
   forceUpdate: Function;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,7 +115,11 @@ const ActualQuestion = ({
           오늘의 질문
         </Header.Title>
       </Header>
-      <Main question={question} onAnswer={onAnswer} />
+      <Main
+        title={question.title}
+        options={question.options}
+        onAnswer={onAnswer}
+      />
       <Footer className="text-center">
         <Tip />
       </Footer>
@@ -112,42 +128,52 @@ const ActualQuestion = ({
   );
 };
 
+const getQuestionPageData = async () => {
+  const question = await getTodayQuestion();
+  if (question.status === 204) {
+    return { question: null };
+  }
+  const optionIds = question.data.options;
+  const options = await getOptions({ ids: optionIds });
+  const { data: answers } = await getAnswers({ question: question.data.id });
+  return {
+    question: { ...question.data, options: options.data },
+    answer: answers.length !== 0 ? answers[0] : null,
+  };
+};
+
 const Question = () => {
-  const todayQuestion = useAsyncAPI(getTodayQuestion);
-  const todayAnswer = useAsyncAPI(getTodayAnswer);
+  const { state, data, forceUpdate } = useAsyncAPI(getQuestionPageData);
 
-  if (todayQuestion.state === "error") {
-    return <Error.Default />;
-  }
+  switch (state) {
+    case "loading":
+      return <Loading.Full />;
 
-  if (todayQuestion.state === "loading" || todayAnswer.state === "loading") {
-    return <Loading.Full />;
-  }
+    case "error":
+      return <Error.Default />;
 
-  if (todayAnswer.state === "loaded") {
-    return <Navigate to="/answer" />;
-  }
-
-  if (todayQuestion.data.status === 200) {
-    return (
-      <ActualQuestion
-        question={todayQuestion.data.data}
-        forceUpdate={todayAnswer.forceUpdate}
-      />
-    );
-  } else {
-    return (
-      <Error.Default>
-        <article>
-          오늘의 질문이 존재하지 않습니다.
-          <br />
-          <ExternalLink className="text-primary" href={URL_CS}>
-            고객센터
-          </ExternalLink>
-          로 문의해 주세요.
-        </article>
-      </Error.Default>
-    );
+    case "loaded":
+      if (data.answer) {
+        return <Navigate to="/answer" />;
+      }
+      if (data.question) {
+        return (
+          <ActualQuestion question={data.question} forceUpdate={forceUpdate} />
+        );
+      } else {
+        return (
+          <Error.Default>
+            <article>
+              오늘의 질문이 존재하지 않습니다.
+              <br />
+              <ExternalLink className="text-primary" href={URL_CS}>
+                고객센터
+              </ExternalLink>
+              로 문의해 주세요.
+            </article>
+          </Error.Default>
+        );
+      }
   }
 };
 

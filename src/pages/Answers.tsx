@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { getAnswers, getTodayQuestionDoc } from "../common/apis";
+import { getAnswers, getTodayQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
@@ -58,14 +58,14 @@ const Answer = ({
 };
 
 const TodayQuestion = () => {
-  const { state, data } = useAsyncAPI(getTodayQuestionDoc);
+  const { state, data } = useAsyncAPI(getTodayQuestion);
 
   return (
     <article className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
       <Badge className="bg-primary-peach">TODAY</Badge>
       <div className="my-6 px-2 text-lg font-medium">
         {state === "loaded"
-          ? data.data().title
+          ? data.data.title
           : state === "loading"
           ? "오늘의 질문을 불러오고 있어요..."
           : "에러가 발생했어요 :("}
@@ -104,12 +104,12 @@ const Main = ({
       <section>
         <Box.Container>
           {myAnswers.length !== 0 ? (
-            myAnswers.map((answer) => (
+            myAnswers.map((myAnswer) => (
               <Answer
-                key={answer.id}
-                answer={answer}
+                key={myAnswer.id}
+                answer={myAnswer}
                 answers={
-                  answersByQuestionIdMap.get(answer.question.id) || [answer]
+                  answersByQuestionIdMap.get(myAnswer.question.id) || [myAnswer]
                 }
               />
             ))

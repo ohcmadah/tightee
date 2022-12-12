@@ -80,10 +80,6 @@ export const getLocalTime = () => {
   return moment.utc().utcOffset(-timezoneOffset);
 };
 
-export const getUTCTime = () => {
-  return moment.utc().valueOf();
-};
-
 export const getFormattedDate = (date?: moment.MomentInput) => {
   return moment(date).format("YY.MM.DD(ddd)");
 };
