@@ -17,5 +17,8 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    define: {
+      "process.env": Object.assign(process.env, env),
+    },
   };
 });

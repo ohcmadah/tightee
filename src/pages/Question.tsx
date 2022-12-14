@@ -136,6 +136,7 @@ const getQuestionPageData = async () => {
   const optionIds = question.data.options;
   const options = await getOptions({ ids: optionIds });
   const { data: answers } = await getAnswers({ question: question.data.id });
+
   return {
     question: { ...question.data, options: options.data },
     answer: answers.length !== 0 ? answers[0] : null,

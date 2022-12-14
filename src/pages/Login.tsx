@@ -34,7 +34,7 @@ const onLoginWithKakao = () => {
 
 const Login = () => {
   if (!window.Kakao.isInitialized()) {
-    window.Kakao.init(import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY);
+    window.Kakao.init(process.env.VITE_KAKAO_JAVASCRIPT_KEY);
   }
 
   return (
