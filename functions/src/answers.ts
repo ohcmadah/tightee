@@ -82,6 +82,7 @@ app.get("/", async (req, res) => {
       return res.status(200).json(filteredAnswers);
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json(error);
   }
 });
@@ -124,6 +125,7 @@ app.get("/:id", async (req, res) => {
       option: { id: option.id, ...(option.data() as Option) },
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json(error);
   }
 });
@@ -142,7 +144,7 @@ app.post("/", async (req, res) => {
       });
     }
 
-    const option = db.doc("options/" + optionId).get();
+    const option = db.doc("options/" + optionId);
     const question = db.doc("questions/" + questionId);
     const user = db.doc("users/" + userId);
 
