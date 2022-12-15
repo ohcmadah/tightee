@@ -129,7 +129,7 @@ app.post("/kakao", async (req, res) => {
       firebaseToken,
     });
   } catch (error: any) {
-    console.error(error);
+    console.error(JSON.stringify(error));
 
     const err = error.response;
     return res.status(err.status).json({
