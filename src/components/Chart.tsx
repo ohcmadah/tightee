@@ -110,7 +110,7 @@ const Pie = ({
             strokeWidth={RADIUS * 2}
             strokeDasharray={`${strokeLength} ${spaceLength}`}
             strokeDashoffset={-offset}
-            transform={`rotate(-90) translate(${-100 + y} ${x})`}
+            transform={`rotate(-90 50 50) translate(${y} ${x})`}
           ></circle>
         );
       })}
