@@ -9,7 +9,7 @@ import Layout from "../components/Layout";
 import withAuth from "../hocs/withAuth";
 
 import kakaoSymbol from "../assets/kakao.svg";
-import tightee from "../../public/tightee.svg";
+import tightee from "../assets/tightee.svg";
 import home from "../assets/home.png";
 
 declare global {
