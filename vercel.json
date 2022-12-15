@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/" },
+    { "source": "/api/(.*)", "destination": "https://github.com/ohcmadah" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
