@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: env.API_URL,
           changeOrigin: true,
-          secure: false,
+          secure: mode === "development" ? false : true,
           rewrite: (path) => path.replace(/^\/api/, ""),
         },
       },
