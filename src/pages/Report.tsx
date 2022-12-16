@@ -15,6 +15,7 @@ import {
   useReportState,
 } from "../contexts/ReportContext";
 
+import { ToastContainer, toast } from "react-toastify";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
 import Error from "../components/Error";
@@ -22,6 +23,7 @@ import Box from "../components/Box";
 import Badge from "../components/Badge";
 import Chart from "../components/Chart";
 import Icon from "../components/Icon";
+import Button from "../components/Button";
 
 import replyIcon from "../assets/reply.svg";
 import rankIcon from "../assets/rank.png";
@@ -33,6 +35,9 @@ import locationIcon from "../assets/location.png";
 import hourglassIcon from "../assets/hourglass.png";
 import lightIcon from "../assets/light.png";
 import heartIcon from "../assets/heart.png";
+import letterIcon from "../assets/letter.png";
+import shareIcon from "../assets/share.svg";
+import copyToClipboard from "../common/copyToClipboard";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
@@ -62,6 +67,38 @@ const calcMBTIrank = (group: Map<MBTI, Answer[]>, options: Option[]) => {
       return { mbti, option: title, ratio };
     })
     .sort((a, b) => b.ratio - a.ratio);
+};
+
+const Footer = () => {
+  const onShare = async () => {
+    const url = location.href;
+    if (navigator.share) {
+      await navigator.share({
+        title: "Tightee",
+        url,
+      });
+    } else {
+      const result = await copyToClipboard(url);
+      if (result) {
+        toast.success("복사가 완료되었어요!");
+      } else {
+        toast.error("공유를 지원하지 않는 환경이에요 :(");
+      }
+    }
+  };
+  return (
+    <footer className="sticky bottom-nav z-nav w-full pb-[20px] pt-6">
+      <Button.Colored
+        color="violet"
+        className="flex w-full items-center py-4 text-white"
+        onClick={onShare}
+      >
+        <Icon src={letterIcon} alt="letter" className="mr-3" />
+        리포트 공유하기
+        <Icon src={shareIcon} alt="share" className="ml-auto mr-0" />
+      </Button.Colored>
+    </footer>
+  );
 };
 
 const Reply = ({ children }: { children?: React.ReactNode }) => (
@@ -259,6 +296,7 @@ const ActualReport = () => {
         <BasicReport />
         <DetailReport />
       </main>
+      <Footer />
     </>
   );
 };
@@ -293,6 +331,11 @@ const Report = () => {
       return (
         <ReportContextProvider data={data}>
           <ActualReport />
+          <ToastContainer
+            className="text-base"
+            autoClose={3000}
+            theme="colored"
+          />
         </ReportContextProvider>
       );
   }

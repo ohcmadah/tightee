@@ -28,6 +28,9 @@ module.exports = {
       height: {
         nav: "58px",
       },
+      inset: {
+        nav: "58px",
+      },
     },
   },
   plugins: [],

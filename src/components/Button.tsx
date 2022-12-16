@@ -24,13 +24,14 @@ const Basic = ({ className, onClick, disabled, children }: ButtonProps) => (
 );
 
 interface ColoredProps extends ButtonProps {
-  color: "primary" | "yellow";
+  color: "primary" | "yellow" | "violet";
 }
 
 const convertColorToClassName = (color: ColoredProps["color"]): string => {
   const map = {
     primary: "bg-primary",
     yellow: "bg-system-yellow",
+    violet: "bg-secondary-question",
   };
   return map[color];
 };
