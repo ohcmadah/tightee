@@ -146,12 +146,12 @@ app.post("/", async (req, res) => {
 
     const option = db.doc("options/" + optionId);
     const question = db.doc("questions/" + questionId);
-    const user = db.doc("users/" + userId);
+    const user = await db.doc("users/" + userId).get();
 
     const answer = {
       option,
       question,
-      user,
+      user: user.data(),
       createdAt: admin.firestore.Timestamp.now(),
     };
     await db.collection("answers").add(answer);
