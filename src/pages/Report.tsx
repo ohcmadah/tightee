@@ -37,6 +37,7 @@ import lightIcon from "../assets/light.png";
 import heartIcon from "../assets/heart.png";
 import letterIcon from "../assets/letter.png";
 import shareIcon from "../assets/share.svg";
+import copyToClipboard from "../common/copyToClipboard";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
@@ -70,18 +71,19 @@ const calcMBTIrank = (group: Map<MBTI, Answer[]>, options: Option[]) => {
 
 const Footer = () => {
   const onShare = async () => {
-    const url = location.href + "?share=true";
+    const url = location.href;
     if (navigator.share) {
       await navigator.share({
         title: "Tightee",
         url,
       });
-    } else if (navigator.clipboard) {
-      await navigator.clipboard.writeText(url);
-      toast.success("복사가 완료되었어요!", {
-        autoClose: 3000,
-        theme: "colored",
-      });
+    } else {
+      const result = await copyToClipboard(url);
+      if (result) {
+        toast.success("복사가 완료되었어요!");
+      } else {
+        toast.error("공유를 지원하지 않는 환경이에요 :(");
+      }
     }
   };
   return (
@@ -329,7 +331,11 @@ const Report = () => {
       return (
         <ReportContextProvider data={data}>
           <ActualReport />
-          <ToastContainer className="text-base" />
+          <ToastContainer
+            className="text-base"
+            autoClose={3000}
+            theme="colored"
+          />
         </ReportContextProvider>
       );
   }
