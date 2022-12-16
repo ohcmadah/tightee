@@ -14,6 +14,7 @@ import DeleteAccount from "./pages/DeleteAccount";
 import Report from "./pages/Report";
 
 import "./styles/index.scss";
+import "react-toastify/dist/ReactToastify.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <BrowserRouter>
