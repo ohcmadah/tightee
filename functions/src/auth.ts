@@ -91,11 +91,14 @@ interface TokenResponse {
   scope?: string;
 }
 
-const getToken = async (code: string): Promise<TokenResponse> => {
+const getToken = async (code: string, url?: string): Promise<TokenResponse> => {
+  const redirectURI = url
+    ? url + "/callback/kakaotalk"
+    : process.env.KAKAO_REDIRECT_URI || "";
   const body = {
     grant_type: "authorization_code",
     client_id: process.env.KAKAO_REST_API_KEY || "",
-    redirect_uri: process.env.KAKAO_REDIRECT_URI || "",
+    redirect_uri: redirectURI,
     code,
   };
 
@@ -113,7 +116,7 @@ app.post("/kakao", async (req, res) => {
   }
 
   try {
-    const response: TokenResponse = await getToken(code);
+    const response: TokenResponse = await getToken(code, req.headers.origin);
     const token = response.access_token;
 
     const kakaoUser: KakaoUser = await getKakaoUser(token);
@@ -129,7 +132,7 @@ app.post("/kakao", async (req, res) => {
       firebaseToken,
     });
   } catch (error: any) {
-    console.error(JSON.stringify(error));
+    console.error(error.response);
 
     const err = error.response;
     return res.status(err.status).json({
