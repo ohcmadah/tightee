@@ -144,14 +144,28 @@ app.post("/", async (req, res) => {
       });
     }
 
+    const { docs: answers } = await db
+      .collection("answers")
+      .where("user.id", "==", userId)
+      .get();
+    const isAlreadyAnswered =
+      answers.filter((answer) => answer.get("question").id === questionId)
+        .length !== 0;
+
+    if (isAlreadyAnswered) {
+      return res
+        .status(400)
+        .json({ code: 400, message: "You have already answered." });
+    }
+
     const option = db.doc("options/" + optionId);
     const question = db.doc("questions/" + questionId);
-    const user = db.doc("users/" + userId);
+    const user = await db.doc("users/" + userId).get();
 
     const answer = {
       option,
       question,
-      user,
+      user: user.data(),
       createdAt: admin.firestore.Timestamp.now(),
     };
     await db.collection("answers").add(answer);

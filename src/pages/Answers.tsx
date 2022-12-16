@@ -60,16 +60,19 @@ const Answer = ({
 const TodayQuestion = () => {
   const { state, data } = useAsyncAPI(getTodayQuestion);
 
+  const question =
+    state === "loading"
+      ? "오늘의 질문을 불러오고 있어요..."
+      : state === "error"
+      ? "에러가 발생했어요 :("
+      : data.status === 204
+      ? "오늘의 질문이 없어요 :("
+      : data.data.title;
+
   return (
     <article className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
       <Badge className="bg-primary-peach">TODAY</Badge>
-      <div className="my-6 px-2 text-lg font-medium">
-        {state === "loaded"
-          ? data.data.title
-          : state === "loading"
-          ? "오늘의 질문을 불러오고 있어요..."
-          : "에러가 발생했어요 :("}
-      </div>
+      <div className="my-6 px-2 text-lg font-medium">{question}</div>
       <Link to="/question" className="flex w-full items-center">
         <Icon src={replyIcon} alt="reply" />
         <div className="grow text-grayscale-20">대답하러 가기</div>

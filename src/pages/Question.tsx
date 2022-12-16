@@ -9,7 +9,7 @@ import {
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Option as OptionType } from "../@types";
-import { getFormattedDate } from "../common/utils";
+import { getFormattedDate, getLocalTime } from "../common/utils";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -78,6 +78,8 @@ const Main = ({
   </main>
 );
 
+type QuestionError = "expired-question" | "already-answered";
+
 const ActualQuestion = ({
   question,
   forceUpdate,
@@ -88,44 +90,70 @@ const ActualQuestion = ({
     title: string;
     options: OptionType[];
   };
-  forceUpdate: Function;
+  forceUpdate: React.DispatchWithoutAction;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<QuestionError | null>(null);
 
   const onAnswer = async (optionId: string) => {
+    const today = getLocalTime().format("YYYYMMDD");
+    if (today !== question.createdAt) {
+      return setError("expired-question");
+    }
     setIsLoading(true);
     try {
       await answer(question.id, optionId);
-    } catch (error) {}
-    setIsLoading(false);
-    forceUpdate();
+      setIsLoading(false);
+      forceUpdate();
+    } catch (error: any) {
+      setIsLoading(false);
+      if (error.code === 400) {
+        setError("already-answered");
+      }
+    }
   };
 
-  return (
-    <>
-      <Header
-        className="flex items-center"
-        optionRenderer={
-          <Badge className="ml-auto bg-primary-peach">
-            {getFormattedDate()}
-          </Badge>
-        }
-      >
-        <Header.Title iconSrc={questionIcon} alt="question">
-          오늘의 질문
-        </Header.Title>
-      </Header>
-      <Main
-        title={question.title}
-        options={question.options}
-        onAnswer={onAnswer}
-      />
-      <Footer className="text-center">
-        <Tip />
-      </Footer>
-      <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
-    </>
-  );
+  switch (error) {
+    case "expired-question":
+      return (
+        <Error.ExpiredQuestion
+          onReload={() => {
+            forceUpdate();
+            setError(null);
+          }}
+        />
+      );
+
+    case "already-answered":
+      return <Navigate to="/answer" />;
+
+    default:
+      return (
+        <>
+          <Header
+            className="flex items-center"
+            optionRenderer={
+              <Badge className="ml-auto bg-primary-peach">
+                {getFormattedDate()}
+              </Badge>
+            }
+          >
+            <Header.Title iconSrc={questionIcon} alt="question">
+              오늘의 질문
+            </Header.Title>
+          </Header>
+          <Main
+            title={question.title}
+            options={question.options}
+            onAnswer={onAnswer}
+          />
+          <Footer className="text-center">
+            <Tip />
+          </Footer>
+          <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
+        </>
+      );
+  }
 };
 
 const getQuestionPageData = async () => {

@@ -17,6 +17,7 @@ const useAsyncAPI = <F extends API>(api: F, ...args: Parameters<F>) => {
 
   useEffect(() => {
     (async () => {
+      setState({ state: "loading", data: null });
       try {
         const data = await api(...args);
         setState(() => ({ state: "loaded", data }));
