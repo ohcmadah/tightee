@@ -9,7 +9,7 @@ import {
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Option as OptionType } from "../@types";
-import { getFormattedDate } from "../common/utils";
+import { getFormattedDate, getLocalTime } from "../common/utils";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -88,11 +88,17 @@ const ActualQuestion = ({
     title: string;
     options: OptionType[];
   };
-  forceUpdate: Function;
+  forceUpdate: React.DispatchWithoutAction;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const onAnswer = async (optionId: string) => {
+    const today = getLocalTime().format("YYYYMMDD");
+    if (today !== question.createdAt) {
+      return setIsError(true);
+    }
+
     setIsLoading(true);
     try {
       await answer(question.id, optionId);
@@ -101,7 +107,7 @@ const ActualQuestion = ({
     forceUpdate();
   };
 
-  return (
+  return !isError ? (
     <>
       <Header
         className="flex items-center"
@@ -125,6 +131,13 @@ const ActualQuestion = ({
       </Footer>
       <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
     </>
+  ) : (
+    <Error.ExpiredQuestion
+      onReload={() => {
+        forceUpdate();
+        setIsError(false);
+      }}
+    />
   );
 };
 
