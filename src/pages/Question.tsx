@@ -10,6 +10,7 @@ import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Option as OptionType } from "../@types";
 import { getFormattedDate, getLocalTime } from "../common/utils";
+import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -156,14 +157,17 @@ const ActualQuestion = ({
   }
 };
 
-const getQuestionPageData = async () => {
+const getQuestionPageData = async (userId: string) => {
   const question = await getTodayQuestion();
   if (question.status === 204) {
     return { question: null };
   }
   const optionIds = question.data.options;
   const options = await getOptions({ ids: optionIds });
-  const { data: answers } = await getAnswers({ question: question.data.id });
+  const { data: answers } = await getAnswers({
+    question: question.data.id,
+    user: userId,
+  });
 
   return {
     question: { ...question.data, options: options.data },
@@ -172,7 +176,10 @@ const getQuestionPageData = async () => {
 };
 
 const Question = () => {
-  const { state, data, forceUpdate } = useAsyncAPI(getQuestionPageData);
+  const {
+    user: { uid },
+  } = useAuthenticatedState();
+  const { state, data, forceUpdate } = useAsyncAPI(getQuestionPageData, uid);
 
   switch (state) {
     case "loading":
