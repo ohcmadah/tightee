@@ -17,3 +17,34 @@ export const getAdminApp = () => {
 
   return app;
 };
+
+export const getProperty = <T extends Record<string, any>>(
+  obj: T,
+  path: string
+): any => {
+  return path
+    .split(".")
+    .reduce(
+      (acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined),
+      obj
+    );
+};
+
+export const toMap = <K, V>(
+  arr: Array<V>,
+  keyGetter: (item: V) => K,
+  valueGetter: (item: V) => any
+) => {
+  const map = new Map<K, any>();
+  arr.forEach((item) => {
+    const key = keyGetter(item);
+    const value = valueGetter(item);
+    const collection = map.get(key);
+    if (!collection) {
+      map.set(key, [value]);
+    } else {
+      collection.push(value);
+    }
+  });
+  return map;
+};

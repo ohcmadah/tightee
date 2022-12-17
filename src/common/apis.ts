@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { UpdateData } from "firebase/firestore";
 import { auth } from "../config";
 import { getLocalTime } from "./utils";
@@ -82,24 +82,31 @@ export const answer = (questionId: string, optionId: string) => {
   });
 };
 
-type GetAnswersParams =
-  | { user: string; token: string; question?: undefined }
-  | { question: string; user?: undefined; token?: undefined };
+const getAnswers = (config: AxiosRequestConfig) => {
+  return axios.get("/api/answers", config);
+};
 
-export const getAnswers = async (
-  params?: GetAnswersParams
-): Promise<AxiosResponse<Answer[]>> => {
-  if (params && params.user) {
-    return axios.get("/api/answers", {
-      params: {
-        user: params.user,
-      },
-      headers: {
-        Authorization: `Bearer ${params.token}`,
-      },
-    });
-  }
-  return axios.get("/api/answers", { params });
+export const getMyAnswers = async (
+  userId: string,
+  token: string
+): Promise<Answer[]> => {
+  const res = await getAnswers({
+    params: { user: userId },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.status === 204 ? [] : res.data;
+};
+
+export const getAnswerGroups = async (params: {
+  groups: string[];
+  questionId?: string;
+}): Promise<{ [groupKey: string]: { [id: string]: Option[] } }> => {
+  const { groups, questionId } = params;
+  const config = {
+    params: { groups, ...(questionId ? { question: questionId } : {}) },
+  };
+  const res = await getAnswers(config);
+  return res.status === 204 ? {} : res.data;
 };
 
 export const getAnswer = (answerId: string): Promise<AxiosResponse<Answer>> => {

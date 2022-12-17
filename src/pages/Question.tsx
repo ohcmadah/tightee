@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import {
   answer,
-  getAnswers,
+  getMyAnswers,
   getOptions,
   getTodayQuestion,
 } from "../common/apis";
@@ -11,6 +11,7 @@ import { URL_CS } from "../common/constants";
 import { Option as OptionType } from "../@types";
 import { getFormattedDate, getLocalTime } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
+import { User } from "firebase/auth";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -157,29 +158,30 @@ const ActualQuestion = ({
   }
 };
 
-const getQuestionPageData = async (userId: string) => {
+const getQuestionPageData = async (user: User) => {
   const question = await getTodayQuestion();
   if (question.status === 204) {
     return { question: null };
   }
+
   const optionIds = question.data.options;
   const options = await getOptions({ ids: optionIds });
-  const { data: answers } = await getAnswers({
-    question: question.data.id,
-    user: userId,
-  });
+
+  const token = await user.getIdToken();
+  const answers = await getMyAnswers(user.uid, token);
+  const isAnswered =
+    answers.filter((answer) => answer.question.id === question.data.id)
+      .length !== 0;
 
   return {
     question: { ...question.data, options: options.data },
-    answer: answers.length !== 0 ? answers[0] : null,
+    isAnswered,
   };
 };
 
 const Question = () => {
-  const {
-    user: { uid },
-  } = useAuthenticatedState();
-  const { state, data, forceUpdate } = useAsyncAPI(getQuestionPageData, uid);
+  const { user } = useAuthenticatedState();
+  const { state, data, forceUpdate } = useAsyncAPI(getQuestionPageData, user);
 
   switch (state) {
     case "loading":
@@ -189,7 +191,7 @@ const Question = () => {
       return <Error.Default />;
 
     case "loaded":
-      if (data.answer) {
+      if (data.isAnswered) {
         return <Navigate to="/answer" />;
       }
       if (data.question) {

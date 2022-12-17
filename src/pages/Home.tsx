@@ -1,5 +1,5 @@
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { getAnswers, getTodayQuestion, getUser } from "../common/apis";
+import { getMyAnswers, getTodayQuestion, getUser } from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { User } from "firebase/auth";
 import { MBTI } from "../@types";
@@ -93,8 +93,7 @@ const getHomeData = async (authUser: User) => {
 
   const question = await getTodayQuestion();
 
-  const myAnswers = await getAnswers({ user: authUser.uid, token });
-  const answers = myAnswers.status === 204 ? [] : myAnswers.data;
+  const answers = await getMyAnswers(authUser.uid, token);
   const todayAnswer = answers.filter(
     (answer) => answer.question.id === question.data.id
   );
