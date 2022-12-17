@@ -4,6 +4,7 @@ import * as cors from "cors";
 import { Answer, Option, Question } from "./@types";
 import { getAdminApp, https } from "./common";
 import { DocumentReference } from "firebase/firestore";
+import { checkUserIdContained } from "./middleware";
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -126,6 +127,63 @@ app.get("/:id", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json(error);
+  }
+});
+
+const convertDocsToAnswers = async (
+  db: admin.firestore.Firestore,
+  docs: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>[]
+) => {
+  const answersPromise = docs.map(async (doc) => {
+    const answer = doc.data() as Answer;
+    const question = await db.doc("questions/" + answer.question.id).get();
+    const option = await db.doc("options/" + answer.option.id).get();
+
+    const converted: ReturnAnswer = {
+      ...answer,
+      id: doc.id,
+      question: { id: question.id, ...(question.data() as Question) },
+      option: { id: option.id, ...(option.data() as Option) },
+    };
+    return converted;
+  });
+
+  const answers = (await Promise.allSettled(answersPromise)).reduce(
+    (acc: ReturnAnswer[], result) =>
+      result.status === "fulfilled" ? [...acc, result.value] : acc,
+    []
+  );
+
+  return answers.sort((a, b) => b.createdAt - a.createdAt);
+};
+
+app.get("/", checkUserIdContained, async (req, res) => {
+  try {
+    const app = getAdminApp();
+    const db = admin.firestore(app);
+
+    const { user: userId } = req.query;
+
+    if (userId) {
+      if (userId === req.body.uid) {
+        const { empty, docs } = await db
+          .collection("answers")
+          .where("user.id", "==", userId)
+          .get();
+        if (empty) {
+          return res.status(204).json();
+        }
+        const answers = await convertDocsToAnswers(db, docs);
+        return res.status(200).json(answers);
+      }
+      return res
+        .status(403)
+        .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+    }
+
+    return res.status(204).json();
+  } catch (error) {
     return res.status(500).json(error);
   }
 });

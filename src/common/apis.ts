@@ -82,22 +82,28 @@ export const answer = (questionId: string, optionId: string) => {
   });
 };
 
-export const getAnswers = async (params?: {
-  user?: string;
-  question?: string;
-  date?: string;
-}): Promise<AxiosResponse<Answer[]>> => {
+type GetAnswersParams =
+  | { user: string; token: string; question?: undefined }
+  | { question: string; user?: undefined; token?: undefined };
+
+export const getAnswers = async (
+  params?: GetAnswersParams
+): Promise<AxiosResponse<Answer[]>> => {
+  if (params && params.user) {
+    return axios.get("/api/answers", {
+      params: {
+        user: params.user,
+      },
+      headers: {
+        Authorization: `Bearer ${params.token}`,
+      },
+    });
+  }
   return axios.get("/api/answers", { params });
 };
 
 export const getAnswer = (answerId: string): Promise<AxiosResponse<Answer>> => {
   return axios.get("/api/answers/" + answerId);
-};
-
-export const getAnswerCount = async () => {
-  const user = getCurrentUserId();
-  const answers = await getAnswers({ user });
-  return answers.data.length;
 };
 
 export const getOptions = (params?: {

@@ -84,8 +84,10 @@ const Main = ({
 };
 
 const getHomeData = async (authUser: User) => {
+  const token = await authUser.getIdToken();
+
   const question = await getTodayQuestion();
-  const myAnswers = await getAnswers({ user: authUser.uid });
+  const myAnswers = await getAnswers({ user: authUser.uid, token });
   const isEmptyAnswers = myAnswers.status === 204;
   const answerCount = isEmptyAnswers ? 0 : myAnswers.data.length;
   const todayAnswer = isEmptyAnswers
@@ -94,7 +96,6 @@ const getHomeData = async (authUser: User) => {
         (answer) => answer.question.id === question.data.id
       );
 
-  const token = await authUser.getIdToken();
   const user = await getUser(authUser.uid, token);
   if (!user) {
     await auth.signOut();
