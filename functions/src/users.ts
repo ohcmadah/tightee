@@ -6,6 +6,28 @@ import { getAdminApp, https } from "./common";
 const app = express();
 app.use(cors({ origin: true }));
 
+const checkToken: express.RequestHandler = async (req, res, next) => {
+  const token = req.headers.authorization?.split("Bearer ")[1];
+
+  if (!token) {
+    return res.status(403).json({ code: 403, message: "No credentials sent!" });
+  }
+
+  const app = getAdminApp();
+  const auth = admin.auth(app);
+
+  const { uid } = await auth.verifyIdToken(token);
+  const { id } = req.params;
+
+  if (uid !== id) {
+    return res
+      .status(403)
+      .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+  }
+
+  return next();
+};
+
 const createQuery = (
   db: admin.firestore.Firestore,
   queryParams: { fields?: string[] }
@@ -64,7 +86,7 @@ app.post("/:id", async (req, res) => {
   }
 });
 
-app.get("/:id", async (req, res) => {
+app.get("/:id", checkToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -83,7 +105,7 @@ app.get("/:id", async (req, res) => {
   }
 });
 
-app.patch("/:id", async (req, res) => {
+app.patch("/:id", checkToken, async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
@@ -99,7 +121,7 @@ app.patch("/:id", async (req, res) => {
   }
 });
 
-app.delete("/:id", async (req, res) => {
+app.delete("/:id", checkToken, async (req, res) => {
   try {
     const { id } = req.params;
 

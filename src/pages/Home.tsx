@@ -1,8 +1,10 @@
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { getAnswers, getTodayQuestion, getUser } from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
+import { User } from "firebase/auth";
 import { MBTI } from "../@types";
 import { getMBTIName } from "../common/utils";
+import { auth } from "../config";
 
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
@@ -14,7 +16,6 @@ import homeIcon from "../assets/home.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
 import settingIcon from "../assets/setting.svg";
 import Box from "../components/Box";
-import { auth } from "../config";
 
 const Content = ({
   iconSrc = rightArrowIcon,
@@ -82,9 +83,9 @@ const Main = ({
   );
 };
 
-const getHomeData = async (uid: string) => {
+const getHomeData = async (authUser: User) => {
   const question = await getTodayQuestion();
-  const myAnswers = await getAnswers({ user: uid });
+  const myAnswers = await getAnswers({ user: authUser.uid });
   const isEmptyAnswers = myAnswers.status === 204;
   const answerCount = isEmptyAnswers ? 0 : myAnswers.data.length;
   const todayAnswer = isEmptyAnswers
@@ -93,7 +94,8 @@ const getHomeData = async (uid: string) => {
         (answer) => answer.question.id === question.data.id
       );
 
-  const user = await getUser(uid);
+  const token = await authUser.getIdToken();
+  const user = await getUser(authUser.uid, token);
   if (!user) {
     await auth.signOut();
     throw new Error("다시 로그인해 주세요.");
@@ -108,7 +110,7 @@ const getHomeData = async (uid: string) => {
 
 const Home = () => {
   const { user } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getHomeData, user.uid);
+  const { state, data } = useAsyncAPI(getHomeData, user);
 
   switch (state) {
     case "loading":

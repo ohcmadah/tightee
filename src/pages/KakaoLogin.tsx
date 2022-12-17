@@ -11,7 +11,7 @@ import withAuth from "../hocs/withAuth";
 
 const authorize = async (code: string) => {
   const { data } = await authKakao(code);
-  const user = await getUser(data.kakaoUser.id);
+  const user = await getUser(data.kakaoUser.id, data.firebaseToken);
 
   if (user) {
     await signInWithCustomToken(firebaseAuth, data.firebaseToken);
