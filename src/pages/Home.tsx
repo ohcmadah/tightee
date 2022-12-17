@@ -2,7 +2,7 @@ import useAsyncAPI from "../hooks/useAsyncAPI";
 import { getAnswers, getTodayQuestion, getUser } from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { MBTI } from "../@types";
-import { getLocalTime, getMBTIName } from "../common/utils";
+import { getMBTIName } from "../common/utils";
 
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
@@ -84,13 +84,14 @@ const Main = ({
 
 const getHomeData = async (uid: string) => {
   const question = await getTodayQuestion();
-  const answers = await getAnswers({ user: uid });
-
-  const answerCount = answers.data.length;
-  const today = getLocalTime().format("YYYYMMDD");
-  const todayAnswer = answers.data.filter(
-    (answer) => answer.question.createdAt === today
-  );
+  const myAnswers = await getAnswers({ user: uid });
+  const isEmptyAnswers = myAnswers.status === 204;
+  const answerCount = isEmptyAnswers ? 0 : myAnswers.data.length;
+  const todayAnswer = isEmptyAnswers
+    ? []
+    : myAnswers.data.filter(
+        (answer) => answer.question.id === question.data.id
+      );
 
   const user = await getUser(uid);
   if (!user) {
@@ -100,8 +101,8 @@ const getHomeData = async (uid: string) => {
   return {
     question,
     answerCount,
-    MBTI: user.MBTI,
     answer: todayAnswer.length !== 0 ? todayAnswer[0] : null,
+    MBTI: user.MBTI,
   };
 };
 
