@@ -1,0 +1,3 @@
+User-agent: *
+allow: /
+Sitemap: https://tightee.com/sitemap.xml
