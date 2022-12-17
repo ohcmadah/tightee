@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth as firebaseAuth } from "../config";
-import { authKakao, getUser } from "../common/apis";
+import { authKakao } from "../common/apis";
 
 import Loading from "../components/Loading";
 import useAsyncAPI from "../hooks/useAsyncAPI";
