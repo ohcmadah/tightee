@@ -15,6 +15,7 @@ import {
   KAKAO_PROVIDER,
 } from "./constants";
 import { getAdminApp, https } from "./common";
+import { Auth } from "firebase-admin/lib/auth/auth";
 
 config();
 
@@ -22,11 +23,9 @@ const app = express();
 app.use(cors({ origin: true }));
 
 const updateOrCreateUser = async (
+  auth: Auth,
   normalizedUser: NormalizedUser
 ): Promise<UserRecord> => {
-  const app = getAdminApp();
-  const auth = admin.auth(app);
-
   const properties = {
     uid: normalizedUser.id,
     provider: normalizedUser.provider,
@@ -122,14 +121,20 @@ app.post("/kakao", async (req, res) => {
     const kakaoUser: KakaoUser = await getKakaoUser(token);
     const normalizedUser: NormalizedUser = normalizeKakaoUser(kakaoUser);
 
-    const authUser = await updateOrCreateUser(normalizedUser);
+    const app = getAdminApp();
+    const auth = admin.auth(app);
+    const authUser = await updateOrCreateUser(auth, normalizedUser);
     const firebaseToken = await admin
       .auth()
       .createCustomToken(authUser.uid, { KAKAO_PROVIDER });
 
+    const db = admin.firestore(app);
+    const user = await db.doc("users/" + authUser.uid).get();
+
     return res.status(200).json({
       kakaoUser: normalizedUser,
       firebaseToken,
+      isJoined: user.exists,
     });
   } catch (error: any) {
     console.error(error.response);
