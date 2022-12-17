@@ -7,25 +7,33 @@ const app = express();
 app.use(cors({ origin: true }));
 
 const checkToken: express.RequestHandler = async (req, res, next) => {
-  const token = req.headers.authorization?.split("Bearer ")[1];
+  try {
+    const token = req.headers.authorization?.split("Bearer ")[1];
 
-  if (!token) {
-    return res.status(403).json({ code: 403, message: "No credentials sent!" });
-  }
+    if (!token) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "No credentials sent!" });
+    }
 
-  const app = getAdminApp();
-  const auth = admin.auth(app);
+    const app = getAdminApp();
+    const auth = admin.auth(app);
 
-  const { uid } = await auth.verifyIdToken(token);
-  const { id } = req.params;
+    const { uid } = await auth.verifyIdToken(token);
+    const { id } = req.params;
 
-  if (uid !== id) {
+    if (uid !== id) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+    }
+
+    return next();
+  } catch (error) {
     return res
       .status(403)
       .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
   }
-
-  return next();
 };
 
 const createQuery = (
