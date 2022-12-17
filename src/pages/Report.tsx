@@ -1,5 +1,5 @@
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { getAnswer, getAnswers } from "../common/apis";
+import { getAnswer, getAnswerGroups, getOptions } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer, MBTI, Option } from "../@types";
 import {
@@ -41,24 +41,31 @@ import copyToClipboard from "../common/copyToClipboard";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
-const genChartData = (
-  answers: Answer[],
-  options: Option[]
-): { [optionId: string]: { title: string; ratio: number } } => {
-  const total = answers.length;
-  const group = groupBy(answers, (answer) => answer.option.id);
+const calcRatio = (
+  group: Map<string, Option[]>,
+  total: number,
+  defaultOptions: Option[]
+) => {
+  return defaultOptions.reduce((acc, option) => {
+    const sameOptions = group.get(option.id);
 
-  return options.reduce((acc, option) => {
-    const answers = group.get(option.id);
-
-    const ratio = (answers?.length || 0) / total;
+    const ratio = (sameOptions?.length || 0) / total;
     return { ...acc, [option.id]: { title: option.text, ratio } };
   }, {});
 };
 
-const calcMBTIrank = (group: Map<MBTI, Answer[]>, options: Option[]) => {
-  return Array.from(group)
-    .filter(([mbti, _]) => mbti !== null)
+const genChartData = (
+  options: Option[],
+  defaultOptions: Option[]
+): { [optionId: string]: { title: string; ratio: number } } => {
+  const total = options.length;
+  const group = groupBy(options, (option) => option.id);
+  return calcRatio(group, total, defaultOptions);
+};
+
+const calcMBTIrank = (group: Record<string, Option[]>, options: Option[]) => {
+  return Object.entries(group)
+    .filter(([mbti, _]) => mbti !== "null")
     .map(([mbti, answers]) => {
       const data = genChartData(answers, options);
       const { title, ratio } = Object.values(data).sort(
@@ -133,27 +140,19 @@ const EmptyMBTI = () => (
 
 const DetailReport = () => {
   const {
-    answer: { user, question, option },
+    answer: { user, option },
+    options,
     groups,
   } = useReportState();
 
   const mbtiData = genChartData(
-    groups.user.mbti.get(user.MBTI) || [],
-    question.options
+    groups["user.MBTI"][user.MBTI ?? "null"],
+    options
   );
-  const regionData = genChartData(
-    groups.user.region.get(user.region) || [],
-    question.options
-  );
+  const regionData = genChartData(groups["user.region"][user.region], options);
   const ageGroup = calcAgeGroup(user.birthdate);
-  const ageData = genChartData(
-    groups.user.age.get(ageGroup) || [],
-    question.options
-  );
-  const genderData = genChartData(
-    groups.user.gender.get(user.gender) || [],
-    question.options
-  );
+  const ageData = genChartData(groups["user.birthdate"][ageGroup], options);
+  const genderData = genChartData(groups["user.gender"][user.gender], options);
 
   return (
     <>
@@ -218,7 +217,7 @@ const DetailReport = () => {
 };
 
 const MBTIRankReport = () => {
-  const { answer, groups } = useReportState();
+  const { answer, options, groups } = useReportState();
 
   if (answer.user.MBTI === null) {
     return (
@@ -229,7 +228,7 @@ const MBTIRankReport = () => {
     );
   }
 
-  const rank = calcMBTIrank(groups.user.mbti, answer.question.options);
+  const rank = calcMBTIrank(groups["user.MBTI"], options);
   const myRank = rank.map((value) => value.mbti).indexOf(answer.user.MBTI) + 1;
 
   return (
@@ -254,7 +253,10 @@ const MBTIRankReport = () => {
 };
 
 const BasicReport = () => {
-  const { answer, answers } = useReportState();
+  const { answer, options, groups } = useReportState();
+
+  const optionsByOptionIdMap = groups["option.id"];
+  const total = Object.values(optionsByOptionIdMap).flat().length;
 
   return (
     <section>
@@ -269,7 +271,11 @@ const BasicReport = () => {
         <Box>
           <Reply>{answer.option.text}</Reply>
           <Chart
-            data={genChartData(answers || [], answer.question.options)}
+            data={calcRatio(
+              new Map(Object.entries(optionsByOptionIdMap)),
+              total,
+              options
+            )}
             id={answer.option.id}
           >
             <Chart.Summary>{`전체 타이티 중에 {value}를 차지하고 있어요.`}</Chart.Summary>
@@ -303,11 +309,22 @@ const ActualReport = () => {
 
 const getMyAnswerAndAnswers = async (answerId: string) => {
   const answer = await getAnswer(answerId);
-  const answers = await getAnswers({ question: answer.data.question.id });
+  const options = await getOptions({ ids: answer.data.question.options });
+  const groups = await getAnswerGroups({
+    groups: [
+      "user.MBTI",
+      "user.region",
+      "user.birthdate",
+      "user.gender",
+      "option.id",
+    ],
+    questionId: answer.data.question.id,
+  });
 
   return {
     answer: answer.data,
-    answers: answers.data,
+    options: options.data,
+    groups,
   };
 };
 

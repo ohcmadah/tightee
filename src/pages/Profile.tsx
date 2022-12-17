@@ -5,6 +5,7 @@ import useForm from "../hooks/useForm";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
 import { getNicknames, getUser, updateUser } from "../common/apis";
+import { User as AuthUser } from "firebase/auth";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -198,10 +199,12 @@ const ProfileForm = ({
 const ActualProfile = ({
   init,
   user,
+  token,
   existentNicknameSet,
 }: {
   init: Function;
   user: User;
+  token: string;
   existentNicknameSet: Set<string>;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -219,7 +222,7 @@ const ActualProfile = ({
   const onUpdateUser = async (data: UpdateData<User>) => {
     setIsLoading(true);
     try {
-      await updateUser(user.id, data);
+      await updateUser(user.id, token, data);
     } catch (error) {}
     setIsLoading(false);
     init();
@@ -251,8 +254,9 @@ const ActualProfile = ({
   );
 };
 
-const getProfileData = async (id: string) => {
-  const user = await getUser(id);
+const getProfileData = async (authUser: AuthUser) => {
+  const token = await authUser.getIdToken();
+  const user = await getUser(authUser.uid, token);
   if (!user) {
     await auth.signOut();
     throw new Error("다시 로그인해 주세요.");
@@ -261,15 +265,12 @@ const getProfileData = async (id: string) => {
     (nickame) => nickame !== user.nickname
   );
 
-  return { user, nicknames };
+  return { user, token, nicknames };
 };
 
 const Profile = () => {
   const auth = useAuthenticatedState();
-  const { state, data, forceUpdate } = useAsyncAPI(
-    getProfileData,
-    auth.user.uid
-  );
+  const { state, data, forceUpdate } = useAsyncAPI(getProfileData, auth.user);
 
   switch (state) {
     case "loading":
@@ -283,6 +284,7 @@ const Profile = () => {
         <ActualProfile
           init={forceUpdate}
           user={data.user}
+          token={data.token}
           existentNicknameSet={new Set(data.nicknames)}
         />
       );

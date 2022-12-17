@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { deleteUser } from "../common/apis";
 import { useNavigate } from "react-router-dom";
+import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -8,19 +9,21 @@ import Button from "../components/Button";
 import ModalPortal from "../components/ModalPortal";
 import Loading from "../components/Loading";
 
-import leftArrowIcon from "../assets/left_arrow.svg";
 import cryingIcon from "../assets/crying.png";
 
 const DeleteAccount = () => {
+  const { user } = useAuthenticatedState();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const onDeleteUser = async () => {
     setIsLoading(true);
     try {
-      await deleteUser();
+      const token = await user.getIdToken();
+      await deleteUser(token);
     } catch (error) {}
     setIsLoading(false);
+    navigate("/login", { replace: true });
   };
 
   return (

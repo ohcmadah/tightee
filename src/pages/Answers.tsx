@@ -1,9 +1,13 @@
-import { useMemo } from "react";
-import { getAnswers, getTodayQuestion } from "../common/apis";
+import {
+  getAnswerGroups,
+  getMyAnswers,
+  getTodayQuestion,
+} from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { Answer as AnswerType } from "../@types";
+import { Answer as AnswerType, Option } from "../@types";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
+import { User } from "firebase/auth";
 
 import { Link } from "react-router-dom";
 import Error from "../components/Error";
@@ -18,19 +22,19 @@ import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
 import rightArrowIcon from "../assets/right_arrow.svg";
 
+type PageData = Awaited<ReturnType<typeof getAnswersPageData>>;
+
 const Answer = ({
   answer,
-  answers,
+  options,
 }: {
   answer: AnswerType;
-  answers: AnswerType[];
+  options: Option[];
 }) => {
   const { id, question, option } = answer;
 
-  const sameAnswers = groupBy(answers, (answer) => answer.option.id).get(
-    option.id
-  );
-  const ratio = (sameAnswers?.length || 0) / answers.length;
+  const sameAnswers = groupBy(options, (option) => option.id).get(option.id);
+  const ratio = (sameAnswers?.length || 0) / options.length;
 
   return (
     <Box>
@@ -82,20 +86,9 @@ const TodayQuestion = () => {
   );
 };
 
-const Main = ({
-  answers,
-  myAnswers,
-}: {
-  answers: AnswerType[];
-  myAnswers: AnswerType[];
-}) => {
+const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
   const isAnsweredTodayQuestion =
     myAnswers[0]?.question.createdAt === getLocalTime().format("YYYYMMDD");
-
-  const answersByQuestionIdMap = useMemo(
-    () => groupBy(answers, (answer) => answer.question.id),
-    [answers]
-  );
 
   return (
     <main>
@@ -111,9 +104,7 @@ const Main = ({
               <Answer
                 key={myAnswer.id}
                 answer={myAnswer}
-                answers={
-                  answersByQuestionIdMap.get(myAnswer.question.id) || [myAnswer]
-                }
+                options={answersByQuestionIdMap[myAnswer.question.id]}
               />
             ))
           ) : (
@@ -127,28 +118,30 @@ const Main = ({
   );
 };
 
-const ActualAnswers = ({
-  answers,
-  myAnswers,
-}: {
-  answers: AnswerType[];
-  myAnswers: AnswerType[];
-}) => (
+const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
   <>
     <Header className="flex items-center">
       <Header.Title iconSrc={answerIcon} alt="answer">
         나의 대답
       </Header.Title>
     </Header>
-    <Main answers={answers} myAnswers={myAnswers} />
+    <Main
+      answersByQuestionIdMap={answersByQuestionIdMap}
+      myAnswers={myAnswers}
+    />
   </>
 );
 
+const getAnswersPageData = async (user: User) => {
+  const token = await user.getIdToken();
+  const myAnswers = await getMyAnswers(user.uid, token);
+  const answerGroups = await getAnswerGroups({ groups: ["question.id"] });
+  return { myAnswers, answersByQuestionIdMap: answerGroups["question.id"] };
+};
+
 const Answers = () => {
-  const {
-    user: { uid },
-  } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getAnswers);
+  const { user } = useAuthenticatedState();
+  const { state, data } = useAsyncAPI(getAnswersPageData, user);
 
   switch (state) {
     case "loading":
@@ -158,11 +151,10 @@ const Answers = () => {
       return <Error.Default />;
 
     case "loaded":
-      const answersByUserIdMap = groupBy(data.data, (answer) => answer.user.id);
       return (
         <ActualAnswers
-          answers={data.data}
-          myAnswers={answersByUserIdMap.get(uid) || []}
+          answersByQuestionIdMap={data.answersByQuestionIdMap}
+          myAnswers={data.myAnswers}
         />
       );
   }

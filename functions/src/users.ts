@@ -2,26 +2,34 @@ import * as admin from "firebase-admin";
 import * as express from "express";
 import * as cors from "cors";
 import { getAdminApp, https } from "./common";
+import { checkFields, checkToken } from "./middleware";
 
 const app = express();
 app.use(cors({ origin: true }));
 
 const createQuery = (
   db: admin.firestore.Firestore,
-  queryParams: { fields?: string[] }
+  queryParams: express.Request["query"]
 ) => {
   const coll = db.collection("users");
   const { fields } = queryParams;
-  if (fields) {
-    return coll.select(...fields);
+  if (typeof fields === "string" && Array.isArray(JSON.parse(fields))) {
+    return coll.select(...JSON.parse(fields));
   }
   return coll;
 };
 
-app.get("/", async (req, res) => {
+app.get("/", checkFields, async (req, res) => {
   try {
     const app = getAdminApp();
     const db = admin.firestore(app);
+
+    const { id } = req.query;
+    if (req.body.uid && req.body.uid !== id) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+    }
 
     const query = createQuery(db, req.query);
     const { empty, docs } = await query.get();
@@ -31,7 +39,7 @@ app.get("/", async (req, res) => {
     }
 
     const users = docs.map((doc) => {
-      return { id: doc.id, ...doc.data() };
+      return doc.data();
     });
 
     return res.status(200).json(users);
@@ -64,9 +72,14 @@ app.post("/:id", async (req, res) => {
   }
 });
 
-app.get("/:id", async (req, res) => {
+app.get("/:id", checkToken, async (req, res) => {
   try {
     const { id } = req.params;
+    if (req.body.uid !== id) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+    }
 
     const app = getAdminApp();
     const db = admin.firestore(app);
@@ -83,9 +96,15 @@ app.get("/:id", async (req, res) => {
   }
 });
 
-app.patch("/:id", async (req, res) => {
+app.patch("/:id", checkToken, async (req, res) => {
   try {
     const { id } = req.params;
+    if (req.body.uid !== id) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+    }
+
     const data = req.body;
 
     const app = getAdminApp();
@@ -99,9 +118,14 @@ app.patch("/:id", async (req, res) => {
   }
 });
 
-app.delete("/:id", async (req, res) => {
+app.delete("/:id", checkToken, async (req, res) => {
   try {
     const { id } = req.params;
+    if (req.body.uid !== id) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+    }
 
     const app = getAdminApp();
     const db = admin.firestore(app);

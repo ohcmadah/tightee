@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth as firebaseAuth } from "../config";
-import { authKakao, getUser } from "../common/apis";
+import { authKakao } from "../common/apis";
 
 import Loading from "../components/Loading";
 import useAsyncAPI from "../hooks/useAsyncAPI";
@@ -11,9 +11,8 @@ import withAuth from "../hocs/withAuth";
 
 const authorize = async (code: string) => {
   const { data } = await authKakao(code);
-  const user = await getUser(data.kakaoUser.id);
 
-  if (user) {
+  if (data.isJoined) {
     await signInWithCustomToken(firebaseAuth, data.firebaseToken);
     return { isLoggedIn: true, auth: data };
   }

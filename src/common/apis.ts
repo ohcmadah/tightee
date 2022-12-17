@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { UpdateData } from "firebase/firestore";
 import { auth } from "../config";
 import { getLocalTime } from "./utils";
@@ -21,20 +21,39 @@ export const createUser = (user: User) => {
   return axios.post("/api/users/" + user.id, { ...user });
 };
 
-export const getUser = async (id: string): Promise<User | null> => {
-  const res = await axios.get("/api/users/" + id);
+export const getUser = async (
+  id: string,
+  token: string
+): Promise<User | null> => {
+  const res = await axios.get("/api/users/" + id, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   if (res.status === 204) {
     return null;
   }
   return res.data;
 };
 
-export const updateUser = (id: string, data: UpdateData<User>) => {
-  return axios.patch("/api/users/" + id, { ...data });
+export const updateUser = (
+  id: string,
+  token: string,
+  data: UpdateData<User>
+) => {
+  return axios.patch(
+    "/api/users/" + id,
+    { ...data },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 };
 
-export const deleteUser = async () => {
-  return axios.delete("/api/users/" + getCurrentUserId());
+export const deleteUser = async (token: string) => {
+  return axios.delete("/api/users/" + getCurrentUserId(), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 export const getNicknames = async (): Promise<string[]> => {
@@ -63,22 +82,35 @@ export const answer = (questionId: string, optionId: string) => {
   });
 };
 
-export const getAnswers = async (params?: {
-  user?: string;
-  question?: string;
-  date?: string;
-}): Promise<AxiosResponse<Answer[]>> => {
-  return axios.get("/api/answers", { params });
+const getAnswers = (config: AxiosRequestConfig) => {
+  return axios.get("/api/answers", config);
+};
+
+export const getMyAnswers = async (
+  userId: string,
+  token: string
+): Promise<Answer[]> => {
+  const res = await getAnswers({
+    params: { user: userId },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.status === 204 ? [] : res.data;
+};
+
+export const getAnswerGroups = async (params: {
+  groups: string[];
+  questionId?: string;
+}): Promise<{ [groupKey: string]: { [id: string]: Option[] } }> => {
+  const { groups, questionId } = params;
+  const config = {
+    params: { groups, ...(questionId ? { question: questionId } : {}) },
+  };
+  const res = await getAnswers(config);
+  return res.status === 204 ? {} : res.data;
 };
 
 export const getAnswer = (answerId: string): Promise<AxiosResponse<Answer>> => {
   return axios.get("/api/answers/" + answerId);
-};
-
-export const getAnswerCount = async () => {
-  const user = getCurrentUserId();
-  const answers = await getAnswers({ user });
-  return answers.data.length;
 };
 
 export const getOptions = (params?: {

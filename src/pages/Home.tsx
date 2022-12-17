@@ -1,8 +1,10 @@
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { getAnswers, getTodayQuestion, getUser } from "../common/apis";
+import { getMyAnswers, getTodayQuestion, getUser } from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
+import { User } from "firebase/auth";
 import { MBTI } from "../@types";
 import { getMBTIName } from "../common/utils";
+import { auth } from "../config";
 
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
@@ -14,7 +16,6 @@ import homeIcon from "../assets/home.png";
 import rightArrowIcon from "../assets/right_arrow.svg";
 import settingIcon from "../assets/setting.svg";
 import Box from "../components/Box";
-import { auth } from "../config";
 
 const Content = ({
   iconSrc = rightArrowIcon,
@@ -82,33 +83,37 @@ const Main = ({
   );
 };
 
-const getHomeData = async (uid: string) => {
-  const question = await getTodayQuestion();
-  const myAnswers = await getAnswers({ user: uid });
-  const isEmptyAnswers = myAnswers.status === 204;
-  const answerCount = isEmptyAnswers ? 0 : myAnswers.data.length;
-  const todayAnswer = isEmptyAnswers
-    ? []
-    : myAnswers.data.filter(
-        (answer) => answer.question.id === question.data.id
-      );
-
-  const user = await getUser(uid);
+const getHomeData = async (authUser: User) => {
+  const token = await authUser.getIdToken();
+  const user = await getUser(authUser.uid, token);
   if (!user) {
     await auth.signOut();
     throw new Error("다시 로그인해 주세요.");
   }
+
+  const question = await getTodayQuestion();
+
+  const answers = await getMyAnswers(authUser.uid, token);
+  const todayAnswer = answers.filter(
+    (answer) => answer.question.id === question.data.id
+  );
+
   return {
-    question,
-    answerCount,
-    answer: todayAnswer.length !== 0 ? todayAnswer[0] : null,
+    question:
+      question.status === 204
+        ? "오늘의 질문이 존재하지 않아요 :("
+        : question.data.title,
+    answer: {
+      id: todayAnswer.length !== 0 ? todayAnswer[0].id : undefined,
+      count: answers.length,
+    },
     MBTI: user.MBTI,
   };
 };
 
 const Home = () => {
   const { user } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getHomeData, user.uid);
+  const { state, data } = useAsyncAPI(getHomeData, user);
 
   switch (state) {
     case "loading":
@@ -128,12 +133,8 @@ const Home = () => {
             <Header.Title iconSrc={homeIcon}>타이티입니다 :)</Header.Title>
           </Header>
           <Main
-            question={
-              data.question.status === 204
-                ? "오늘의 질문이 존재하지 않습니다."
-                : data.question.data.title
-            }
-            answer={{ id: data.answer?.id, count: data.answerCount }}
+            question={data.question}
+            answer={data.answer}
             MBTI={data.MBTI}
           />
         </>

@@ -12,12 +12,6 @@ import kakaoSymbol from "../assets/kakao.svg";
 import tightee from "../assets/tightee.svg";
 import home from "../assets/home.png";
 
-declare global {
-  interface Window {
-    Kakao: any;
-  }
-}
-
 const onLoginWithKakao = () => {
   const redirectUri = `${location.origin}/callback/kakaotalk`;
   const scope = [
