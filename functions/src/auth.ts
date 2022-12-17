@@ -124,9 +124,9 @@ app.post("/kakao", async (req, res) => {
     const app = getAdminApp();
     const auth = admin.auth(app);
     const authUser = await updateOrCreateUser(auth, normalizedUser);
-    const firebaseToken = await admin
-      .auth()
-      .createCustomToken(authUser.uid, { KAKAO_PROVIDER });
+    const firebaseToken = await auth.createCustomToken(authUser.uid, {
+      KAKAO_PROVIDER,
+    });
 
     const db = admin.firestore(app);
     const user = await db.doc("users/" + authUser.uid).get();
