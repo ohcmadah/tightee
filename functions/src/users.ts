@@ -36,19 +36,37 @@ const checkToken: express.RequestHandler = async (req, res, next) => {
   }
 };
 
+const checkFields: express.RequestHandler = async (req, res, next) => {
+  try {
+    const { fields } = req.query;
+    if (typeof fields === "string" && Array.isArray(JSON.parse(fields))) {
+      const fieldStringList = JSON.parse(fields) as string[];
+      const isAuthRequired =
+        fieldStringList.includes("id") || fieldStringList.includes("email");
+      if (isAuthRequired) {
+        return checkToken(req, res, next);
+      }
+    }
+    return next();
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+};
+
 const createQuery = (
   db: admin.firestore.Firestore,
-  queryParams: { fields?: string[] }
+  queryParams: express.Request["query"]
 ) => {
   const coll = db.collection("users");
   const { fields } = queryParams;
-  if (fields) {
-    return coll.select(...fields);
+  if (typeof fields === "string" && Array.isArray(JSON.parse(fields))) {
+    return coll.select(...JSON.parse(fields));
   }
   return coll;
 };
 
-app.get("/", async (req, res) => {
+app.get("/", checkFields, async (req, res) => {
   try {
     const app = getAdminApp();
     const db = admin.firestore(app);
@@ -61,7 +79,7 @@ app.get("/", async (req, res) => {
     }
 
     const users = docs.map((doc) => {
-      return { id: doc.id, ...doc.data() };
+      return doc.data();
     });
 
     return res.status(200).json(users);
