@@ -1,14 +1,10 @@
 import { Option } from "./Option";
+import { Question } from "./Question";
 import { User } from "./User";
 
 export interface Answer {
   id: string;
   user: User;
-  question: {
-    id: string;
-    createdAt: string;
-    options: [Option];
-    title: string;
-  };
+  question: Question;
   option: Option;
 }

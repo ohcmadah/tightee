@@ -18,69 +18,31 @@ type ReturnAnswer = {
   createdAt: number;
 };
 
-app.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+const convertDocToAnswer = async (
+  db: admin.firestore.Firestore,
+  doc: admin.firestore.QueryDocumentSnapshot | admin.firestore.DocumentSnapshot
+) => {
+  const answer = doc.data() as Answer;
+  const question = await db.doc("questions/" + answer.question.id).get();
+  const options = question
+    .get("options")
+    .map((doc: DocumentReference) => doc.id);
+  const option = await db.doc("options/" + answer.option.id).get();
 
-    const app = getAdminApp();
-    const db = admin.firestore(app);
-
-    const answerDoc = await db.doc("answers/" + id).get();
-    if (!answerDoc.exists) {
-      return res.status(204).json({});
-    }
-
-    const answer = answerDoc.data() as Answer;
-    const question = await db.doc("questions/" + answer.question.id).get();
-    const option = await db.doc("options/" + answer.option.id).get();
-
-    const optionsPromise = question
-      .get("options")
-      .map((doc: DocumentReference) => db.doc("options/" + doc.id).get());
-
-    const options = (await Promise.allSettled(optionsPromise)).reduce(
-      (acc: ({ id: string } & Option)[], result) =>
-        result.status === "fulfilled"
-          ? [
-              ...acc,
-              { ...(result.value.data() as Option), id: result.value.id },
-            ]
-          : acc,
-      []
-    );
-
-    return res.status(200).json({
-      ...answer,
-      id: answerDoc.id,
-      question: { id: question.id, ...(question.data() as Question), options },
-      option: { id: option.id, ...(option.data() as Option) },
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error);
-  }
-});
+  const converted: ReturnAnswer = {
+    ...answer,
+    id: doc.id,
+    question: { id: question.id, ...(question.data() as Question), options },
+    option: { id: option.id, ...(option.data() as Option) },
+  };
+  return converted;
+};
 
 const convertDocsToAnswers = async (
   db: admin.firestore.Firestore,
   docs: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>[]
 ) => {
-  const answersPromise = docs.map(async (doc) => {
-    const answer = doc.data() as Answer;
-    const question = await db.doc("questions/" + answer.question.id).get();
-    const options = question
-      .get("options")
-      .map((doc: DocumentReference) => doc.id);
-    const option = await db.doc("options/" + answer.option.id).get();
-
-    const converted: ReturnAnswer = {
-      ...answer,
-      id: doc.id,
-      question: { id: question.id, ...(question.data() as Question), options },
-      option: { id: option.id, ...(option.data() as Option) },
-    };
-    return converted;
-  });
+  const answersPromise = docs.map((doc) => convertDocToAnswer(db, doc));
 
   const answers = (await Promise.allSettled(answersPromise)).reduce(
     (acc: ReturnAnswer[], result) =>
@@ -154,6 +116,30 @@ app.get("/", checkUserIdContained, async (req, res) => {
       .status(400)
       .json({ code: 400, message: "전체 답변은 불러올 수 없습니다." });
   } catch (error) {
+    return res.status(500).json(error);
+  }
+});
+
+app.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const app = getAdminApp();
+    const db = admin.firestore(app);
+
+    const answerDoc = await db.doc("answers/" + id).get();
+    if (!answerDoc.exists) {
+      return res.status(204).json({});
+    }
+
+    const answer = await convertDocToAnswer(db, answerDoc);
+    const { nickname, region, birthdate, gender, MBTI } = answer.user;
+    return res.status(200).json({
+      ...answer,
+      user: { nickname, region, birthdate, gender, MBTI },
+    });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json(error);
   }
 });

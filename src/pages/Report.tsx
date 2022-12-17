@@ -1,5 +1,5 @@
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { getAnswer, getAnswerGroups } from "../common/apis";
+import { getAnswer, getAnswerGroups, getOptions } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer, MBTI, Option } from "../@types";
 import {
@@ -140,27 +140,19 @@ const EmptyMBTI = () => (
 
 const DetailReport = () => {
   const {
-    answer: { user, question, option },
+    answer: { user, option },
+    options,
     groups,
   } = useReportState();
 
   const mbtiData = genChartData(
     groups["user.MBTI"][user.MBTI ?? "null"],
-    question.options
+    options
   );
-  const regionData = genChartData(
-    groups["user.region"][user.region],
-    question.options
-  );
+  const regionData = genChartData(groups["user.region"][user.region], options);
   const ageGroup = calcAgeGroup(user.birthdate);
-  const ageData = genChartData(
-    groups["user.birthdate"][ageGroup],
-    question.options
-  );
-  const genderData = genChartData(
-    groups["user.gender"][user.gender],
-    question.options
-  );
+  const ageData = genChartData(groups["user.birthdate"][ageGroup], options);
+  const genderData = genChartData(groups["user.gender"][user.gender], options);
 
   return (
     <>
@@ -225,7 +217,7 @@ const DetailReport = () => {
 };
 
 const MBTIRankReport = () => {
-  const { answer, groups } = useReportState();
+  const { answer, options, groups } = useReportState();
 
   if (answer.user.MBTI === null) {
     return (
@@ -236,7 +228,7 @@ const MBTIRankReport = () => {
     );
   }
 
-  const rank = calcMBTIrank(groups["user.MBTI"], answer.question.options);
+  const rank = calcMBTIrank(groups["user.MBTI"], options);
   const myRank = rank.map((value) => value.mbti).indexOf(answer.user.MBTI) + 1;
 
   return (
@@ -261,7 +253,7 @@ const MBTIRankReport = () => {
 };
 
 const BasicReport = () => {
-  const { answer, groups } = useReportState();
+  const { answer, options, groups } = useReportState();
 
   const optionsByOptionIdMap = groups["option.id"];
   const total = Object.values(optionsByOptionIdMap).flat().length;
@@ -282,7 +274,7 @@ const BasicReport = () => {
             data={calcRatio(
               new Map(Object.entries(optionsByOptionIdMap)),
               total,
-              answer.question.options
+              options
             )}
             id={answer.option.id}
           >
@@ -317,6 +309,7 @@ const ActualReport = () => {
 
 const getMyAnswerAndAnswers = async (answerId: string) => {
   const answer = await getAnswer(answerId);
+  const options = await getOptions({ ids: answer.data.question.options });
   const groups = await getAnswerGroups({
     groups: [
       "user.MBTI",
@@ -330,6 +323,7 @@ const getMyAnswerAndAnswers = async (answerId: string) => {
 
   return {
     answer: answer.data,
+    options: options.data,
     groups,
   };
 };

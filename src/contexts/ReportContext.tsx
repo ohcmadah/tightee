@@ -3,6 +3,7 @@ import { Answer, Option } from "../@types";
 
 type ReportState = {
   answer: Answer;
+  options: Option[];
   groups: { [groupKey: string]: { [id: string]: Option[] } };
 };
 
