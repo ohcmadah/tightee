@@ -85,26 +85,29 @@ const Main = ({
 
 const getHomeData = async (authUser: User) => {
   const token = await authUser.getIdToken();
-
-  const question = await getTodayQuestion();
-  const myAnswers = await getAnswers({ user: authUser.uid, token });
-  const isEmptyAnswers = myAnswers.status === 204;
-  const answerCount = isEmptyAnswers ? 0 : myAnswers.data.length;
-  const todayAnswer = isEmptyAnswers
-    ? []
-    : myAnswers.data.filter(
-        (answer) => answer.question.id === question.data.id
-      );
-
   const user = await getUser(authUser.uid, token);
   if (!user) {
     await auth.signOut();
     throw new Error("다시 로그인해 주세요.");
   }
+
+  const question = await getTodayQuestion();
+
+  const myAnswers = await getAnswers({ user: authUser.uid, token });
+  const answers = myAnswers.status === 204 ? [] : myAnswers.data;
+  const todayAnswer = answers.filter(
+    (answer) => answer.question.id === question.data.id
+  );
+
   return {
-    question,
-    answerCount,
-    answer: todayAnswer.length !== 0 ? todayAnswer[0] : null,
+    question:
+      question.status === 204
+        ? "오늘의 질문이 존재하지 않아요 :("
+        : question.data.title,
+    answer: {
+      id: todayAnswer.length !== 0 ? todayAnswer[0].id : undefined,
+      count: answers.length,
+    },
     MBTI: user.MBTI,
   };
 };
@@ -131,12 +134,8 @@ const Home = () => {
             <Header.Title iconSrc={homeIcon}>타이티입니다 :)</Header.Title>
           </Header>
           <Main
-            question={
-              data.question.status === 204
-                ? "오늘의 질문이 존재하지 않습니다."
-                : data.question.data.title
-            }
-            answer={{ id: data.answer?.id, count: data.answerCount }}
+            question={data.question}
+            answer={data.answer}
             MBTI={data.MBTI}
           />
         </>
