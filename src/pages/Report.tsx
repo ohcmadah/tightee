@@ -301,8 +301,11 @@ const MBTIRankReport = () => {
         {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
       </Chart.Summary>
       <div className="mt-5 last:mb-0">
-        {rank.map(({ mbti, option, ratio }, index) => (
-          <div key={mbti} className="mb-3">
+        {rank.slice(0, 3).map(({ mbti, option, ratio }, index) => (
+          <div
+            key={mbti}
+            className={cn("mb-3", { "font-medium": mbti === answer.user.MBTI })}
+          >
             <Icon src={RANK_ICONS[index]} alt={`${index + 1}등`} />
             {mbti}{" "}
             <span className="text-grayscale-60">
