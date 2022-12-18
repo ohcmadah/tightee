@@ -285,7 +285,7 @@ const MBTIRankReport = () => {
   if (answer.user.MBTI === null) {
     return (
       <Box>
-        <Title icon={rankIcon}>MBTI 순위</Title>
+        <Title icon={rankIcon}>MBTI 단합 랭킹</Title>
         <EmptyMBTI />
       </Box>
     );
@@ -296,7 +296,7 @@ const MBTIRankReport = () => {
 
   return (
     <Box>
-      <Title icon={rankIcon}>MBTI 순위</Title>
+      <Title icon={rankIcon}>MBTI 단합 랭킹</Title>
       <Chart.Summary value={myRank + "등"}>
         {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
       </Chart.Summary>
