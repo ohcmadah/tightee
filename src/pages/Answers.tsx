@@ -53,7 +53,7 @@ const Answer = ({
         to={`${id}/report`}
         className="flex w-full items-center justify-between"
       >
-        <Chart.Summary value={ratio}>
+        <Chart.Summary value={ratio} className="mr-3 truncate text-ellipsis">
           {"전체 타이티 중에 {value}를 차지하고 있어요."}
         </Chart.Summary>
         <img src={rightArrowIcon} alt="arrow" />
@@ -135,10 +135,12 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
 
 const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
   <>
-    <Header className="flex items-center">
-      <Header.Title iconSrc={answerIcon} alt="answer">
-        나의 대답
-      </Header.Title>
+    <Header>
+      <Header.H1 className="flex items-center">
+        <Header.Icon iconSrc={answerIcon} alt="answer">
+          나의 대답
+        </Header.Icon>
+      </Header.H1>
     </Header>
     <Main
       answersByQuestionIdMap={answersByQuestionIdMap}

@@ -229,9 +229,11 @@ const ActualProfile = ({
   return (
     <>
       <Header>
-        <Header.Title iconSrc={eyesIcon} alt="eyes">
-          나의 프로필
-        </Header.Title>
+        <Header.H1>
+          <Header.Icon iconSrc={eyesIcon} alt="eyes">
+            나의 프로필
+          </Header.Icon>
+        </Header.H1>
       </Header>
       <ProfileForm
         user={user}

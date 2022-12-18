@@ -29,7 +29,11 @@ const DeleteAccount = () => {
   return (
     <>
       <Header>
-        <Header.Back onClick={() => navigate("/profile")}>회원탈퇴</Header.Back>
+        <Header.H1>
+          <Header.Back onClick={() => navigate("/profile")}>
+            회원탈퇴
+          </Header.Back>
+        </Header.H1>
       </Header>
       <main className="text-center text-base">
         <img
@@ -48,7 +52,7 @@ const DeleteAccount = () => {
             지금까지 쌓은 소중한 기록들이 모두 사라져요 :(
           </article>
           <article className="text-system-alert">
-            탈퇴 후에는 계정을 다시 복구할 수 없으니 이 점 유의해 주세요.
+            탈퇴 후에는 계정을 다시 복구할 수 없으니 유의해 주세요.
           </article>
         </section>
       </main>

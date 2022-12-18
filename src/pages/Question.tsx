@@ -132,17 +132,15 @@ const ActualQuestion = ({
     default:
       return (
         <>
-          <Header
-            className="flex items-center"
-            optionRenderer={
-              <Badge className="ml-auto bg-primary-peach">
-                {getFormattedDate()}
-              </Badge>
-            }
-          >
-            <Header.Title iconSrc={questionIcon} alt="question">
-              오늘의 질문
-            </Header.Title>
+          <Header className="flex items-center">
+            <Header.H1>
+              <Header.Icon iconSrc={questionIcon} alt="question">
+                오늘의 질문
+              </Header.Icon>
+            </Header.H1>
+            <Badge className="ml-auto bg-primary-peach">
+              {getFormattedDate()}
+            </Badge>
           </Header>
           <Main
             title={question.title}

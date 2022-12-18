@@ -13,7 +13,7 @@ const Box = ({
 }) => (
   <div
     className={cn(
-      "flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg",
+      "flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-5 text-base drop-shadow-lg",
       className
     )}
   >

@@ -3,7 +3,7 @@ import cn from "classnames";
 import React, { MouseEventHandler } from "react";
 import leftArrowIcon from "../assets/left_arrow.svg";
 
-const Title = ({
+const Icon = ({
   iconSrc,
   alt,
   children,
@@ -38,19 +38,36 @@ const Back = ({
   </>
 );
 
+const H2 = ({
+  className,
+  children,
+}: {
+  className?: cn.Argument;
+  children: React.ReactNode;
+}) => (
+  <h2 className={cn("select-none text-2xl font-bold", className)}>
+    {children}
+  </h2>
+);
+
+const H1 = ({
+  className,
+  children,
+}: {
+  className?: cn.Argument;
+  children: React.ReactNode;
+}) => (
+  <h1 className={cn("select-none text-3xl font-bold", className)}>
+    {children}
+  </h1>
+);
+
 const Header = ({
   className,
-  optionRenderer,
   children,
 }: {
   className?: string | string[];
-  optionRenderer?: React.ReactNode;
   children: React.ReactNode;
-}) => (
-  <header className={cn("mb-12", className)}>
-    <h1 className="select-none text-3xl font-bold">{children}</h1>
-    {optionRenderer}
-  </header>
-);
+}) => <header className={cn("mb-12", className)}>{children}</header>;
 
-export default Object.assign(Header, { Title: Title, Back: Back });
+export default Object.assign(Header, { H1, H2, Icon, Back });

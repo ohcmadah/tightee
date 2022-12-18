@@ -130,7 +130,9 @@ const Home = () => {
       return (
         <>
           <Header>
-            <Header.Title iconSrc={homeIcon}>타이티입니다 :)</Header.Title>
+            <Header.H1>
+              <Header.Icon iconSrc={homeIcon}>타이티입니다 :)</Header.Icon>
+            </Header.H1>
           </Header>
           <Main
             question={data.question}

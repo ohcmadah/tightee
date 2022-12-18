@@ -70,9 +70,11 @@ const Agreement = () => {
   return (
     <>
       <Header>
-        MBTI기반 성향 분석 서비스,
-        <br />
-        타이티에 오신 것을 환영합니다!
+        <Header.H2>
+          MBTI기반 성향 분석 서비스,
+          <br />
+          타이티에 오신 것을 환영합니다!
+        </Header.H2>
       </Header>
 
       <main>
