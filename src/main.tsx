@@ -12,7 +12,6 @@ import Profile from "./pages/Profile";
 import Answers from "./pages/Answers";
 import DeleteAccount from "./pages/DeleteAccount";
 import Report from "./pages/Report";
-import PublicReport from "./pages/PublicReport";
 
 import "./styles/index.scss";
 import "react-toastify/dist/ReactToastify.css";
@@ -32,7 +31,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <Route path="/login" element={<Login />} />
         <Route path="/callback/kakaotalk" element={<KakaoLogin />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/:answerId/public" element={<PublicReport />} />
+        <Route path="/:answerId/public" element={<Report isPublic />} />
       </Routes>
     </AuthContextProvider>
   </BrowserRouter>

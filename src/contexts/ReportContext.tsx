@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import { Answer, Option } from "../@types";
 
 type ReportState = {
+  isPublic: boolean;
   answer: Answer;
   options: Option[];
   groups: { [groupKey: string]: { [id: string]: Option[] } };

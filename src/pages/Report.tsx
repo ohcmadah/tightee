@@ -1,4 +1,5 @@
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import cn from "classnames";
 import { getAnswer, getAnswerGroups, getOptions } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Option } from "../@types";
@@ -14,8 +15,10 @@ import {
   ReportContextProvider,
   useReportState,
 } from "../contexts/ReportContext";
+import copyToClipboard from "../common/copyToClipboard";
 
 import { ToastContainer, toast } from "react-toastify";
+import Layout from "../components/Layout";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
 import Error from "../components/Error";
@@ -23,7 +26,9 @@ import Box from "../components/Box";
 import Badge from "../components/Badge";
 import Chart from "../components/Chart";
 import Icon from "../components/Icon";
-import Button from "../components/Button";
+import Button, {
+  ColoredProps as ColoredButtonProps,
+} from "../components/Button";
 
 import replyIcon from "../assets/reply.svg";
 import rankIcon from "../assets/rank.png";
@@ -37,7 +42,7 @@ import lightIcon from "../assets/light.png";
 import heartIcon from "../assets/heart.png";
 import letterIcon from "../assets/letter.png";
 import shareIcon from "../assets/share.svg";
-import copyToClipboard from "../common/copyToClipboard";
+import starEyesIcon from "../assets/star_eyes.png";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
@@ -76,7 +81,29 @@ const calcMBTIrank = (group: Record<string, Option[]>, options: Option[]) => {
     .sort((a, b) => b.ratio - a.ratio);
 };
 
-const Footer = () => {
+const FloatingFooter = ({
+  className,
+  color,
+  onClick,
+  children,
+}: {
+  className: cn.Argument;
+  color: ColoredButtonProps["color"];
+  onClick: ColoredButtonProps["onClick"];
+  children: React.ReactNode;
+}) => (
+  <footer className={cn("sticky z-nav w-full pb-[20px] pt-6", className)}>
+    <Button.Colored
+      color={color}
+      className="flex w-full items-center py-4 text-white"
+      onClick={onClick}
+    >
+      {children}
+    </Button.Colored>
+  </footer>
+);
+
+const ShareFooter = () => {
   const { answer } = useReportState();
   const onShare = async () => {
     const url = location.origin + "/" + answer.id + "/public";
@@ -95,17 +122,42 @@ const Footer = () => {
     }
   };
   return (
-    <footer className="sticky bottom-nav z-nav w-full pb-[20px] pt-6">
-      <Button.Colored
-        color="violet"
-        className="flex w-full items-center py-4 text-white"
-        onClick={onShare}
-      >
-        <Icon src={letterIcon} alt="letter" className="mr-3" />
-        친구에게 리포트 공유하기
-        <Icon src={shareIcon} alt="share" className="ml-auto mr-0" />
-      </Button.Colored>
-    </footer>
+    <FloatingFooter className="bottom-nav" color="violet" onClick={onShare}>
+      <Icon src={letterIcon} alt="letter" className="mr-3" />
+      친구에게 리포트 공유하기
+      <Icon src={shareIcon} alt="share" className="ml-auto mr-0" />
+    </FloatingFooter>
+  );
+};
+
+const RightArrowIcon = () => (
+  <svg
+    className="ml-auto"
+    width="9"
+    height="16"
+    viewBox="0 0 9 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M0.657615 0.915855C0.548587 1.02748 0.487549 1.17732 0.487549 1.33335C0.487549 1.48939 0.548587 1.63923 0.657615 1.75085L6.74886 7.9996L0.657615 14.2471C0.548587 14.3587 0.487549 14.5086 0.487549 14.6646C0.487549 14.8206 0.548587 14.9705 0.657615 15.0821C0.71061 15.1365 0.773972 15.1798 0.843961 15.2093C0.91395 15.2389 0.989148 15.2541 1.06511 15.2541C1.14108 15.2541 1.21628 15.2389 1.28627 15.2093C1.35626 15.1798 1.41962 15.1365 1.47262 15.0821L7.95011 8.43585C8.06388 8.31914 8.12755 8.16259 8.12755 7.9996C8.12755 7.83661 8.06388 7.68007 7.95011 7.56335L1.47262 0.917105C1.41962 0.862676 1.35626 0.819414 1.28627 0.789875C1.21628 0.760336 1.14108 0.745117 1.06511 0.745117C0.989148 0.745117 0.91395 0.760336 0.843961 0.789875C0.773972 0.819414 0.71061 0.862676 0.657615 0.917105V0.915855Z"
+      fill="white"
+    />
+  </svg>
+);
+
+const PublicFooter = () => {
+  const navigate = useNavigate();
+  return (
+    <FloatingFooter
+      className="bottom-0"
+      color="primary"
+      onClick={() => navigate("/welcome")}
+    >
+      <Icon src={starEyesIcon} alt="star eyes" className="mr-3" />
+      질문에 대답하고 나만의 리포트 보러가기
+      <RightArrowIcon />
+    </FloatingFooter>
   );
 };
 
@@ -123,23 +175,29 @@ const Title = ({ icon, children }: { icon: string; children: string }) => (
   </Badge>
 );
 
-const EmptyMBTI = () => (
-  <div className="flex items-start">
-    <Icon src={lightIcon} alt="tip" />
-    <div>
-      <div className="mb-3 leading-7 text-grayscale-80">
-        <strong className="font-medium">
+const EmptyMBTI = () => {
+  const { isPublic } = useReportState();
+  return (
+    <div className="flex items-start">
+      <Icon src={lightIcon} alt="tip" />
+      <div className="text-grayscale-80">
+        <div className="font-medium leading-7">
           MBTI 정보가 없어 분석할 수 없어요 :(
-        </strong>
-        <br />
-        MBTI 설정 후 다음 날 질문부터 정보를 확인할 수 있어요!
+        </div>
+        {!isPublic && (
+          <>
+            <div className="mb-3">
+              MBTI 설정 후 다음 날 질문부터 정보를 확인할 수 있어요!
+            </div>
+            <Link to="/profile" className="font-medium text-grayscale-100">
+              {"MBTI 설정하기 >"}
+            </Link>
+          </>
+        )}
       </div>
-      <Link to="/profile" className="font-medium text-grayscale-100">
-        {"MBTI 설정하기 >"}
-      </Link>
     </div>
-  </div>
-);
+  );
+};
 
 const DetailReport = () => {
   const {
@@ -300,15 +358,37 @@ const ActualReport = () => {
     <>
       <Header>
         <Header.H1>
-          <Header.Back onClick={() => navigate(-1)}>리포트</Header.Back>
+          <Header.Back onClick={() => navigate("/answers")}>리포트</Header.Back>
         </Header.H1>
       </Header>
       <main>
         <BasicReport />
         <DetailReport />
       </main>
-      <Footer />
+      <ShareFooter />
     </>
+  );
+};
+
+const PublicReport = () => {
+  const {
+    answer: {
+      user: { nickname },
+    },
+  } = useReportState();
+  const nicknameWithEllipsis =
+    nickname.length > 10 ? nickname.substring(0, 10) + "..." : nickname;
+  return (
+    <Layout>
+      <Header>
+        <Header.H1>{nicknameWithEllipsis}님의 리포트</Header.H1>
+      </Header>
+      <main>
+        <BasicReport />
+        <DetailReport />
+      </main>
+      <PublicFooter />
+    </Layout>
   );
 };
 
@@ -333,11 +413,12 @@ const getMyAnswerAndAnswers = async (answerId: string) => {
   };
 };
 
-const Report = () => {
+const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   const { answerId } = useParams();
 
   if (!answerId) {
-    return <Navigate to="/answer" />;
+    // TODO: 404 페이지 만들기
+    return <Navigate to={isPublic ? "/" : "/answer"} />;
   }
 
   const { state, data } = useAsyncAPI(getMyAnswerAndAnswers, answerId);
@@ -351,8 +432,8 @@ const Report = () => {
 
     case "loaded":
       return (
-        <ReportContextProvider data={data}>
-          <ActualReport />
+        <ReportContextProvider data={{ ...data, isPublic }}>
+          {isPublic ? <PublicReport /> : <ActualReport />}
           <ToastContainer
             className="text-base"
             autoClose={3000}

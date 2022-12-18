@@ -23,7 +23,7 @@ const Basic = ({ className, onClick, disabled, children }: ButtonProps) => (
   </button>
 );
 
-interface ColoredProps extends ButtonProps {
+export interface ColoredProps extends ButtonProps {
   color: "primary" | "yellow" | "violet";
 }
 
