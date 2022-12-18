@@ -32,7 +32,7 @@ const Login = () => {
   }
 
   return (
-    <Layout className="flex h-[100vh] flex-col items-center justify-center px-10">
+    <Layout className="flex h-[100vh] flex-col items-center justify-center">
       <h1>
         <img src={tightee} alt="Tightee" />
       </h1>

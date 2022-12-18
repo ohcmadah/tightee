@@ -27,7 +27,7 @@ const Content = ({
   children: React.ReactNode;
 }) => (
   <div className="mt-4 flex w-full items-center justify-between px-1">
-    {children}
+    <div className="mr-3">{children}</div>
     <img src={iconSrc} alt={alt} />
   </div>
 );

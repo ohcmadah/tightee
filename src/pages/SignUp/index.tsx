@@ -33,7 +33,7 @@ const SignUp = () => {
 
   return (
     <SignUpContextProvider auth={state}>
-      <Layout className="py-16">
+      <Layout>
         <Main />
       </Layout>
     </SignUpContextProvider>
