@@ -138,13 +138,15 @@ app.get("/:id", async (req, res) => {
 
     const token = req.headers.authorization?.split("Bearer ")[1];
     if (token) {
-      const { uid } = await auth.verifyIdToken(token);
-      if (uid === id) {
-        return res.status(200).json({
-          ...answer,
-          user: { id, nickname, region, birthdate, gender, MBTI },
-        });
-      }
+      try {
+        const { uid } = await auth.verifyIdToken(token);
+        if (uid === id) {
+          return res.status(200).json({
+            ...answer,
+            user: { id, nickname, region, birthdate, gender, MBTI },
+          });
+        }
+      } catch (error) {}
     }
 
     return res.status(200).json({

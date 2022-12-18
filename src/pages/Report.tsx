@@ -353,7 +353,7 @@ const BasicReport = () => {
   );
 };
 
-const ActualReport = () => {
+const MyReport = () => {
   const navigate = useNavigate();
 
   return (
@@ -380,8 +380,9 @@ const PublicReport = () => {
   } = useReportState();
   const nicknameWithEllipsis =
     nickname.length > 10 ? nickname.substring(0, 10) + "..." : nickname;
+
   return (
-    <Layout>
+    <>
       <Header>
         <Header.H1>{nicknameWithEllipsis}님의 리포트</Header.H1>
       </Header>
@@ -390,7 +391,7 @@ const PublicReport = () => {
         <DetailReport />
       </main>
       <PublicFooter />
-    </Layout>
+    </>
   );
 };
 
@@ -430,7 +431,7 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   const { state, data } = useAsyncAPI(
     getMyAnswerAndAnswers,
     answerId,
-    isAuthentication ? authState.user : null
+    isAuthentication && !isPublic ? authState.user : null
   );
 
   switch (state) {
@@ -452,7 +453,7 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
       }
       return (
         <ReportContextProvider data={{ ...data, isPublic }}>
-          {isPublic ? <PublicReport /> : <ActualReport />}
+          {isPublic ? <PublicReport /> : <MyReport />}
           <ToastContainer
             className="text-base"
             autoClose={3000}
@@ -463,4 +464,13 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   }
 };
 
-export default Report;
+const ReportWrapper = ({ isPublic = false }: { isPublic?: boolean }) =>
+  isPublic ? (
+    <Layout>
+      <Report isPublic={isPublic} />
+    </Layout>
+  ) : (
+    <Report isPublic={isPublic} />
+  );
+
+export default ReportWrapper;
