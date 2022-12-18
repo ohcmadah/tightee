@@ -109,8 +109,12 @@ export const getAnswerGroups = async (params: {
   return res.status === 204 ? {} : res.data;
 };
 
-export const getAnswer = (answerId: string): Promise<AxiosResponse<Answer>> => {
-  return axios.get("/api/answers/" + answerId);
+export const getAnswer = (
+  answerId: string,
+  params?: { token?: string }
+): Promise<AxiosResponse<Answer>> => {
+  const headers = params && { Authorization: `Bearer ${params.token}` };
+  return axios.get("/api/answers/" + answerId, { headers });
 };
 
 export const getOptions = (params?: {

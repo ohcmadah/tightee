@@ -16,6 +16,8 @@ import {
   useReportState,
 } from "../contexts/ReportContext";
 import copyToClipboard from "../common/copyToClipboard";
+import { useAuthState } from "../contexts/AuthContext";
+import { User } from "firebase/auth";
 
 import { ToastContainer, toast } from "react-toastify";
 import Layout from "../components/Layout";
@@ -392,8 +394,9 @@ const PublicReport = () => {
   );
 };
 
-const getMyAnswerAndAnswers = async (answerId: string) => {
-  const answer = await getAnswer(answerId);
+const getMyAnswerAndAnswers = async (answerId: string, user: User | null) => {
+  const token = await user?.getIdToken();
+  const answer = await getAnswer(answerId, { token });
   const options = await getOptions({ ids: answer.data.question.options });
   const groups = await getAnswerGroups({
     groups: [
@@ -415,13 +418,20 @@ const getMyAnswerAndAnswers = async (answerId: string) => {
 
 const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   const { answerId } = useParams();
+  const authState = useAuthState();
+  const isAuthentication =
+    authState.state === "loaded" && authState.isAuthentication;
 
   if (!answerId) {
     // TODO: 404 페이지 만들기
     return <Navigate to={isPublic ? "/" : "/answer"} />;
   }
 
-  const { state, data } = useAsyncAPI(getMyAnswerAndAnswers, answerId);
+  const { state, data } = useAsyncAPI(
+    getMyAnswerAndAnswers,
+    answerId,
+    isAuthentication ? authState.user : null
+  );
 
   switch (state) {
     case "loading":
@@ -431,6 +441,15 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
       return <Error.Default />;
 
     case "loaded":
+      if (!isPublic && isAuthentication) {
+        if (data.answer.user.id !== authState.user.uid) {
+          return (
+            <Error.Default>
+              <article>리포트를 볼 수 있는 권한이 없어요 :(</article>
+            </Error.Default>
+          );
+        }
+      }
       return (
         <ReportContextProvider data={{ ...data, isPublic }}>
           {isPublic ? <PublicReport /> : <ActualReport />}

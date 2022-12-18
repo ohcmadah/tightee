@@ -122,18 +122,31 @@ app.get("/", checkUserIdContained, async (req, res) => {
 
 app.get("/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id: answerId } = req.params;
 
     const app = getAdminApp();
     const db = admin.firestore(app);
+    const auth = admin.auth(app);
 
-    const answerDoc = await db.doc("answers/" + id).get();
+    const answerDoc = await db.doc("answers/" + answerId).get();
     if (!answerDoc.exists) {
       return res.status(204).json({});
     }
 
     const answer = await convertDocToAnswer(db, answerDoc);
-    const { nickname, region, birthdate, gender, MBTI } = answer.user;
+    const { id, nickname, region, birthdate, gender, MBTI } = answer.user;
+
+    const token = req.headers.authorization?.split("Bearer ")[1];
+    if (token) {
+      const { uid } = await auth.verifyIdToken(token);
+      if (uid === id) {
+        return res.status(200).json({
+          ...answer,
+          user: { id, nickname, region, birthdate, gender, MBTI },
+        });
+      }
+    }
+
     return res.status(200).json({
       ...answer,
       user: { nickname, region, birthdate, gender, MBTI },
