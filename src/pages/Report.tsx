@@ -101,7 +101,7 @@ const Footer = () => {
         onClick={onShare}
       >
         <Icon src={letterIcon} alt="letter" className="mr-3" />
-        리포트 공유하기
+        친구에게 리포트 공유하기
         <Icon src={shareIcon} alt="share" className="ml-auto mr-0" />
       </Button.Colored>
     </footer>
