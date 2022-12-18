@@ -77,8 +77,9 @@ const calcMBTIrank = (group: Record<string, Option[]>, options: Option[]) => {
 };
 
 const Footer = () => {
+  const { answer } = useReportState();
   const onShare = async () => {
-    const url = location.href;
+    const url = location.origin + "/" + answer.id + "/public";
     if (navigator.share) {
       await navigator.share({
         title: "Tightee",
