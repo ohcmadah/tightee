@@ -59,7 +59,7 @@ const calcXY = (isSelected: boolean, ratio: number) => {
   if (!isSelected || ratio === 1) {
     return { x: 0, y: 0 };
   }
-  return { x: 5, y: ratio <= 0.5 ? 3 : -3 };
+  return { x: 5, y: ratio <= 0.5 ? 3 : -5 };
 };
 
 const DEFAULT_COLORS = ["#30A9DE", "#EFDC05", "#E53A40", "#090707"];
