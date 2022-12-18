@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AuthContextProvider } from "./contexts/AuthContext";
 
 import Main from "./pages/Main";
@@ -18,20 +19,22 @@ import "react-toastify/dist/ReactToastify.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <BrowserRouter>
-    <AuthContextProvider>
-      <Routes>
-        <Route path="/" element={<Main />}>
-          <Route index element={<Home />} />
-          <Route path="question" element={<Question />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="delete-account" element={<DeleteAccount />} />
-          <Route path="answer" element={<Answers />} />
-          <Route path="answer/:answerId/report" element={<Report />} />
-        </Route>
-        <Route path="/login" element={<Login />} />
-        <Route path="/callback/kakaotalk" element={<KakaoLogin />} />
-        <Route path="/signup" element={<SignUp />} />
-      </Routes>
-    </AuthContextProvider>
+    <HelmetProvider>
+      <AuthContextProvider>
+        <Routes>
+          <Route path="/" element={<Main />}>
+            <Route index element={<Home />} />
+            <Route path="question" element={<Question />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="delete-account" element={<DeleteAccount />} />
+            <Route path="answer" element={<Answers />} />
+            <Route path="answer/:answerId/report" element={<Report />} />
+          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route path="/callback/kakaotalk" element={<KakaoLogin />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Routes>
+      </AuthContextProvider>
+    </HelmetProvider>
   </BrowserRouter>
 );
