@@ -54,7 +54,7 @@ const Submitting = () => {
       return <Error.Default>{`${data}`}</Error.Default>;
 
     case "loaded":
-      return <Navigate to="/" replace />;
+      return <Navigate to={signUpState.nextUrl} replace />;
   }
 };
 

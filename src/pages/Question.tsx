@@ -196,6 +196,10 @@ const Question = ({
   const navigate = useNavigate();
   const { isExpired, answer, question } = data;
 
+  if (answer) {
+    return <Navigate to={"/answer/" + answer.id + "/report"} />;
+  }
+
   if (isExpired) {
     return (
       <Error.ExpiredQuestion
@@ -205,10 +209,6 @@ const Question = ({
         }}
       />
     );
-  }
-
-  if (answer) {
-    return <Navigate to={"/answer/" + answer.id + "/report"} />;
   }
 
   return question ? (
@@ -230,9 +230,6 @@ const getQuestionPageData = async (user: User, questionId?: string) => {
 
   const today = getLocalTime().format("YYYYMMDD");
   const isTodayQuestion = question.data.createdAt === today;
-  if (!isTodayQuestion) {
-    return { isExpired: true };
-  }
 
   const optionIds = question.data.options;
   const options = await getOptions({ ids: optionIds });
@@ -246,7 +243,7 @@ const getQuestionPageData = async (user: User, questionId?: string) => {
   return {
     question: { ...question.data, options: options.data },
     answer: filteredAnswers.length !== 0 ? filteredAnswers[0] : null,
-    isExpired: false,
+    isExpired: !isTodayQuestion,
   };
 };
 

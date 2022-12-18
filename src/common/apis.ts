@@ -18,7 +18,7 @@ const getCurrentUserId = () => {
   return userId;
 };
 
-export const onLoginWithKakao = () => {
+export const loginWithKakao = (state?: any) => {
   const redirectUri = `${location.origin}/callback/kakaotalk`;
   const scope = [
     KAKAO_SCOPE_NICKNAME,
@@ -29,6 +29,7 @@ export const onLoginWithKakao = () => {
   window.Kakao.Auth.authorize({
     redirectUri,
     scope,
+    ...(state ? { state } : {}),
   });
 };
 

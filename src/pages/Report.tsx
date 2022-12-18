@@ -150,12 +150,23 @@ const RightArrowIcon = () => (
 
 const PublicFooter = () => {
   const navigate = useNavigate();
+  const {
+    answer: { question },
+  } = useReportState();
+  const authState = useAuthState();
+  const onStart = () => {
+    const questionId = question.id;
+    const isAuthentication =
+      authState.state === "loaded" && authState.isAuthentication;
+    if (isAuthentication) {
+      return navigate("/question/" + questionId);
+    }
+    return navigate("/welcome", {
+      state: { questionId },
+    });
+  };
   return (
-    <FloatingFooter
-      className="bottom-0"
-      color="primary"
-      onClick={() => navigate("/welcome")}
-    >
+    <FloatingFooter className="bottom-0" color="primary" onClick={onStart}>
       <Icon src={starEyesIcon} alt="star eyes" className="mr-3" />
       질문에 대답하고 나만의 리포트 보러가기
       <RightArrowIcon />
@@ -304,7 +315,7 @@ const MBTIRankReport = () => {
         {rank.slice(0, 3).map(({ mbti, option, ratio }, index) => (
           <div
             key={mbti}
-            className={cn("mb-3", { "font-medium": mbti === answer.user.MBTI })}
+            className={cn("mb-3", { "font-bold": mbti === answer.user.MBTI })}
           >
             <Icon src={RANK_ICONS[index]} alt={`${index + 1}등`} />
             {mbti}{" "}
