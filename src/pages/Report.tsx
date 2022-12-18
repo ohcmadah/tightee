@@ -1,7 +1,7 @@
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { getAnswer, getAnswerGroups, getOptions } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { Answer, MBTI, Option } from "../@types";
+import { Option } from "../@types";
 import {
   calcAgeGroup,
   convertGenderCodeToReadable,
@@ -101,7 +101,7 @@ const Footer = () => {
         onClick={onShare}
       >
         <Icon src={letterIcon} alt="letter" className="mr-3" />
-        리포트 공유하기
+        친구에게 리포트 공유하기
         <Icon src={shareIcon} alt="share" className="ml-auto mr-0" />
       </Button.Colored>
     </footer>
@@ -127,7 +127,9 @@ const EmptyMBTI = () => (
     <Icon src={lightIcon} alt="tip" />
     <div>
       <div className="mb-3 leading-7 text-grayscale-80">
-        MBTI 정보가 없어 분석할 수 없어요 :(
+        <strong className="font-medium">
+          MBTI 정보가 없어 분석할 수 없어요 :(
+        </strong>
         <br />
         MBTI 설정 후 다음 날 질문부터 정보를 확인할 수 있어요!
       </div>
@@ -165,7 +167,7 @@ const DetailReport = () => {
             {user.MBTI ? (
               <Chart data={mbtiData} id={option.id}>
                 <Chart.Summary>{`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
-                <Chart.Pie className="m-auto my-7" size="33%" />
+                <Chart.Pie className="m-auto my-7" size="40%" />
                 <Chart.Regend />
               </Chart>
             ) : (
@@ -182,7 +184,7 @@ const DetailReport = () => {
                   convertRegionCodeToReadable(user.region) +
                   "'에 사는 타이티 중에 {value}가 같은 응답을 했어요."}
               </Chart.Summary>
-              <Chart.Pie className="m-auto my-7" size="33%" />
+              <Chart.Pie className="m-auto my-7" size="40%" />
               <Chart.Regend />
             </Chart>
           </Box>
@@ -192,7 +194,7 @@ const DetailReport = () => {
             <Reply>{option.text}</Reply>
             <Chart data={ageData} id={option.id}>
               <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
-              <Chart.Pie className="m-auto my-7" size="33%" />
+              <Chart.Pie className="m-auto my-7" size="40%" />
               <Chart.Regend />
             </Chart>
           </Box>
@@ -206,7 +208,7 @@ const DetailReport = () => {
                   user.gender
                 )}'인 타이티 중에 {value}가 같은 응답을 했어요.`}
               </Chart.Summary>
-              <Chart.Pie className="m-auto my-7" size="33%" />
+              <Chart.Pie className="m-auto my-7" size="40%" />
               <Chart.Regend />
             </Chart>
           </Box>
@@ -279,7 +281,7 @@ const BasicReport = () => {
             id={answer.option.id}
           >
             <Chart.Summary>{`전체 타이티 중에 {value}를 차지하고 있어요.`}</Chart.Summary>
-            <Chart.Pie className="m-auto my-7" size="33%" />
+            <Chart.Pie className="m-auto my-7" size="40%" />
             <Chart.Regend />
           </Chart>
         </Box>
@@ -296,7 +298,9 @@ const ActualReport = () => {
   return (
     <>
       <Header>
-        <Header.Back onClick={() => navigate(-1)}>리포트</Header.Back>
+        <Header.H1>
+          <Header.Back onClick={() => navigate(-1)}>리포트</Header.Back>
+        </Header.H1>
       </Header>
       <main>
         <BasicReport />

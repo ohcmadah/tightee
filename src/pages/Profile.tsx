@@ -60,7 +60,7 @@ const Settings = ({
       </section>
 
       <section className="mb-6 flex items-center">
-        <Button.Outline className="mr-8 min-w-[200px]" onClick={onLogout}>
+        <Button.Outline className="mr-6 min-w-[50%]" onClick={onLogout}>
           로그아웃
         </Button.Outline>
         <span className="text-base">다음에 또 만나요!</span>
@@ -68,15 +68,13 @@ const Settings = ({
 
       <section className="mb-12 flex items-center">
         <Button.Outline
-          className="mr-8 min-w-[200px]"
+          className="mr-6 min-w-[50%]"
           onClick={() => navigate("/delete-account")}
         >
           회원탈퇴
         </Button.Outline>
         <span className="text-base">
-          지금까지 쌓은 소중한 기록들이
-          <br />
-          모두 사라져요 :(
+          지금까지 쌓은 소중한 기록들이 모두 사라져요 :(
         </span>
       </section>
 
@@ -231,9 +229,11 @@ const ActualProfile = ({
   return (
     <>
       <Header>
-        <Header.Title iconSrc={eyesIcon} alt="eyes">
-          나의 프로필
-        </Header.Title>
+        <Header.H1>
+          <Header.Icon iconSrc={eyesIcon} alt="eyes">
+            나의 프로필
+          </Header.Icon>
+        </Header.H1>
       </Header>
       <ProfileForm
         user={user}

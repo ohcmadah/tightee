@@ -6,7 +6,7 @@ import withAuth from "../hocs/withAuth";
 const Home = () => {
   return (
     <>
-      <Layout className="flex flex-col py-16">
+      <Layout className="flex flex-col">
         <Outlet />
       </Layout>
       <Nav />

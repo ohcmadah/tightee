@@ -1,12 +1,12 @@
+import { useNavigate } from "react-router-dom";
+import { URL_CS } from "../common/constants";
+
 import Header from "./Header";
+import Button from "./Button";
+import Footer from "./Footer";
+import ExternalLink from "./ExternalLink";
 
 import sadIcon from "../assets/sad.png";
-import ExternalLink from "./ExternalLink";
-import { URL_CS } from "../common/constants";
-import Button from "./Button";
-import { useNavigate } from "react-router-dom";
-import Footer from "./Footer";
-import React, { MouseEventHandler } from "react";
 
 const Base = ({
   title,
@@ -18,7 +18,9 @@ const Base = ({
   children: React.ReactNode;
 }) => (
   <>
-    <Header className="text-center">{title}</Header>
+    <Header>
+      <Header.H1 className="text-center">{title}</Header.H1>
+    </Header>
     <main className="text-center text-base">
       <img
         width={30}
@@ -56,13 +58,13 @@ const Default = ({ children }: { children?: React.ReactNode }) => {
     <Base title="무언가 문제가 발생했어요." footer={DefaultFooter}>
       {children || (
         <article>
-          주소가 잘못되었거나 페이지에 문제가 있어 들어갈 수 없어요 :(
+          주소가 잘못되었거나 문제가 있어 들어갈 수 없어요 :(
           <br />
-          혹시 서비스 이용에 어려움을 겪고 있다면&nbsp;
+          서비스 이용에 어려움이 있다면&nbsp;
           <ExternalLink className="text-primary" href={URL_CS}>
             고객센터
           </ExternalLink>
-          로 문의해주세요!
+          로 문의해 주세요!
         </article>
       )}
     </Base>

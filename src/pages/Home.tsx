@@ -27,7 +27,7 @@ const Content = ({
   children: React.ReactNode;
 }) => (
   <div className="mt-4 flex w-full items-center justify-between px-1">
-    {children}
+    <div className="mr-3">{children}</div>
     <img src={iconSrc} alt={alt} />
   </div>
 );
@@ -130,7 +130,9 @@ const Home = () => {
       return (
         <>
           <Header>
-            <Header.Title iconSrc={homeIcon}>타이티입니다 :)</Header.Title>
+            <Header.H1>
+              <Header.Icon iconSrc={homeIcon}>타이티입니다 :)</Header.Icon>
+            </Header.H1>
           </Header>
           <Main
             question={data.question}

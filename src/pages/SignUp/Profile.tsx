@@ -57,9 +57,11 @@ const Profile = () => {
   return (
     <>
       <Header>
-        맞춤 분석을 위해
-        <br />
-        간단한 정보를 알려주세요.
+        <Header.H2>
+          맞춤 분석을 위해
+          <br />
+          간단한 정보를 알려주세요.
+        </Header.H2>
       </Header>
 
       <main>

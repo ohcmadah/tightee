@@ -36,7 +36,7 @@ const KakaoLogin = () => {
 
     case "error":
       return (
-        <Layout className="pt-12">
+        <Layout>
           <Error.Default />
         </Layout>
       );

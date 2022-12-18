@@ -8,7 +8,7 @@ interface LayoutProps {
 }
 
 const Layout = ({ className, children }: LayoutProps) => (
-  <main className={cn(styles.layout, className)}>{children}</main>
+  <main className={cn(styles.layout, "py-14 px-8", className)}>{children}</main>
 );
 
 export default Layout;

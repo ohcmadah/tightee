@@ -21,6 +21,7 @@ import Icon from "../components/Icon";
 import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
 import rightArrowIcon from "../assets/right_arrow.svg";
+import writingHand from "../assets/writing_hand.png";
 
 type PageData = Awaited<ReturnType<typeof getAnswersPageData>>;
 
@@ -52,7 +53,7 @@ const Answer = ({
         to={`${id}/report`}
         className="flex w-full items-center justify-between"
       >
-        <Chart.Summary value={ratio}>
+        <Chart.Summary value={ratio} className="mr-3 truncate text-ellipsis">
           {"전체 타이티 중에 {value}를 차지하고 있어요."}
         </Chart.Summary>
         <img src={rightArrowIcon} alt="arrow" />
@@ -86,9 +87,22 @@ const TodayQuestion = () => {
   );
 };
 
+const AlreadyAnswered = () => (
+  <article className="mb-8 flex flex-col items-center">
+    <Icon src={writingHand} alt="writing hand" className="mr-0" />
+    <div className="mt-3 text-center text-base text-grayscale-60">
+      오늘 질문에 이미 대답하셨네요!
+      <br />
+      내일 또 재미있는 질문이 기다리고 있어요 :)
+    </div>
+  </article>
+);
+
 const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
+  const isEmptyMyAnswers = myAnswers.length === 0;
   const isAnsweredTodayQuestion =
-    myAnswers[0]?.question.createdAt === getLocalTime().format("YYYYMMDD");
+    !isEmptyMyAnswers &&
+    myAnswers[0].question.createdAt === getLocalTime().format("YYYYMMDD");
 
   return (
     <main>
@@ -98,8 +112,13 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
         </section>
       )}
       <section>
+        {isAnsweredTodayQuestion && <AlreadyAnswered />}
         <Box.Container>
-          {myAnswers.length !== 0 ? (
+          {isEmptyMyAnswers ? (
+            <div className="mt-12 text-center text-base text-grayscale-80">
+              아직 질문에 응답한 내역이 없어요 :)
+            </div>
+          ) : (
             myAnswers.map((myAnswer) => (
               <Answer
                 key={myAnswer.id}
@@ -107,10 +126,6 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
                 options={answersByQuestionIdMap[myAnswer.question.id]}
               />
             ))
-          ) : (
-            <div className="mt-12 text-center text-base text-grayscale-80">
-              아직 질문에 응답한 내역이 없어요 :)
-            </div>
           )}
         </Box.Container>
       </section>
@@ -120,10 +135,12 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
 
 const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
   <>
-    <Header className="flex items-center">
-      <Header.Title iconSrc={answerIcon} alt="answer">
-        나의 대답
-      </Header.Title>
+    <Header>
+      <Header.H1 className="flex items-center">
+        <Header.Icon iconSrc={answerIcon} alt="answer">
+          나의 대답
+        </Header.Icon>
+      </Header.H1>
     </Header>
     <Main
       answersByQuestionIdMap={answersByQuestionIdMap}

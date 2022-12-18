@@ -24,7 +24,7 @@ const Summary = ({
   children,
 }: {
   value?: number | string;
-  className?: cn.Argument;
+  className?: string;
   children?: string;
 }) => {
   const regex = /(\{value\})/;
@@ -34,9 +34,9 @@ const Summary = ({
   const ratio = data?.filter((value) => value.isSelected)[0].ratio;
 
   return (
-    <div className={cn("flex items-center text-grayscale-80", className)}>
+    <div className="flex items-start text-grayscale-80">
       <Icon src={chartIcon} alt="chart" />
-      <div>
+      <div className={className}>
         {elements?.map((element, index) =>
           element.match(regex) ? (
             <span key={index} className="text-primary">
@@ -174,4 +174,8 @@ const Chart = ({
   );
 };
 
-export default Object.assign(Chart, { Summary, Pie, Regend });
+export default Object.assign(Chart, {
+  Summary: Summary,
+  Pie: Pie,
+  Regend: Regend,
+});

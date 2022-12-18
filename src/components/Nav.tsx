@@ -33,7 +33,7 @@ const Menu = ({ path, icon }: { path: string; icon: string }) => {
 const Nav = () => (
   <nav>
     <div className="h-nav" />
-    <ul className="fixed bottom-0 left-0 z-nav flex h-nav w-full items-center gap-x-5 bg-white bg-primary-peach px-12 py-2">
+    <ul className="fixed bottom-0 left-0 z-nav flex h-nav w-full items-center gap-x-5 bg-white bg-primary-peach px-8 py-2">
       {pages.map(({ path, icon }) => (
         <Menu key={path} path={path} icon={icon} />
       ))}

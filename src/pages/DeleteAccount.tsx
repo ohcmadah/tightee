@@ -29,7 +29,11 @@ const DeleteAccount = () => {
   return (
     <>
       <Header>
-        <Header.Back onClick={() => navigate("/profile")}>회원탈퇴</Header.Back>
+        <Header.H1>
+          <Header.Back onClick={() => navigate("/profile")}>
+            회원탈퇴
+          </Header.Back>
+        </Header.H1>
       </Header>
       <main className="text-center text-base">
         <img
@@ -38,18 +42,19 @@ const DeleteAccount = () => {
           src={cryingIcon}
           alt="crying face"
         />
-        <article>
-          <div className="mb-4 text-xl font-bold">
+        <section>
+          <article className="mb-4 text-xl font-bold">
             정말 타이티를 탈퇴하시겠어요?
-          </div>
-          <div className="leading-8">
-            타이티를 탈퇴하시면 지금까지 쌓은 소중한 기록들이 모두 사라져요 :(
+          </article>
+          <article className="mb-2">
+            타이티를 탈퇴하시면
             <br />
-            <span className="text-system-alert">
-              탈퇴 후에는 계정을 다시 복구할 수 없으니 이 점 유의해 주세요.
-            </span>
-          </div>
-        </article>
+            지금까지 쌓은 소중한 기록들이 모두 사라져요 :(
+          </article>
+          <article className="text-system-alert">
+            탈퇴 후에는 계정을 다시 복구할 수 없으니 유의해 주세요.
+          </article>
+        </section>
       </main>
       <Footer className="flex items-center justify-center gap-x-3">
         <Button.Outline

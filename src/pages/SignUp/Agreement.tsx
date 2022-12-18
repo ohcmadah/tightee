@@ -70,13 +70,15 @@ const Agreement = () => {
   return (
     <>
       <Header>
-        우리 사이의 연결고리.
-        <br />
-        타이티에 오신 것을 환영합니다!
+        <Header.H2>
+          MBTI기반 성향 분석 서비스,
+          <br />
+          타이티에 오신 것을 환영합니다!
+        </Header.H2>
       </Header>
 
       <main>
-        <h2 className="text-2xl font-bold">약관동의</h2>
+        <h2 className="text-xl font-bold">약관동의</h2>
         <section
           className={cn(
             styles.agreementList,
