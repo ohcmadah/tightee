@@ -4,6 +4,11 @@ import { auth } from "../config";
 import { getLocalTime } from "./utils";
 
 import { Answer, Auth, Option, Question, User } from "../@types";
+import {
+  KAKAO_SCOPE_BIRTHDAY,
+  KAKAO_SCOPE_GENDER,
+  KAKAO_SCOPE_NICKNAME,
+} from "./constants";
 
 const getCurrentUserId = () => {
   const userId = auth.currentUser?.uid;
@@ -11,6 +16,20 @@ const getCurrentUserId = () => {
     throw new Error("Unauthorized");
   }
   return userId;
+};
+
+export const onLoginWithKakao = () => {
+  const redirectUri = `${location.origin}/callback/kakaotalk`;
+  const scope = [
+    KAKAO_SCOPE_NICKNAME,
+    KAKAO_SCOPE_GENDER,
+    KAKAO_SCOPE_BIRTHDAY,
+  ].join(",");
+
+  window.Kakao.Auth.authorize({
+    redirectUri,
+    scope,
+  });
 };
 
 export const authKakao = (code: string): Promise<AxiosResponse<Auth>> => {
@@ -109,8 +128,12 @@ export const getAnswerGroups = async (params: {
   return res.status === 204 ? {} : res.data;
 };
 
-export const getAnswer = (answerId: string): Promise<AxiosResponse<Answer>> => {
-  return axios.get("/api/answers/" + answerId);
+export const getAnswer = (
+  answerId: string,
+  params?: { token?: string }
+): Promise<AxiosResponse<Answer>> => {
+  const headers = params && { Authorization: `Bearer ${params.token}` };
+  return axios.get("/api/answers/" + answerId, { headers });
 };
 
 export const getOptions = (params?: {

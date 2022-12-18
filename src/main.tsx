@@ -5,6 +5,7 @@ import { AuthContextProvider } from "./contexts/AuthContext";
 import Main from "./pages/Main";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Welcome from "./pages/Welcome";
 import KakaoLogin from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
 import Question from "./pages/Question";
@@ -29,8 +30,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
           <Route path="answer/:answerId/report" element={<Report />} />
         </Route>
         <Route path="/login" element={<Login />} />
+        <Route path="/Welcome" element={<Welcome />} />
         <Route path="/callback/kakaotalk" element={<KakaoLogin />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/:answerId/public" element={<Report isPublic />} />
       </Routes>
     </AuthContextProvider>
   </BrowserRouter>
