@@ -32,7 +32,9 @@ const SignUp = () => {
   }
 
   return (
-    <SignUpContextProvider auth={state}>
+    <SignUpContextProvider
+      data={{ auth: state.auth, questionId: state.questionId }}
+    >
       <Layout>
         <Main />
       </Layout>
@@ -40,4 +42,4 @@ const SignUp = () => {
   );
 };
 
-export default withAuth(SignUp, "guest");
+export default SignUp;

@@ -1,4 +1,5 @@
-import { onLoginWithKakao } from "../common/apis";
+import { useLocation } from "react-router-dom";
+import { loginWithKakao } from "../common/apis";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
@@ -8,6 +9,8 @@ import chickIcon from "../assets/chick.png";
 import Button from "../components/Button";
 
 const Welcome = () => {
+  const { state } = useLocation();
+
   if (!window.Kakao.isInitialized()) {
     window.Kakao.init(process.env.KAKAO_JAVASCRIPT_KEY);
   }
@@ -31,7 +34,10 @@ const Welcome = () => {
         <br />
         맞춤형 분석 리포트를 실시간으로 확인해보세요 :)
       </section>
-      <Button.Kakao className="mt-14" onClick={onLoginWithKakao} />
+      <Button.Kakao
+        className="mt-14"
+        onClick={() => loginWithKakao(state.questionId)}
+      />
     </Layout>
   );
 };

@@ -18,7 +18,7 @@ const getCurrentUserId = () => {
   return userId;
 };
 
-export const onLoginWithKakao = () => {
+export const loginWithKakao = (state?: any) => {
   const redirectUri = `${location.origin}/callback/kakaotalk`;
   const scope = [
     KAKAO_SCOPE_NICKNAME,
@@ -29,6 +29,7 @@ export const onLoginWithKakao = () => {
   window.Kakao.Auth.authorize({
     redirectUri,
     scope,
+    ...(state ? { state } : {}),
   });
 };
 
@@ -89,7 +90,7 @@ export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
   return axios.get("/api/questions", { params: { date: today } });
 };
 
-export const getQuestion = (id: string) => {
+export const getQuestion = (id: string): Promise<AxiosResponse<Question>> => {
   return axios.get("/api/questions/" + id);
 };
 

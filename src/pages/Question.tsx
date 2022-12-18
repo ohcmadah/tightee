@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import {
   answer,
   getMyAnswers,
   getOptions,
+  getQuestion,
   getTodayQuestion,
 } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
@@ -60,7 +61,7 @@ const QuestionSection = ({ title }: { title: string }) => {
   return (
     <section className="mb-14 flex flex-col items-center">
       <img width={30} className="mb-3" src={thinkingIcon} alt="thinking" />
-      <h2 className="text-lg font-bold">{title}</h2>
+      <h2 className="text-center text-lg font-bold">{title}</h2>
     </section>
   );
 };
@@ -156,30 +157,104 @@ const ActualQuestion = ({
   }
 };
 
-const getQuestionPageData = async (user: User) => {
-  const question = await getTodayQuestion();
+const TodayQuestion = ({
+  data,
+  forceUpdate,
+}: {
+  data: Awaited<ReturnType<typeof getQuestionPageData>>;
+  forceUpdate: React.DispatchWithoutAction;
+}) => {
+  const { answer, question } = data;
+
+  if (answer) {
+    return <Navigate to="/answer" />;
+  }
+
+  return question ? (
+    <ActualQuestion question={question} forceUpdate={forceUpdate} />
+  ) : (
+    <Error.Default>
+      <article>
+        오늘의 질문이 존재하지 않습니다.
+        <br />
+        <ExternalLink className="text-primary" href={URL_CS}>
+          고객센터
+        </ExternalLink>
+        로 문의해 주세요.
+      </article>
+    </Error.Default>
+  );
+};
+
+const Question = ({
+  data,
+  forceUpdate,
+}: {
+  data: Awaited<ReturnType<typeof getQuestionPageData>>;
+  forceUpdate: React.DispatchWithoutAction;
+}) => {
+  const navigate = useNavigate();
+  const { isExpired, answer, question } = data;
+
+  if (answer) {
+    return <Navigate to={"/answer/" + answer.id + "/report"} />;
+  }
+
+  if (isExpired) {
+    return (
+      <Error.ExpiredQuestion
+        onReload={() => {
+          forceUpdate();
+          navigate("/question");
+        }}
+      />
+    );
+  }
+
+  return question ? (
+    <ActualQuestion question={question} forceUpdate={forceUpdate} />
+  ) : (
+    <Error.Default>
+      <article>질문이 존재하지 않습니다.</article>
+    </Error.Default>
+  );
+};
+
+const getQuestionPageData = async (user: User, questionId?: string) => {
+  const question = await (questionId
+    ? getQuestion(questionId)
+    : getTodayQuestion());
   if (question.status === 204) {
     return { question: null };
   }
+
+  const today = getLocalTime().format("YYYYMMDD");
+  const isTodayQuestion = question.data.createdAt === today;
 
   const optionIds = question.data.options;
   const options = await getOptions({ ids: optionIds });
 
   const token = await user.getIdToken();
   const answers = await getMyAnswers(user.uid, token);
-  const isAnswered =
-    answers.filter((answer) => answer.question.id === question.data.id)
-      .length !== 0;
+  const filteredAnswers = answers.filter(
+    (answer) => answer.question.id === question.data.id
+  );
 
   return {
     question: { ...question.data, options: options.data },
-    isAnswered,
+    answer: filteredAnswers.length !== 0 ? filteredAnswers[0] : null,
+    isExpired: !isTodayQuestion,
   };
 };
 
-const Question = () => {
+const QuestionWrapper = () => {
+  const { questionId } = useParams();
   const { user } = useAuthenticatedState();
-  const { state, data, forceUpdate } = useAsyncAPI(getQuestionPageData, user);
+  const { state, data, forceUpdate } = useAsyncAPI(
+    getQuestionPageData,
+    user,
+    questionId
+  );
 
   switch (state) {
     case "loading":
@@ -189,28 +264,12 @@ const Question = () => {
       return <Error.Default />;
 
     case "loaded":
-      if (data.isAnswered) {
-        return <Navigate to="/answer" />;
-      }
-      if (data.question) {
-        return (
-          <ActualQuestion question={data.question} forceUpdate={forceUpdate} />
-        );
-      } else {
-        return (
-          <Error.Default>
-            <article>
-              오늘의 질문이 존재하지 않습니다.
-              <br />
-              <ExternalLink className="text-primary" href={URL_CS}>
-                고객센터
-              </ExternalLink>
-              로 문의해 주세요.
-            </article>
-          </Error.Default>
-        );
-      }
+      return questionId ? (
+        <Question data={data} forceUpdate={forceUpdate} />
+      ) : (
+        <TodayQuestion data={data} forceUpdate={forceUpdate} />
+      );
   }
 };
 
-export default Question;
+export default QuestionWrapper;

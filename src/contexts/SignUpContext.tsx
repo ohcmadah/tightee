@@ -25,6 +25,7 @@ export type SignUpState = {
   errors: FormError;
   agreement: AgreementValues;
   profile: ProfileValues;
+  nextUrl: string;
 };
 
 const SignUpStateContext = createContext<SignUpState | undefined>(undefined);
@@ -71,13 +72,13 @@ const signUpReducer = (state: SignUpState, action: Action): SignUpState => {
 };
 
 export const SignUpContextProvider = ({
-  auth,
+  data,
   children,
 }: {
-  auth: Auth;
+  data: { auth: Auth; questionId?: string };
   children: React.ReactNode;
 }) => {
-  const { kakaoUser, firebaseToken } = auth;
+  const { kakaoUser, firebaseToken } = data.auth;
   const month = kakaoUser.birthday?.substring(0, 2);
   const [signUpState, dispatch] = useReducer(signUpReducer, {
     id: kakaoUser.id,
@@ -100,6 +101,7 @@ export const SignUpContextProvider = ({
       },
       gender: kakaoUser.gender,
     },
+    nextUrl: data.questionId ? "/question/" + data.questionId : "/",
   });
 
   return (
