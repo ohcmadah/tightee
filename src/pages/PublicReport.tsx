@@ -16,6 +16,7 @@ import {
 } from "../contexts/ReportContext";
 
 import { ToastContainer, toast } from "react-toastify";
+import Layout from "../components/Layout";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
 import Error from "../components/Error";
@@ -35,8 +36,7 @@ import locationIcon from "../assets/location.png";
 import hourglassIcon from "../assets/hourglass.png";
 import lightIcon from "../assets/light.png";
 import heartIcon from "../assets/heart.png";
-import letterIcon from "../assets/letter.png";
-import shareIcon from "../assets/share.svg";
+import starEyesIcon from "../assets/star_eyes.png";
 import copyToClipboard from "../common/copyToClipboard";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
@@ -76,34 +76,37 @@ const calcMBTIrank = (group: Record<string, Option[]>, options: Option[]) => {
     .sort((a, b) => b.ratio - a.ratio);
 };
 
+const RightArrowIcon = () => (
+  <svg
+    className="ml-auto"
+    width="9"
+    height="16"
+    viewBox="0 0 9 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M0.657615 0.915855C0.548587 1.02748 0.487549 1.17732 0.487549 1.33335C0.487549 1.48939 0.548587 1.63923 0.657615 1.75085L6.74886 7.9996L0.657615 14.2471C0.548587 14.3587 0.487549 14.5086 0.487549 14.6646C0.487549 14.8206 0.548587 14.9705 0.657615 15.0821C0.71061 15.1365 0.773972 15.1798 0.843961 15.2093C0.91395 15.2389 0.989148 15.2541 1.06511 15.2541C1.14108 15.2541 1.21628 15.2389 1.28627 15.2093C1.35626 15.1798 1.41962 15.1365 1.47262 15.0821L7.95011 8.43585C8.06388 8.31914 8.12755 8.16259 8.12755 7.9996C8.12755 7.83661 8.06388 7.68007 7.95011 7.56335L1.47262 0.917105C1.41962 0.862676 1.35626 0.819414 1.28627 0.789875C1.21628 0.760336 1.14108 0.745117 1.06511 0.745117C0.989148 0.745117 0.91395 0.760336 0.843961 0.789875C0.773972 0.819414 0.71061 0.862676 0.657615 0.917105V0.915855Z"
+      fill="white"
+    />
+  </svg>
+);
+
 const Footer = () => {
-  const { answer } = useReportState();
-  const onShare = async () => {
-    const url = location.origin + "/" + answer.id + "/public";
-    if (navigator.share) {
-      await navigator.share({
-        title: "Tightee",
-        url,
-      });
-    } else {
-      const result = await copyToClipboard(url);
-      if (result) {
-        toast.success("복사가 완료되었어요!");
-      } else {
-        toast.error("공유를 지원하지 않는 환경이에요 :(");
-      }
-    }
+  const navigate = useNavigate();
+  const onStartTightee = () => {
+    navigate("/");
   };
   return (
-    <footer className="sticky bottom-nav z-nav w-full pb-[20px] pt-6">
+    <footer className="sticky bottom-0 z-nav w-full pb-[20px] pt-6">
       <Button.Colored
-        color="violet"
+        color="primary"
         className="flex w-full items-center py-4 text-white"
-        onClick={onShare}
+        onClick={onStartTightee}
       >
-        <Icon src={letterIcon} alt="letter" className="mr-3" />
-        친구에게 리포트 공유하기
-        <Icon src={shareIcon} alt="share" className="ml-auto mr-0" />
+        <Icon src={starEyesIcon} alt="star eyes" className="mr-3" />
+        질문에 대답하고 나만의 리포트 보러가기
+        <RightArrowIcon />
       </Button.Colored>
     </footer>
   );
@@ -294,25 +297,25 @@ const BasicReport = () => {
 };
 
 const ActualReport = () => {
-  const navigate = useNavigate();
+  const {
+    answer: { user },
+  } = useReportState();
 
   return (
-    <>
+    <Layout>
       <Header>
-        <Header.H1>
-          <Header.Back onClick={() => navigate(-1)}>리포트</Header.Back>
-        </Header.H1>
+        <Header.H1>{user.nickname}님의 리포트</Header.H1>
       </Header>
       <main>
         <BasicReport />
         <DetailReport />
       </main>
       <Footer />
-    </>
+    </Layout>
   );
 };
 
-const getMyAnswerAndAnswers = async (answerId: string) => {
+const getPublicReportData = async (answerId: string) => {
   const answer = await getAnswer(answerId);
   const options = await getOptions({ ids: answer.data.question.options });
   const groups = await getAnswerGroups({
@@ -333,14 +336,14 @@ const getMyAnswerAndAnswers = async (answerId: string) => {
   };
 };
 
-const Report = () => {
+const PublicReport = () => {
   const { answerId } = useParams();
 
   if (!answerId) {
-    return <Navigate to="/answer" />;
+    return <Navigate to="/" />;
   }
 
-  const { state, data } = useAsyncAPI(getMyAnswerAndAnswers, answerId);
+  const { state, data } = useAsyncAPI(getPublicReportData, answerId);
 
   switch (state) {
     case "loading":
@@ -363,4 +366,4 @@ const Report = () => {
   }
 };
 
-export default Report;
+export default PublicReport;
