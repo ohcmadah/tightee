@@ -60,7 +60,7 @@ const Settings = ({
       </section>
 
       <section className="mb-6 flex items-center">
-        <Button.Outline className="mr-8 min-w-[200px]" onClick={onLogout}>
+        <Button.Outline className="mr-6 min-w-[50%]" onClick={onLogout}>
           로그아웃
         </Button.Outline>
         <span className="text-base">다음에 또 만나요!</span>
@@ -68,7 +68,7 @@ const Settings = ({
 
       <section className="mb-12 flex items-center">
         <Button.Outline
-          className="mr-8 min-w-[200px]"
+          className="mr-6 min-w-[50%]"
           onClick={() => navigate("/delete-account")}
         >
           회원탈퇴

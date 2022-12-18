@@ -21,6 +21,7 @@ import Icon from "../components/Icon";
 import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
 import rightArrowIcon from "../assets/right_arrow.svg";
+import writingHand from "../assets/writing_hand.png";
 
 type PageData = Awaited<ReturnType<typeof getAnswersPageData>>;
 
@@ -86,9 +87,22 @@ const TodayQuestion = () => {
   );
 };
 
+const AlreadyAnswered = () => (
+  <article className="mb-8 flex flex-col items-center">
+    <Icon src={writingHand} alt="writing hand" className="mr-0" />
+    <div className="mt-3 text-center text-base text-grayscale-60">
+      오늘 질문에 이미 대답하셨네요!
+      <br />
+      내일 또 재미있는 질문이 기다리고 있어요 :)
+    </div>
+  </article>
+);
+
 const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
+  const isEmptyMyAnswers = myAnswers.length === 0;
   const isAnsweredTodayQuestion =
-    myAnswers[0]?.question.createdAt === getLocalTime().format("YYYYMMDD");
+    !isEmptyMyAnswers &&
+    myAnswers[0].question.createdAt === getLocalTime().format("YYYYMMDD");
 
   return (
     <main>
@@ -98,8 +112,13 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
         </section>
       )}
       <section>
+        {isAnsweredTodayQuestion && <AlreadyAnswered />}
         <Box.Container>
-          {myAnswers.length !== 0 ? (
+          {isEmptyMyAnswers ? (
+            <div className="mt-12 text-center text-base text-grayscale-80">
+              아직 질문에 응답한 내역이 없어요 :)
+            </div>
+          ) : (
             myAnswers.map((myAnswer) => (
               <Answer
                 key={myAnswer.id}
@@ -107,10 +126,6 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
                 options={answersByQuestionIdMap[myAnswer.question.id]}
               />
             ))
-          ) : (
-            <div className="mt-12 text-center text-base text-grayscale-80">
-              아직 질문에 응답한 내역이 없어요 :)
-            </div>
           )}
         </Box.Container>
       </section>
