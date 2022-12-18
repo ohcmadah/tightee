@@ -1,7 +1,11 @@
 import cn from "classnames";
+import { GENDER_FEMALE, GENDER_MALE } from "../common/constants";
+
 import maleImage from "../assets/male.png";
 import femaleImage from "../assets/female.png";
-import { GENDER_FEMALE, GENDER_MALE } from "../common/constants";
+import kakaoSymbol from "../assets/kakao.svg";
+
+import styles from "../styles/components/Button.module.scss";
 
 interface ButtonProps {
   className?: string | string[];
@@ -103,9 +107,31 @@ const GenderToggle = ({
   );
 };
 
+const Kakao = ({
+  className,
+  onClick,
+}: {
+  className?: cn.Argument;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+}) => (
+  <button
+    className={cn(
+      "flex h-12 w-full items-center justify-between rounded-md bg-kakao-container px-4 text-base font-medium text-grayscale-100/[.85]",
+      className,
+      styles.kakaoButton
+    )}
+    onClick={onClick}
+  >
+    <img className="w-4" src={kakaoSymbol} alt="Kakao" />
+    카카오로 시작하기
+    <div />
+  </button>
+);
+
 export default {
   Basic: Basic,
   Colored: Colored,
   Outline: Outline,
   GenderToggle: GenderToggle,
+  Kakao: Kakao,
 };
