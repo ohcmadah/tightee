@@ -363,7 +363,7 @@ const MyReport = () => {
     <>
       <Header>
         <Header.H1>
-          <Header.Back onClick={() => navigate("/answers")}>리포트</Header.Back>
+          <Header.Back onClick={() => navigate("/answer")}>리포트</Header.Back>
         </Header.H1>
       </Header>
       <main>

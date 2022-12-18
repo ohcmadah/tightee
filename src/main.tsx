@@ -24,6 +24,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <Route path="/" element={<Main />}>
           <Route index element={<Home />} />
           <Route path="question" element={<Question />} />
+          <Route path="question/:questionId" element={<Question />} />
           <Route path="profile" element={<Profile />} />
           <Route path="delete-account" element={<DeleteAccount />} />
           <Route path="answer" element={<Answers />} />

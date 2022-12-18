@@ -47,9 +47,9 @@ app.get("/:id", async (req, res) => {
 
     const questionDoc = await db.doc("questions/" + id).get();
     if (questionDoc.exists) {
-      return res
-        .status(200)
-        .json({ ...questionDoc.data(), id: questionDoc.id });
+      const question = questionDoc.data() as Question;
+      const options = question.options.map((option) => option.id);
+      return res.status(200).json({ ...question, id: questionDoc.id, options });
     } else {
       return res.status(204).json({});
     }

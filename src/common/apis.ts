@@ -89,7 +89,7 @@ export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
   return axios.get("/api/questions", { params: { date: today } });
 };
 
-export const getQuestion = (id: string) => {
+export const getQuestion = (id: string): Promise<AxiosResponse<Question>> => {
   return axios.get("/api/questions/" + id);
 };
 
