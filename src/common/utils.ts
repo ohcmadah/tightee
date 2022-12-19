@@ -162,3 +162,12 @@ export const convertRegionCodeToReadable = (code: string) => {
 export const convertGenderCodeToReadable = (code: string) => {
   return code === constants.GENDER_MALE ? "남성" : "여성";
 };
+
+export const getCookieValue = (key: string) => {
+  const cookies = document.cookie.split("; ");
+  const value = cookies
+    .find((cookie) => cookie.startsWith(key + "="))
+    ?.split(key + "=")
+    .pop();
+  return value;
+};
