@@ -8,7 +8,7 @@ import { convertBirthdateToUTC } from "../../common/utils";
 import useAsyncAPI from "../../hooks/useAsyncAPI";
 
 import Loading from "../../components/Loading";
-import Error from "../../components/Error";
+import ErrorView from "../../components/ErrorView";
 
 const convertStateToUser = (state: SignUpState): User | null => {
   const { profile } = state;
@@ -51,7 +51,7 @@ const Submitting = () => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default>{`${data}`}</Error.Default>;
+      return <ErrorView.Default>{`${data}`}</ErrorView.Default>;
 
     case "loaded":
       return <Navigate to={signUpState.nextUrl} replace />;

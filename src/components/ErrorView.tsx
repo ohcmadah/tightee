@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import ExternalLink from "./ExternalLink";
 
 import sadIcon from "../assets/sad.png";
+import Notice from "./Notice";
 
 const Base = ({
   title,
@@ -21,14 +22,10 @@ const Base = ({
     <Header>
       <Header.H1 className="text-center">{title}</Header.H1>
     </Header>
-    <main className="text-center text-base">
-      <img
-        width={30}
-        className="mb-2 inline-block"
-        src={sadIcon}
-        alt="sad pensive face"
-      />
-      {children}
+    <main>
+      <Notice iconSrc={sadIcon} alt="sad pensive face" className="text-base">
+        {children}
+      </Notice>
     </main>
     <Footer className="flex items-center justify-center gap-x-3">
       {footer}
@@ -90,11 +87,11 @@ const ExpiredQuestion = ({
   );
 
   return (
-    <Base title="답을 보내는 데 실패했어요." footer={DefaultFooter}>
+    <Base title="답을 보낼 수 없어요 :(" footer={DefaultFooter}>
       <article>
-        시간이 지나 질문이 마감되었어요 :(
+        시간이 지나 질문이 마감되었어요.
         <br />
-        새로 추가한 오늘의 질문에 대답하러 가볼까요?
+        새로 추가된 오늘의 질문에 대답하러 가볼까요?
       </article>
     </Base>
   );

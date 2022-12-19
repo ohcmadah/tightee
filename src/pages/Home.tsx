@@ -9,7 +9,7 @@ import { auth } from "../config";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
-import ErrorView from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import Badge from "../components/Badge";
 
 import homeIcon from "../assets/home.png";

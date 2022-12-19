@@ -10,6 +10,7 @@ import ModalPortal from "../components/ModalPortal";
 import Loading from "../components/Loading";
 
 import cryingIcon from "../assets/crying.png";
+import Notice from "../components/Notice";
 
 const DeleteAccount = () => {
   const { user } = useAuthenticatedState();
@@ -35,14 +36,8 @@ const DeleteAccount = () => {
           </Header.Back>
         </Header.H1>
       </Header>
-      <main className="text-center text-base">
-        <img
-          width={30}
-          className="mb-2 inline-block"
-          src={cryingIcon}
-          alt="crying face"
-        />
-        <section>
+      <main>
+        <Notice iconSrc={cryingIcon} alt="crying face" className="text-base">
           <article className="mb-4 text-xl font-bold">
             정말 타이티를 탈퇴하시겠어요?
           </article>
@@ -54,7 +49,7 @@ const DeleteAccount = () => {
           <article className="text-system-alert">
             탈퇴 후에는 계정을 다시 복구할 수 없으니 유의해 주세요.
           </article>
-        </section>
+        </Notice>
       </main>
       <Footer className="flex items-center justify-center gap-x-3">
         <Button.Outline

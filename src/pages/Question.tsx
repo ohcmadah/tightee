@@ -17,7 +17,7 @@ import { User } from "firebase/auth";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import Loading from "../components/Loading";
-import Error from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import ExternalLink from "../components/ExternalLink";
 import Footer from "../components/Footer";
 import Badge from "../components/Badge";
@@ -26,15 +26,17 @@ import ModalPortal from "../components/ModalPortal";
 import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
 import lightIcon from "../assets/light.png";
+import Notice from "../components/Notice";
 
 const Tip = () => (
-  <>
-    <img width={30} className="inline-block" src={lightIcon} alt="light" />
-    <div className="mt-1.5 text-sm leading-6 text-grayscale-60">
-      질문에 대답하면 MBTI, 성별, 나이별, 지역별 등<br />
-      재미있는 분석 결과를 즉시 확인할 수 있어요 :)
-    </div>
-  </>
+  <Notice
+    iconSrc={lightIcon}
+    alt="light"
+    className="text-sm leading-6 text-grayscale-60"
+  >
+    질문에 대답하면 MBTI, 성별, 나이별, 지역별 등<br />
+    재미있는 분석 결과를 즉시 확인할 수 있어요 :)
+  </Notice>
 );
 
 const OptionSection = ({
@@ -119,7 +121,7 @@ const ActualQuestion = ({
   switch (error) {
     case "expired-question":
       return (
-        <Error.ExpiredQuestion
+        <ErrorView.ExpiredQuestion
           onReload={() => {
             forceUpdate();
             setError(null);
@@ -139,9 +141,6 @@ const ActualQuestion = ({
                 오늘의 질문
               </Header.Icon>
             </Header.H1>
-            <Badge className="ml-auto bg-primary-peach">
-              {getFormattedDate()}
-            </Badge>
           </Header>
           <Main
             title={question.title}
@@ -173,7 +172,7 @@ const TodayQuestion = ({
   return question ? (
     <ActualQuestion question={question} forceUpdate={forceUpdate} />
   ) : (
-    <Error.Default>
+    <ErrorView.Default>
       <article>
         오늘의 질문이 존재하지 않습니다.
         <br />
@@ -182,7 +181,7 @@ const TodayQuestion = ({
         </ExternalLink>
         로 문의해 주세요.
       </article>
-    </Error.Default>
+    </ErrorView.Default>
   );
 };
 
@@ -202,7 +201,7 @@ const Question = ({
 
   if (isExpired) {
     return (
-      <Error.ExpiredQuestion
+      <ErrorView.ExpiredQuestion
         onReload={() => {
           forceUpdate();
           navigate("/question");
@@ -214,9 +213,9 @@ const Question = ({
   return question ? (
     <ActualQuestion question={question} forceUpdate={forceUpdate} />
   ) : (
-    <Error.Default>
+    <ErrorView.Default>
       <article>질문이 존재하지 않습니다.</article>
-    </Error.Default>
+    </ErrorView.Default>
   );
 };
 
@@ -261,7 +260,7 @@ const QuestionWrapper = () => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return <ErrorView.Default />;
 
     case "loaded":
       return questionId ? (

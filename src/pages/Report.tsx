@@ -23,7 +23,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Layout from "../components/Layout";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
-import Error from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import Box from "../components/Box";
 import Badge from "../components/Badge";
 import Chart from "../components/Chart";
@@ -45,6 +45,8 @@ import heartIcon from "../assets/heart.png";
 import letterIcon from "../assets/letter.png";
 import shareIcon from "../assets/share.svg";
 import starEyesIcon from "../assets/star_eyes.png";
+import clockIcon from "../assets/clock.png";
+import Notice from "../components/Notice";
 
 const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
 
@@ -367,6 +369,20 @@ const BasicReport = () => {
   );
 };
 
+const Main = () => (
+  <main>
+    <BasicReport />
+    <DetailReport />
+    <Notice
+      iconSrc={clockIcon}
+      alt="clock"
+      className="mt-8 text-sm text-grayscale-60"
+    >
+      하루가 끝나기 전에는 리포트가 변경될 수 있어요 :)
+    </Notice>
+  </main>
+);
+
 const MyReport = () => {
   const navigate = useNavigate();
 
@@ -377,10 +393,7 @@ const MyReport = () => {
           <Header.Back onClick={() => navigate("/answer")}>리포트</Header.Back>
         </Header.H1>
       </Header>
-      <main>
-        <BasicReport />
-        <DetailReport />
-      </main>
+      <Main />
       <ShareFooter />
     </>
   );
@@ -400,10 +413,7 @@ const PublicReport = () => {
       <Header>
         <Header.H1>{nicknameWithEllipsis}님의 리포트</Header.H1>
       </Header>
-      <main>
-        <BasicReport />
-        <DetailReport />
-      </main>
+      <Main />
       <PublicFooter />
     </>
   );
@@ -453,15 +463,15 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return <ErrorView.Default />;
 
     case "loaded":
       if (!isPublic && isAuthentication) {
         if (data.answer.user.id !== authState.user.uid) {
           return (
-            <Error.Default>
+            <ErrorView.Default>
               <article>리포트를 볼 수 있는 권한이 없어요 :(</article>
-            </Error.Default>
+            </ErrorView.Default>
           );
         }
       }
