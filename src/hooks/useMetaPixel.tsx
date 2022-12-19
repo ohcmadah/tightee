@@ -4,10 +4,6 @@ import * as pixel from "../common/metaPixel";
 import { getCookieValue } from "../common/utils";
 
 const useMetaPixcel = () => {
-  if (!getCookieValue("_fbc")) {
-    return;
-  }
-
   const location = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -20,6 +16,9 @@ const useMetaPixcel = () => {
 
   useEffect(() => {
     pixel.pageView();
+    // if (getCookieValue("_fbc")) {
+    //   pixel.pageView();
+    // }
   }, [location]);
 };
 
