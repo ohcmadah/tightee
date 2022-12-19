@@ -9,6 +9,7 @@ import { User as AuthUser } from "firebase/auth";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
+  URL_CONTACT,
   URL_CS,
   URL_MBTI_TEST,
   URL_PERSONAL_AGREEMENT,
@@ -32,8 +33,11 @@ import MBTISelector from "../components/MBTISelector";
 import ModalPortal from "../components/ModalPortal";
 import ExternalLink from "../components/ExternalLink";
 import ErrorView from "../components/ErrorView";
+import Icon from "../components/Icon";
 
 import eyesIcon from "../assets/eyes.png";
+import answerIcon from "../assets/answer.png";
+
 const Settings = ({
   subscribe,
   onUpdateUser,
@@ -87,6 +91,16 @@ const Settings = ({
         </ExternalLink>
         <ExternalLink className="font-bold" href={URL_TERMS}>
           서비스 이용 약관
+        </ExternalLink>
+      </section>
+
+      <section className="mx-auto mt-8">
+        <ExternalLink
+          className="inline-block rounded-full border border-secondary-question py-2 px-6 font-bold text-secondary-question hover:bg-secondary-question hover:text-white"
+          href={URL_CONTACT}
+        >
+          <Icon src={answerIcon} alt="contact" />
+          자유롭게 1:1 문의하기
         </ExternalLink>
       </section>
     </>

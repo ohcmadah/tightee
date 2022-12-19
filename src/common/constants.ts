@@ -14,6 +14,7 @@ export const URL_CS =
   "https://tightee.notion.site/620b2d7e3da74414829ff268e54a6d2e";
 export const URL_MBTI_TEST =
   "https://www.16personalities.com/ko/%EB%AC%B4%EB%A3%8C-%EC%84%B1%EA%B2%A9-%EC%9C%A0%ED%98%95-%EA%B2%80%EC%82%AC";
+export const URL_CONTACT = "https://tightee.channel.io";
 
 export const REGION_SEOUL = "seoul";
 export const REGION_BUSAN = "busan";
