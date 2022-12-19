@@ -4,6 +4,7 @@ import { AuthContextProvider } from "./contexts/AuthContext";
 import useGoogleAnalytics from "./hooks/useGoogleAnalytics";
 import useGoogleTagManager from "./hooks/useGoogleTagManager";
 import useBackground from "./hooks/useBackground";
+import useMetaPixcel from "./hooks/useMetaPixel";
 
 import Main from "./pages/Main";
 import Home from "./pages/Home";
@@ -23,6 +24,7 @@ import "react-toastify/dist/ReactToastify.css";
 const App = () => {
   useGoogleAnalytics();
   useGoogleTagManager();
+  useMetaPixcel();
   useBackground("/christmas.png");
 
   return (
