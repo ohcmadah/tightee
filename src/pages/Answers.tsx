@@ -22,6 +22,7 @@ import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
 import rightArrowIcon from "../assets/right_arrow.svg";
 import writingHand from "../assets/writing_hand.png";
+import Notice from "../components/Notice";
 
 type PageData = Awaited<ReturnType<typeof getAnswersPageData>>;
 
@@ -88,14 +89,15 @@ const TodayQuestion = () => {
 };
 
 const AlreadyAnswered = () => (
-  <article className="mb-8 flex flex-col items-center">
-    <Icon src={writingHand} alt="writing hand" className="mr-0" />
-    <div className="mt-3 text-center text-base text-grayscale-60">
-      오늘 질문에 이미 대답하셨네요!
-      <br />
-      내일 또 재미있는 질문이 기다리고 있어요 :)
-    </div>
-  </article>
+  <Notice
+    iconSrc={writingHand}
+    alt="writing hand"
+    className="mb-8 text-grayscale-60"
+  >
+    오늘 질문에 이미 대답하셨네요!
+    <br />
+    내일 또 재미있는 질문이 기다리고 있어요 :)
+  </Notice>
 );
 
 const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
@@ -106,13 +108,14 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
 
   return (
     <main>
-      {!isAnsweredTodayQuestion && (
+      {!isAnsweredTodayQuestion ? (
         <section>
           <TodayQuestion />
         </section>
+      ) : (
+        <AlreadyAnswered />
       )}
       <section>
-        {isAnsweredTodayQuestion && <AlreadyAnswered />}
         <Box.Container>
           {isEmptyMyAnswers ? (
             <div className="mt-12 text-center text-base text-grayscale-80">

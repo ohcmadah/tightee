@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import ExternalLink from "./ExternalLink";
 
 import sadIcon from "../assets/sad.png";
+import Notice from "./Notice";
 
 const Base = ({
   title,
@@ -21,14 +22,10 @@ const Base = ({
     <Header>
       <Header.H1 className="text-center">{title}</Header.H1>
     </Header>
-    <main className="text-center text-base">
-      <img
-        width={30}
-        className="mb-2 inline-block"
-        src={sadIcon}
-        alt="sad pensive face"
-      />
-      {children}
+    <main>
+      <Notice iconSrc={sadIcon} alt="sad pensive face" className="text-base">
+        {children}
+      </Notice>
     </main>
     <Footer className="flex items-center justify-center gap-x-3">
       {footer}
