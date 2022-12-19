@@ -141,9 +141,6 @@ const ActualQuestion = ({
                 오늘의 질문
               </Header.Icon>
             </Header.H1>
-            <Badge className="ml-auto bg-primary-peach">
-              {getFormattedDate()}
-            </Badge>
           </Header>
           <Main
             title={question.title}

@@ -55,7 +55,7 @@ const Answer = ({
         className="flex w-full items-center justify-between"
       >
         <Chart.Summary value={ratio} className="mr-3 truncate text-ellipsis">
-          {"전체 타이티 중에 {value}를 차지하고 있어요."}
+          {"전체 타이티 중에 {value}에 속해요."}
         </Chart.Summary>
         <img src={rightArrowIcon} alt="arrow" />
       </Link>
