@@ -24,7 +24,7 @@ const Login = () => {
       <div className="mt-3 select-none text-base font-bold text-grayscale-80">
         MBTI, 나이, 지역별로 나의 성향을 분석해보세요.
       </div>
-      <Button.Kakao className="mt-12" onClick={loginWithKakao} />
+      <Button.Kakao className="mt-12" onClick={() => loginWithKakao()} />
       <a
         href={URL_CS}
         target="_blank"
