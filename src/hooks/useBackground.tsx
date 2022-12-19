@@ -5,7 +5,7 @@ const useBackground = (src: string) => {
     document.body.style.backgroundImage = `url(${src})`;
     const rootElement = document.getElementById("root");
     if (rootElement) {
-      rootElement.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+      rootElement.style.backgroundColor = "rgba(255, 255, 255, 0.7)";
     }
   }, []);
 };
