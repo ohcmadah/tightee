@@ -1,13 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import * as analytics from "../common/ga4";
 
 const useGoogleAnalytics = () => {
   const location = useLocation();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    analytics.init();
+    if (!isInitialized) {
+      analytics.init();
+      setIsInitialized(true);
+    }
   }, []);
 
   useEffect(() => {

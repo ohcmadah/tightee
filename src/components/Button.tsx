@@ -63,7 +63,7 @@ const Colored = ({
 const Outline = ({ className, onClick, disabled, children }: ButtonProps) => (
   <button
     className={cn(
-      "rounded-md border border-grayscale-20 p-3.5 text-base font-bold text-grayscale-20",
+      "rounded-md border border-grayscale-20 bg-white p-3.5 text-base font-bold text-grayscale-20",
       className
     )}
     onClick={onClick}

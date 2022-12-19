@@ -96,7 +96,7 @@ const Settings = ({
 
       <section className="mx-auto mt-8">
         <ExternalLink
-          className="inline-block rounded-full border border-secondary-question py-2 px-6 font-bold text-secondary-question hover:bg-secondary-question hover:text-white"
+          className="inline-block rounded-full border border-secondary-question bg-white py-2 px-6 font-bold text-secondary-question hover:bg-secondary-question hover:text-white"
           href={URL_CONTACT}
         >
           <Icon src={answerIcon} alt="contact" />

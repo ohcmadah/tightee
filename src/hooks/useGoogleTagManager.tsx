@@ -1,10 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import * as tagManager from "../common/gtm";
 
 const useGoogleTagManager = () => {
+  const [isInitialized, setIsInitialized] = useState(false);
+
   useEffect(() => {
-    tagManager.init();
+    if (!isInitialized) {
+      tagManager.init();
+      setIsInitialized(true);
+    }
   }, []);
 };
 
