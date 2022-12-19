@@ -17,7 +17,7 @@ import { User } from "firebase/auth";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import Loading from "../components/Loading";
-import Error from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import ExternalLink from "../components/ExternalLink";
 import Footer from "../components/Footer";
 import Badge from "../components/Badge";
@@ -119,7 +119,7 @@ const ActualQuestion = ({
   switch (error) {
     case "expired-question":
       return (
-        <Error.ExpiredQuestion
+        <ErrorView.ExpiredQuestion
           onReload={() => {
             forceUpdate();
             setError(null);
@@ -173,7 +173,7 @@ const TodayQuestion = ({
   return question ? (
     <ActualQuestion question={question} forceUpdate={forceUpdate} />
   ) : (
-    <Error.Default>
+    <ErrorView.Default>
       <article>
         오늘의 질문이 존재하지 않습니다.
         <br />
@@ -182,7 +182,7 @@ const TodayQuestion = ({
         </ExternalLink>
         로 문의해 주세요.
       </article>
-    </Error.Default>
+    </ErrorView.Default>
   );
 };
 
@@ -202,7 +202,7 @@ const Question = ({
 
   if (isExpired) {
     return (
-      <Error.ExpiredQuestion
+      <ErrorView.ExpiredQuestion
         onReload={() => {
           forceUpdate();
           navigate("/question");
@@ -214,9 +214,9 @@ const Question = ({
   return question ? (
     <ActualQuestion question={question} forceUpdate={forceUpdate} />
   ) : (
-    <Error.Default>
+    <ErrorView.Default>
       <article>질문이 존재하지 않습니다.</article>
-    </Error.Default>
+    </ErrorView.Default>
   );
 };
 
@@ -261,7 +261,7 @@ const QuestionWrapper = () => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return <ErrorView.Default />;
 
     case "loaded":
       return questionId ? (

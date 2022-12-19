@@ -23,7 +23,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Layout from "../components/Layout";
 import Header from "../components/Header";
 import Loading from "../components/Loading";
-import Error from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import Box from "../components/Box";
 import Badge from "../components/Badge";
 import Chart from "../components/Chart";
@@ -453,15 +453,15 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return <ErrorView.Default />;
 
     case "loaded":
       if (!isPublic && isAuthentication) {
         if (data.answer.user.id !== authState.user.uid) {
           return (
-            <Error.Default>
+            <ErrorView.Default>
               <article>리포트를 볼 수 있는 권한이 없어요 :(</article>
-            </Error.Default>
+            </ErrorView.Default>
           );
         }
       }

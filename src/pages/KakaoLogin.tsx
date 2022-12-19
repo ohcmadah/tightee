@@ -2,11 +2,10 @@ import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { auth as firebaseAuth } from "../config";
 import { authKakao } from "../common/apis";
-import { useAuthState } from "../contexts/AuthContext";
 
 import Loading from "../components/Loading";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import Error from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import Layout from "../components/Layout";
 
 const authorize = async (code: string) => {
@@ -38,7 +37,7 @@ const KakaoLogin = () => {
     case "error":
       return (
         <Layout>
-          <Error.Default />
+          <ErrorView.Default />
         </Layout>
       );
 

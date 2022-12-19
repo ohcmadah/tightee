@@ -31,7 +31,7 @@ import RegionSelector from "../components/RegionSelector";
 import MBTISelector from "../components/MBTISelector";
 import ModalPortal from "../components/ModalPortal";
 import ExternalLink from "../components/ExternalLink";
-import ErrorView from "../components/Error";
+import ErrorView from "../components/ErrorView";
 
 import eyesIcon from "../assets/eyes.png";
 const Settings = ({

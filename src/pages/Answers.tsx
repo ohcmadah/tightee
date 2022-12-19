@@ -10,7 +10,7 @@ import { useAuthenticatedState } from "../contexts/AuthContext";
 import { User } from "firebase/auth";
 
 import { Link } from "react-router-dom";
-import Error from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import Loading from "../components/Loading";
 import Header from "../components/Header";
 import Badge from "../components/Badge";
@@ -165,7 +165,7 @@ const Answers = () => {
       return <Loading.Full />;
 
     case "error":
-      return <Error.Default />;
+      return <ErrorView.Default />;
 
     case "loaded":
       return (

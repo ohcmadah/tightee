@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { User } from "firebase/auth";
-import Error from "../components/Error";
+import ErrorView from "../components/ErrorView";
 import Loading from "../components/Loading";
 import { useAuthState } from "../contexts/AuthContext";
 
@@ -34,7 +34,7 @@ const withAuth = (
         }
 
       case "error":
-        return <Error.Default />;
+        return <ErrorView.Default />;
     }
   };
 };
