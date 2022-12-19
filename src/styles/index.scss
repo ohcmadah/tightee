@@ -7,4 +7,15 @@
 :root {
   font-size: 14px;
   font-family: "Noto Sans KR", sans-serif;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  background-repeat: repeat;
+  background-size: 150px 150px;
+}
+
+#root {
+  min-height: 100%;
 }
