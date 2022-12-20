@@ -3,7 +3,7 @@ import * as express from "express";
 import * as cors from "cors";
 import * as moment from "moment-timezone";
 import { Answer, Option, Question } from "./@types";
-import { getAdminApp, getProperty, https, toMap } from "./common";
+import { getAdminApp, getProperty, https, promiseAll, toMap } from "./common";
 import { DocumentReference } from "firebase/firestore";
 import { checkUserIdContained } from "./middleware";
 
@@ -23,16 +23,22 @@ const convertDocToAnswer = async (
   doc: admin.firestore.QueryDocumentSnapshot | admin.firestore.DocumentSnapshot
 ) => {
   const answer = doc.data() as Answer;
-  const question = await db.doc("questions/" + answer.question.id).get();
+  const questionPromise = db.doc("questions/" + answer.question.id).get();
+  const optionPromise = db.doc("options/" + answer.option.id).get();
+  const [question, option] = await promiseAll([questionPromise, optionPromise]);
+
   const options = question
     .get("options")
     .map((doc: DocumentReference) => doc.id);
-  const option = await db.doc("options/" + answer.option.id).get();
 
   const converted: ReturnAnswer = {
     ...answer,
     id: doc.id,
-    question: { id: question.id, ...(question.data() as Question), options },
+    question: {
+      id: question.id,
+      ...(question.data() as Question),
+      options,
+    },
     option: { id: option.id, ...(option.data() as Option) },
   };
   return converted;
