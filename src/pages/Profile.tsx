@@ -211,12 +211,10 @@ const ProfileForm = ({
 const ActualProfile = ({
   init,
   user,
-  token,
   existentNicknameSet,
 }: {
   init: Function;
   user: User;
-  token: string;
   existentNicknameSet: Set<string>;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -234,7 +232,7 @@ const ActualProfile = ({
   const onUpdateUser = async (data: UpdateData<User>) => {
     setIsLoading(true);
     try {
-      await updateUser(user.id, token, data);
+      await updateUser(user.id, data);
     } catch (error) {}
     setIsLoading(false);
     init();
@@ -268,9 +266,8 @@ const ActualProfile = ({
   );
 };
 
-const getProfileData = async (authUser: AuthUser) => {
-  const token = await authUser.getIdToken();
-  const user = await getUser(authUser.uid, token);
+const getProfileData = async (uid: string) => {
+  const user = await getUser(uid);
   if (!user) {
     await auth.signOut();
     throw new Error("다시 로그인해 주세요.");
@@ -279,12 +276,15 @@ const getProfileData = async (authUser: AuthUser) => {
     (nickame) => nickame !== user.nickname
   );
 
-  return { user, token, nicknames };
+  return { user, nicknames };
 };
 
 const Profile = () => {
   const auth = useAuthenticatedState();
-  const { state, data, forceUpdate } = useAsyncAPI(getProfileData, auth.user);
+  const { state, data, forceUpdate } = useAsyncAPI(
+    getProfileData,
+    auth.user.uid
+  );
 
   switch (state) {
     case "loading":
@@ -298,7 +298,6 @@ const Profile = () => {
         <ActualProfile
           init={forceUpdate}
           user={data.user}
-          token={data.token}
           existentNicknameSet={new Set(data.nicknames)}
         />
       );
