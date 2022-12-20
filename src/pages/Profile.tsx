@@ -267,16 +267,30 @@ const ActualProfile = ({
 };
 
 const getProfileData = async (uid: string) => {
-  const user = await getUser(uid);
+  const userPromise = getUser(uid);
+  const nicknamesPromise = getNicknames();
+  const [userResult, nicknames] = await Promise.allSettled([
+    userPromise,
+    nicknamesPromise,
+  ]);
+
+  if (userResult.status === "rejected") {
+    throw new Error(userResult.reason);
+  }
+  if (nicknames.status === "rejected") {
+    throw new Error(nicknames.reason);
+  }
+
+  const user = userResult.value;
   if (!user) {
     await auth.signOut();
     throw new Error("다시 로그인해 주세요.");
   }
-  const nicknames = (await getNicknames()).filter(
-    (nickame) => nickame !== user.nickname
-  );
 
-  return { user, nicknames };
+  return {
+    user,
+    nicknames: nicknames.value.filter((nickame) => nickame !== user.nickname),
+  };
 };
 
 const Profile = () => {

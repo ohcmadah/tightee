@@ -47,3 +47,17 @@ export const toMap = <K, V>(
   });
   return map;
 };
+
+export const promiseAll = async <T>(promises: Array<T>) => {
+  const results = await Promise.allSettled(promises);
+  const values = [];
+
+  for (const result of results) {
+    if (result.status === "rejected") {
+      throw new Error(result.reason);
+    }
+    values.push(result.value);
+  }
+
+  return values;
+};

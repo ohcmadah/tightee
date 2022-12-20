@@ -12,7 +12,6 @@ import { URL_CS } from "../common/constants";
 import { Option as OptionType } from "../@types";
 import { getLocalTime } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
-import { User } from "firebase/auth";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -224,15 +223,27 @@ const getQuestionPageData = async (uid: string, questionId?: string) => {
   const isTodayQuestion = question.data.createdAt === today;
 
   const optionIds = question.data.options;
-  const options = await getOptions({ ids: optionIds });
 
-  const answers = await getMyAnswers(uid);
-  const answer = answers.find(
+  const optionsPromise = getOptions({ ids: optionIds });
+  const answersPromise = getMyAnswers(uid);
+  const [options, answers] = await Promise.allSettled([
+    optionsPromise,
+    answersPromise,
+  ]);
+
+  if (options.status === "rejected") {
+    throw new Error(options.reason);
+  }
+  if (answers.status === "rejected") {
+    throw new Error(answers.reason);
+  }
+
+  const answer = answers.value.find(
     (answer) => answer.question.id === question.data.id
   );
 
   return {
-    question: { ...question.data, options: options.data },
+    question: { ...question.data, options: options.value.data },
     answer,
     isExpired: !isTodayQuestion,
   };
