@@ -77,7 +77,7 @@ const Pie = ({
     return <>ChartProvider not found.</>;
   }
 
-  const RADIUS = 22.5;
+  const RADIUS = 21.5;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
   let filled = 0;
