@@ -96,7 +96,10 @@ export const getQuestion = (id: string): Promise<AxiosResponse<Question>> => {
   return axios.get("/api/questions/" + id);
 };
 
-export const answer = (questionId: string, optionId: string) => {
+export const answer = (
+  questionId: string,
+  optionId: string
+): Promise<AxiosResponse<{ id: string }>> => {
   return axios.post("/api/answers", {
     question: questionId,
     option: optionId,

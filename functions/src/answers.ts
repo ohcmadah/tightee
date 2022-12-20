@@ -166,20 +166,19 @@ app.post("/", async (req, res) => {
 
     const { question: questionId, option: optionId, user: userId } = req.body;
 
-    if (!questionId || !optionId) {
+    if (!questionId || !optionId || !userId) {
       return res.status(400).json({
         code: 400,
         message: "Bad Request.",
       });
     }
 
-    const { docs: answers } = await db
-      .collection("answers")
-      .where("user.id", "==", userId)
-      .get();
-    const isAlreadyAnswered =
-      answers.filter((answer) => answer.get("question").id === questionId)
-        .length !== 0;
+    const { docs: answers } = await db.collection("answers").get();
+    const isAlreadyAnswered = answers.find(
+      (answer) =>
+        answer.get("question").id === questionId &&
+        answer.data().user.id === userId
+    );
 
     if (isAlreadyAnswered) {
       return res
@@ -191,15 +190,15 @@ app.post("/", async (req, res) => {
     const question = db.doc("questions/" + questionId);
     const user = await db.doc("users/" + userId).get();
 
-    const answer = {
+    const data = {
       option,
       question,
       user: user.data(),
       createdAt: admin.firestore.Timestamp.now(),
     };
-    await db.collection("answers").add(answer);
+    const answer = await db.collection("answers").add(data);
 
-    return res.status(200).json({});
+    return res.status(200).json({ id: answer.id });
   } catch (error) {
     return res.status(500).json(error);
   }
