@@ -2,6 +2,7 @@ export const KAKAO_SCOPE_NICKNAME = "profile_nickname";
 export const KAKAO_SCOPE_PROFILE_IMAGE = "profile_image";
 export const KAKAO_SCOPE_GENDER = "gender";
 export const KAKAO_SCOPE_BIRTHDAY = "birthday";
+export const KAKAO_SCOPE_EMAIL = "account_email";
 
 export const GENDER_MALE = "M";
 export const GENDER_FEMALE = "F";

@@ -129,12 +129,16 @@ app.post("/kakao", async (req, res) => {
     });
 
     const db = admin.firestore(app);
-    const user = await db.doc("users/" + authUser.uid).get();
+    const userDoc = db.doc("users/" + authUser.uid);
+    const isJoined = (await userDoc.get()).exists;
+    if (isJoined) {
+      await userDoc.update({ email: normalizedUser.email });
+    }
 
     return res.status(200).json({
       kakaoUser: normalizedUser,
       firebaseToken,
-      isJoined: user.exists,
+      isJoined,
     });
   } catch (error: any) {
     console.error(error.response);

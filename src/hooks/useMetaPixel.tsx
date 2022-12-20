@@ -15,10 +15,9 @@ const useMetaPixcel = () => {
   }, []);
 
   useEffect(() => {
-    pixel.pageView();
-    // if (getCookieValue("_fbc")) {
-    //   pixel.pageView();
-    // }
+    if (getCookieValue("_fbc")) {
+      pixel.pageView();
+    }
   }, [location]);
 };
 

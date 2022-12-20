@@ -6,6 +6,7 @@ import { getLocalTime } from "./utils";
 import { Answer, Auth, Option, Question, User } from "../@types";
 import {
   KAKAO_SCOPE_BIRTHDAY,
+  KAKAO_SCOPE_EMAIL,
   KAKAO_SCOPE_GENDER,
   KAKAO_SCOPE_NICKNAME,
 } from "./constants";
@@ -24,6 +25,7 @@ export const loginWithKakao = (state?: any) => {
     KAKAO_SCOPE_NICKNAME,
     KAKAO_SCOPE_GENDER,
     KAKAO_SCOPE_BIRTHDAY,
+    KAKAO_SCOPE_EMAIL,
   ].join(",");
 
   window.Kakao.Auth.authorize({
@@ -94,7 +96,10 @@ export const getQuestion = (id: string): Promise<AxiosResponse<Question>> => {
   return axios.get("/api/questions/" + id);
 };
 
-export const answer = (questionId: string, optionId: string) => {
+export const answer = (
+  questionId: string,
+  optionId: string
+): Promise<AxiosResponse<{ id: string }>> => {
   return axios.post("/api/answers", {
     question: questionId,
     option: optionId,

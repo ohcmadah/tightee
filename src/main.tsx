@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import Answers from "./pages/Answers";
 import DeleteAccount from "./pages/DeleteAccount";
 import Report from "./pages/Report";
+import Ad from "./pages/Ad";
 
 import "./styles/index.scss";
 import "react-toastify/dist/ReactToastify.css";
@@ -43,6 +44,7 @@ const App = () => {
       <Route path="/callback/kakaotalk" element={<KakaoLogin />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/:answerId/public" element={<Report isPublic />} />
+      <Route path="/result" element={<Ad />} />
     </Routes>
   );
 };

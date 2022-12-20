@@ -10,7 +10,7 @@ import {
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Option as OptionType } from "../@types";
-import { getFormattedDate, getLocalTime } from "../common/utils";
+import { getLocalTime } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { User } from "firebase/auth";
 
@@ -97,6 +97,7 @@ const ActualQuestion = ({
   };
   forceUpdate: React.DispatchWithoutAction;
 }) => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<QuestionError | null>(null);
 
@@ -107,9 +108,9 @@ const ActualQuestion = ({
     }
     setIsLoading(true);
     try {
-      await answer(question.id, optionId);
+      const { data } = await answer(question.id, optionId);
       setIsLoading(false);
-      forceUpdate();
+      navigate("/answer/" + data.id + "/report");
     } catch (error: any) {
       setIsLoading(false);
       if (error.code === 400) {
@@ -163,11 +164,7 @@ const TodayQuestion = ({
   data: Awaited<ReturnType<typeof getQuestionPageData>>;
   forceUpdate: React.DispatchWithoutAction;
 }) => {
-  const { answer, question } = data;
-
-  if (answer) {
-    return <Navigate to="/answer" />;
-  }
+  const { question } = data;
 
   return question ? (
     <ActualQuestion question={question} forceUpdate={forceUpdate} />
@@ -193,11 +190,7 @@ const Question = ({
   forceUpdate: React.DispatchWithoutAction;
 }) => {
   const navigate = useNavigate();
-  const { isExpired, answer, question } = data;
-
-  if (answer) {
-    return <Navigate to={"/answer/" + answer.id + "/report"} />;
-  }
+  const { isExpired, question } = data;
 
   if (isExpired) {
     return (
@@ -235,13 +228,13 @@ const getQuestionPageData = async (user: User, questionId?: string) => {
 
   const token = await user.getIdToken();
   const answers = await getMyAnswers(user.uid, token);
-  const filteredAnswers = answers.filter(
+  const answer = answers.find(
     (answer) => answer.question.id === question.data.id
   );
 
   return {
     question: { ...question.data, options: options.data },
-    answer: filteredAnswers.length !== 0 ? filteredAnswers[0] : null,
+    answer,
     isExpired: !isTodayQuestion,
   };
 };
@@ -263,6 +256,10 @@ const QuestionWrapper = () => {
       return <ErrorView.Default />;
 
     case "loaded":
+      if (data.answer) {
+        return <Navigate to={"/answer/" + data.answer.id + "/report"} />;
+      }
+
       return questionId ? (
         <Question data={data} forceUpdate={forceUpdate} />
       ) : (
