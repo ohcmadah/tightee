@@ -152,16 +152,15 @@ const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
   </>
 );
 
-const getAnswersPageData = async (user: User) => {
-  const token = await user.getIdToken();
-  const myAnswers = await getMyAnswers(user.uid, token);
+const getAnswersPageData = async (uid: string) => {
+  const myAnswers = await getMyAnswers(uid);
   const answerGroups = await getAnswerGroups({ groups: ["question.id"] });
   return { myAnswers, answersByQuestionIdMap: answerGroups["question.id"] };
 };
 
 const Answers = () => {
   const { user } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getAnswersPageData, user);
+  const { state, data } = useAsyncAPI(getAnswersPageData, user.uid);
 
   switch (state) {
     case "loading":
