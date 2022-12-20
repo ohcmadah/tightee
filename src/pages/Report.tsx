@@ -422,8 +422,9 @@ const PublicReport = () => {
 const getMyAnswerAndAnswers = async (answerId: string, user: User | null) => {
   const token = await user?.getIdToken();
   const answer = await getAnswer(answerId, { token });
-  const options = await getOptions({ ids: answer.data.question.options });
-  const groups = await getAnswerGroups({
+
+  const optionsPromise = getOptions({ ids: answer.data.question.options });
+  const groupsPromise = getAnswerGroups({
     groups: [
       "user.MBTI",
       "user.region",
@@ -433,11 +434,21 @@ const getMyAnswerAndAnswers = async (answerId: string, user: User | null) => {
     ],
     questionId: answer.data.question.id,
   });
+  const [optionsResult, groupsResult] = await Promise.allSettled([
+    optionsPromise,
+    groupsPromise,
+  ]);
+  if (optionsResult.status === "rejected") {
+    throw new Error(optionsResult.reason);
+  }
+  if (groupsResult.status === "rejected") {
+    throw new Error(groupsResult.reason);
+  }
 
   return {
     answer: answer.data,
-    options: options.data,
-    groups,
+    options: optionsResult.value.data,
+    groups: groupsResult.value,
   };
 };
 

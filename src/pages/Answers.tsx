@@ -7,7 +7,6 @@ import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType, Option } from "../@types";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useAuthenticatedState } from "../contexts/AuthContext";
-import { User } from "firebase/auth";
 
 import { Link } from "react-router-dom";
 import ErrorView from "../components/ErrorView";
@@ -153,9 +152,22 @@ const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
 );
 
 const getAnswersPageData = async (uid: string) => {
-  const myAnswers = await getMyAnswers(uid);
-  const answerGroups = await getAnswerGroups({ groups: ["question.id"] });
-  return { myAnswers, answersByQuestionIdMap: answerGroups["question.id"] };
+  const myAnswersPromise = getMyAnswers(uid);
+  const answerGroupsPromise = getAnswerGroups({ groups: ["question.id"] });
+  const [myAnswers, answerGroups] = await Promise.allSettled([
+    myAnswersPromise,
+    answerGroupsPromise,
+  ]);
+  if (myAnswers.status === "rejected") {
+    throw new Error(myAnswers.reason);
+  }
+  if (answerGroups.status === "rejected") {
+    throw new Error(answerGroups.reason);
+  }
+  return {
+    myAnswers: myAnswers.value,
+    answersByQuestionIdMap: answerGroups.value["question.id"],
+  };
 };
 
 const Answers = () => {

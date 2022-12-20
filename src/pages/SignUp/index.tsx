@@ -8,7 +8,6 @@ import Layout from "../../components/Layout";
 import Agreement from "./Agreement";
 import Profile from "./Profile";
 import Submitting from "./Submitting";
-import withAuth from "../../hocs/withAuth";
 
 const Main = () => {
   const { step } = useSignUpState();

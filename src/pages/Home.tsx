@@ -1,15 +1,8 @@
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import {
-  answer,
-  getMyAnswers,
-  getTodayQuestion,
-  getUser,
-} from "../common/apis";
+import { getMyAnswers, getTodayQuestion, getUser } from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
-import { User } from "firebase/auth";
 import { MBTI } from "../@types";
 import { getMBTIName } from "../common/utils";
-import { auth } from "../config";
 
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
