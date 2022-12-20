@@ -7,15 +7,14 @@ export const https = functions
   .region(SEOUL_CODE).https;
 
 export const getAdminApp = () => {
-  const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY || "");
+  if (!admin.apps.length) {
+    const serviceAccountKey = JSON.parse(process.env.SERVICE_ACCOUNT_KEY || "");
+    return admin.initializeApp({
+      credential: admin.credential.cert(serviceAccountKey),
+    });
+  }
 
-  const app = !admin.apps.length
-    ? admin.initializeApp({
-        credential: admin.credential.cert(serviceAccountKey),
-      })
-    : admin.app();
-
-  return app;
+  return admin.app();
 };
 
 export const getProperty = <T extends Record<string, any>>(

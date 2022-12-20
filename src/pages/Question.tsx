@@ -212,7 +212,7 @@ const Question = ({
   );
 };
 
-const getQuestionPageData = async (user: User, questionId?: string) => {
+const getQuestionPageData = async (uid: string, questionId?: string) => {
   const question = await (questionId
     ? getQuestion(questionId)
     : getTodayQuestion());
@@ -226,8 +226,7 @@ const getQuestionPageData = async (user: User, questionId?: string) => {
   const optionIds = question.data.options;
   const options = await getOptions({ ids: optionIds });
 
-  const token = await user.getIdToken();
-  const answers = await getMyAnswers(user.uid, token);
+  const answers = await getMyAnswers(uid);
   const answer = answers.find(
     (answer) => answer.question.id === question.data.id
   );
@@ -244,7 +243,7 @@ const QuestionWrapper = () => {
   const { user } = useAuthenticatedState();
   const { state, data, forceUpdate } = useAsyncAPI(
     getQuestionPageData,
-    user,
+    user.uid,
     questionId
   );
 

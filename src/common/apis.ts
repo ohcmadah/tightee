@@ -43,10 +43,16 @@ export const createUser = (user: User) => {
   return axios.post("/api/users/" + user.id, { ...user });
 };
 
-export const getUser = async (
-  id: string,
-  token: string
-): Promise<User | null> => {
+const getAuthIdToken = () => {
+  const authUser = auth.currentUser;
+  if (!authUser) {
+    throw new Error("로그인해 주세요.");
+  }
+  return authUser.getIdToken();
+};
+
+export const getUser = async (id: string): Promise<User | null> => {
+  const token = await getAuthIdToken();
   const res = await axios.get("/api/users/" + id, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -58,19 +64,16 @@ export const getUser = async (
   return res.data;
 };
 
-export const updateUser = (
-  id: string,
-  token: string,
-  data: UpdateData<User>
-) => {
-  return axios.patch(
+export const updateUser = async (id: string, data: UpdateData<User>) => {
+  const token = await getAuthIdToken();
+  return await axios.patch(
     "/api/users/" + id,
     { ...data },
     { headers: { Authorization: `Bearer ${token}` } }
   );
 };
 
-export const deleteUser = async (token: string) => {
+export const deleteUser = (token: string) => {
   return axios.delete("/api/users/" + getCurrentUserId(), {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -111,10 +114,8 @@ const getAnswers = (config: AxiosRequestConfig) => {
   return axios.get("/api/answers", config);
 };
 
-export const getMyAnswers = async (
-  userId: string,
-  token: string
-): Promise<Answer[]> => {
+export const getMyAnswers = async (userId: string): Promise<Answer[]> => {
+  const token = await getAuthIdToken();
   const res = await getAnswers({
     params: { user: userId },
     headers: { Authorization: `Bearer ${token}` },

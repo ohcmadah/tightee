@@ -1,5 +1,10 @@
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { getMyAnswers, getTodayQuestion, getUser } from "../common/apis";
+import {
+  answer,
+  getMyAnswers,
+  getTodayQuestion,
+  getUser,
+} from "../common/apis";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { User } from "firebase/auth";
 import { MBTI } from "../@types";
@@ -39,7 +44,7 @@ const Main = ({
 }: {
   question: string;
   answer: { id?: string; count: number };
-  MBTI: MBTI;
+  MBTI?: MBTI;
 }) => {
   return (
     <main>
@@ -83,37 +88,48 @@ const Main = ({
   );
 };
 
-const getHomeData = async (authUser: User) => {
-  const token = await authUser.getIdToken();
-  const user = await getUser(authUser.uid, token);
-  if (!user) {
-    await auth.signOut();
-    throw new Error("다시 로그인해 주세요.");
+const getHomeData = async (uid: string) => {
+  const userPromise = getUser(uid);
+  const questionPromise = getTodayQuestion();
+  const answersPromise = getMyAnswers(uid);
+
+  const results = await Promise.allSettled([
+    userPromise,
+    questionPromise,
+    answersPromise,
+  ]);
+  const [user, question, answers] = results;
+
+  if (user.status === "rejected") {
+    throw new Error(user.reason);
+  }
+  if (question.status === "rejected") {
+    throw new Error(question.reason);
+  }
+  if (answers.status === "rejected") {
+    throw new Error(answers.reason);
   }
 
-  const question = await getTodayQuestion();
-
-  const answers = await getMyAnswers(authUser.uid, token);
-  const todayAnswer = answers.filter(
-    (answer) => answer.question.id === question.data.id
+  const todayAnswer = answers.value.find(
+    (answer) => answer.question.id === question.value.data.id
   );
 
   return {
     question:
-      question.status === 204
+      question.value.status === 204
         ? "오늘의 질문이 존재하지 않아요 :("
-        : question.data.title,
+        : question.value.data.title,
     answer: {
-      id: todayAnswer.length !== 0 ? todayAnswer[0].id : undefined,
-      count: answers.length,
+      id: todayAnswer?.id,
+      count: answers.value.length,
     },
-    MBTI: user.MBTI,
+    MBTI: user.value?.MBTI,
   };
 };
 
 const Home = () => {
   const { user } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getHomeData, user);
+  const { state, data } = useAsyncAPI(getHomeData, user.uid);
 
   switch (state) {
     case "loading":
