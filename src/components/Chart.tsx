@@ -108,7 +108,9 @@ const Pie = ({
             fill="transparent"
             stroke={color}
             strokeWidth={RADIUS * 2}
-            strokeDasharray={`${strokeLength} ${spaceLength}`}
+            strokeDasharray={
+              strokeLength.toFixed(2) + " " + spaceLength.toFixed(2)
+            }
             strokeDashoffset={-offset}
             transform={`rotate(-90 50 50) translate(${y} ${x})`}
           ></circle>
