@@ -29,8 +29,13 @@ export const checkToken: express.RequestHandler = async (req, res, next) => {
 export const checkFields: express.RequestHandler = (req, res, next) => {
   try {
     const { fields } = req.query;
-    if (typeof fields === "string" && Array.isArray(JSON.parse(fields))) {
-      const fieldStringList = JSON.parse(fields) as string[];
+
+    if (!fields) {
+      return checkToken(req, res, next);
+    }
+
+    if (Array.isArray(fields)) {
+      const fieldStringList = fields as string[];
       const isAuthRequired =
         fieldStringList.includes("id") || fieldStringList.includes("email");
       if (isAuthRequired) {

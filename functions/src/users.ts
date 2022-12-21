@@ -13,8 +13,8 @@ const createQuery = (
 ) => {
   const coll = db.collection("users");
   const { fields } = queryParams;
-  if (typeof fields === "string" && Array.isArray(JSON.parse(fields))) {
-    return coll.select(...JSON.parse(fields));
+  if (Array.isArray(fields)) {
+    return coll.select(...(fields as string[]));
   }
   return coll;
 };

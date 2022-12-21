@@ -2,6 +2,7 @@ import { useState } from "react";
 import { deleteUser } from "../common/apis";
 import { useNavigate } from "react-router-dom";
 import { useAuthenticatedState } from "../contexts/AuthContext";
+import { auth } from "../config";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -21,7 +22,10 @@ const DeleteAccount = () => {
     setIsLoading(true);
     try {
       const token = await user.getIdToken();
-      await deleteUser(token);
+      const res = await deleteUser(token);
+      if (res.status === 200) {
+        await auth.signOut();
+      }
     } catch (error) {}
     setIsLoading(false);
     navigate("/login", { replace: true });

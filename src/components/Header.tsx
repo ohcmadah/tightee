@@ -70,4 +70,9 @@ const Header = ({
   children: React.ReactNode;
 }) => <header className={cn("mb-12", className)}>{children}</header>;
 
-export default Object.assign(Header, { H1, H2, Icon, Back });
+export default Object.assign(Header, {
+  H1: H1,
+  H2: H2,
+  Icon: Icon,
+  Back: Back,
+});
