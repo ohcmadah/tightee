@@ -82,7 +82,7 @@ const Agreement = () => {
         <section
           className={cn(
             styles.agreementList,
-            "mt-4 flex flex-col rounded-md border border-grayscale-20/50 py-7 px-5"
+            "mt-4 flex flex-col rounded-md border border-grayscale-20/50 bg-white py-7 px-5"
           )}
         >
           <Input.Checkbox
