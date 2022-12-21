@@ -14,7 +14,7 @@ const Login = () => {
   return (
     <Layout className="flex h-[100vh] flex-col items-center justify-center">
       <h1>
-        <Img lazy src="/tightee.svg" alt="Tightee" />
+        <Img src="/tightee.svg" alt="Tightee" />
       </h1>
       <h2 className="mt-2 select-none text-base font-bold text-grayscale-60">
         전국민 MBTI 검증 프로젝트
