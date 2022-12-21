@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import cn from "classnames";
 import { useNavigate } from "react-router-dom";
 import {
@@ -66,6 +67,10 @@ const Agreement = () => {
       payload: { key: "agreement", value: newValues },
     });
   };
+
+  useEffect(() => {
+    new Image().src = "/images/checked.png";
+  }, []);
 
   return (
     <>
