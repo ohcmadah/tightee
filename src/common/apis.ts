@@ -85,9 +85,10 @@ export const getNicknames = async (): Promise<string[]> => {
   const users = await axios.get("/api/users", {
     params: { fields: ["nickname"] },
   });
-  return users.data.map(
-    (user: { id: string; nickname: string }) => user.nickname
-  );
+  if (users.status === 204) {
+    return [];
+  }
+  return users.data.map((user: { nickname: string }) => user.nickname);
 };
 
 export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
