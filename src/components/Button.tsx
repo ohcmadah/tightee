@@ -4,10 +4,6 @@ import { GENDER_FEMALE, GENDER_MALE } from "../common/constants";
 import Icon from "./Icon";
 import Img from "./Img";
 
-import maleImage from "../assets/male.png";
-import femaleImage from "../assets/female.png";
-import kakaoSymbol from "../assets/kakao.svg";
-
 import styles from "../styles/components/Button.module.scss";
 
 interface ButtonProps {
@@ -94,7 +90,7 @@ const GenderToggle = ({
         })}
         onClick={() => onChange(GENDER_MALE)}
       >
-        <Icon className="mr-[20px]" src={maleImage} alt="male" />
+        <Icon className="mr-[20px]" src="/images/male.png" alt="male" />
         남자
       </Outline>
       <Outline
@@ -103,7 +99,7 @@ const GenderToggle = ({
         })}
         onClick={() => onChange(GENDER_FEMALE)}
       >
-        <Icon className="mr-[20px]" src={femaleImage} alt="female" />
+        <Icon className="mr-[20px]" src="/images/female.png" alt="female" />
         여자
       </Outline>
     </div>
@@ -125,7 +121,7 @@ const Kakao = ({
     )}
     onClick={onClick}
   >
-    <img className="w-[14px]" src={kakaoSymbol} alt="Kakao" />
+    <Img lazy className="w-[14px]" src="/images/kakao.svg" alt="Kakao" />
     카카오로 시작하기
     <div />
   </button>

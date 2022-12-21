@@ -31,24 +31,13 @@ import Icon from "../components/Icon";
 import Button, {
   ColoredProps as ColoredButtonProps,
 } from "../components/Button";
-
-import replyIcon from "../assets/reply.svg";
-import rankIcon from "../assets/rank.png";
-import goldIcon from "../assets/gold.png";
-import silverIcon from "../assets/silver.png";
-import bronzeIcon from "../assets/bronze.png";
-import genieIcon from "../assets/genie.png";
-import locationIcon from "../assets/location.png";
-import hourglassIcon from "../assets/hourglass.png";
-import lightIcon from "../assets/light.png";
-import heartIcon from "../assets/heart.png";
-import letterIcon from "../assets/letter.png";
-import shareIcon from "../assets/share.svg";
-import starEyesIcon from "../assets/star_eyes.png";
-import clockIcon from "../assets/clock.png";
 import Notice from "../components/Notice";
 
-const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
+const RANK_ICONS = [
+  "/images/gold.png",
+  "/images/silver.png",
+  "/images/bronze.png",
+];
 
 const calcRatio = (
   group: Map<string, Option[]>,
@@ -127,9 +116,9 @@ const ShareFooter = () => {
   };
   return (
     <FloatingFooter className="bottom-nav" color="violet" onClick={onShare}>
-      <Icon src={letterIcon} alt="letter" className="mr-3" />
+      <Icon src="/images/letter.png" alt="letter" className="mr-3" />
       친구에게 리포트 공유하기
-      <Icon src={shareIcon} alt="share" className="ml-auto mr-0" />
+      <Icon src="/images/share.svg" alt="share" className="ml-auto mr-0" />
     </FloatingFooter>
   );
 };
@@ -169,7 +158,7 @@ const PublicFooter = () => {
   };
   return (
     <FloatingFooter className="bottom-0" color="primary" onClick={onStart}>
-      <Icon src={starEyesIcon} alt="star eyes" className="mr-3" />
+      <Icon src="/images/star_eyes.png" alt="star eyes" className="mr-3" />
       질문에 대답하고 나만의 리포트 보러가기
       <RightArrowIcon />
     </FloatingFooter>
@@ -178,7 +167,7 @@ const PublicFooter = () => {
 
 const Reply = ({ children }: { children?: React.ReactNode }) => (
   <div className="mb-5 flex items-center text-primary">
-    <Icon src={replyIcon} alt="reply" />
+    <Icon src="/images/reply.svg" alt="reply" />
     {children}
   </div>
 );
@@ -194,7 +183,7 @@ const EmptyMBTI = () => {
   const { isPublic } = useReportState();
   return (
     <div className="flex items-start">
-      <Icon src={lightIcon} alt="tip" />
+      <Icon src="/images/light.png" alt="tip" />
       <div className="text-grayscale-80">
         <div className="font-medium leading-7">
           MBTI 정보가 없어 분석할 수 없어요 :(
@@ -236,7 +225,7 @@ const DetailReport = () => {
       <section>
         <Box.Container>
           <Box>
-            <Title icon={genieIcon}>MBTI별 분석</Title>
+            <Title icon="/images/genie.png">MBTI별 분석</Title>
             <Reply>{option.text}</Reply>
             {user.MBTI ? (
               <Chart data={mbtiData} id={option.id}>
@@ -250,7 +239,7 @@ const DetailReport = () => {
           </Box>
 
           <Box>
-            <Title icon={locationIcon}>지역별 분석</Title>
+            <Title icon="/images/location.png">지역별 분석</Title>
             <Reply>{option.text}</Reply>
             <Chart data={regionData} id={option.id}>
               <Chart.Summary>
@@ -264,7 +253,7 @@ const DetailReport = () => {
           </Box>
 
           <Box>
-            <Title icon={hourglassIcon}>나이별 분석</Title>
+            <Title icon="/images/hourglass.png">나이별 분석</Title>
             <Reply>{option.text}</Reply>
             <Chart data={ageData} id={option.id}>
               <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
@@ -274,7 +263,7 @@ const DetailReport = () => {
           </Box>
 
           <Box>
-            <Title icon={heartIcon}>성별 분석</Title>
+            <Title icon="/images/heart.png">성별 분석</Title>
             <Reply>{option.text}</Reply>
             <Chart data={genderData} id={option.id}>
               <Chart.Summary>
@@ -298,7 +287,7 @@ const MBTIRankReport = () => {
   if (answer.user.MBTI === null) {
     return (
       <Box>
-        <Title icon={rankIcon}>MBTI 단합 랭킹</Title>
+        <Title icon="/images/rank.png">MBTI 단합 랭킹</Title>
         <EmptyMBTI />
       </Box>
     );
@@ -309,7 +298,7 @@ const MBTIRankReport = () => {
 
   return (
     <Box>
-      <Title icon={rankIcon}>MBTI 단합 랭킹</Title>
+      <Title icon="/images/rank.png">MBTI 단합 랭킹</Title>
       <Chart.Summary value={myRank + "등"}>
         {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
       </Chart.Summary>
@@ -374,7 +363,7 @@ const Main = () => (
     <BasicReport />
     <DetailReport />
     <Notice
-      iconSrc={clockIcon}
+      iconSrc="/images/clock.png"
       alt="clock"
       className="mt-8 text-sm text-grayscale-60"
     >

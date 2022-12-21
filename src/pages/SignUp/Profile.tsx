@@ -18,8 +18,6 @@ import Loading from "../../components/Loading";
 import ModalPortal from "../../components/ModalPortal";
 import Img from "../../components/Img";
 
-import lightImage from "../../assets/light.png";
-
 import styles from "../../styles/pages/SignUp.module.scss";
 
 const Profile = () => {
@@ -111,7 +109,7 @@ const Profile = () => {
         <Form.Section label="MBTI">
           <MBTISelector value={profile.MBTI} onChange={onSelect} />
           <div className="mt-2.5 flex items-center rounded-xl bg-system-dimyellow py-3 px-3.5 text-sm text-grayscale-80">
-            <Img lazy src={lightImage} alt="tip" className="mr-3 w-6" />
+            <Img lazy src="/images/light.png" alt="tip" className="mr-3 w-6" />
             지금 몰라도 나중에 입력할 수 있어요!
           </div>
         </Form.Section>

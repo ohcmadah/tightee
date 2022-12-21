@@ -10,21 +10,13 @@ import Badge from "../components/Badge";
 import Chart from "../components/Chart";
 import Icon from "../components/Icon";
 import Button from "../components/Button";
-
-import replyIcon from "../assets/reply.svg";
-import rankIcon from "../assets/rank.png";
-import goldIcon from "../assets/gold.png";
-import silverIcon from "../assets/silver.png";
-import bronzeIcon from "../assets/bronze.png";
-import genieIcon from "../assets/genie.png";
-import locationIcon from "../assets/location.png";
-import hourglassIcon from "../assets/hourglass.png";
-import heartIcon from "../assets/heart.png";
-import starEyesIcon from "../assets/star_eyes.png";
-import clockIcon from "../assets/clock.png";
 import Notice from "../components/Notice";
 
-const RANK_ICONS = [goldIcon, silverIcon, bronzeIcon];
+const RANK_ICONS = [
+  "/images/gold.png",
+  "/images/silver.png",
+  "/images/bronze.png",
+];
 
 const OPTION1 = "당연하지 👌";
 const OPTION2 = "계획..? 그게 뭐야? 😒";
@@ -65,7 +57,7 @@ const PublicFooter = () => {
         className="flex w-full items-center py-4 text-white"
         onClick={onStart}
       >
-        <Icon src={starEyesIcon} alt="star eyes" className="mr-3" />
+        <Icon src="/images/star_eyes.png" alt="star eyes" className="mr-3" />
         질문에 대답하고 나만의 리포트 보러가기
         <RightArrowIcon />
       </Button.Colored>
@@ -75,7 +67,7 @@ const PublicFooter = () => {
 
 const Reply = ({ children }: { children?: React.ReactNode }) => (
   <div className="mb-5 flex items-center text-primary">
-    <Icon src={replyIcon} alt="reply" />
+    <Icon src="/images/reply.svg" alt="reply" />
     {children}
   </div>
 );
@@ -108,7 +100,7 @@ const DetailReport = () => {
       <section>
         <Box.Container>
           <Box>
-            <Title icon={genieIcon}>MBTI별 분석</Title>
+            <Title icon="/images/genie.png">MBTI별 분석</Title>
             <Reply>{MY_MBTI}</Reply>
             <Chart
               data={genChartData([0.6787, 0.3213])}
@@ -121,7 +113,7 @@ const DetailReport = () => {
           </Box>
 
           <Box>
-            <Title icon={locationIcon}>지역별 분석</Title>
+            <Title icon="/images/location.png">지역별 분석</Title>
             <Reply>{OPTION1}</Reply>
             <Chart
               data={genChartData([0.7238, 0.2762])}
@@ -138,7 +130,7 @@ const DetailReport = () => {
           </Box>
 
           <Box>
-            <Title icon={hourglassIcon}>나이별 분석</Title>
+            <Title icon="/images/hourglass.png">나이별 분석</Title>
             <Reply>{OPTION1}</Reply>
             <Chart
               data={genChartData([0.6377, 0.3623])}
@@ -153,7 +145,7 @@ const DetailReport = () => {
           </Box>
 
           <Box>
-            <Title icon={heartIcon}>성별 분석</Title>
+            <Title icon="/images/heart.png">성별 분석</Title>
             <Reply>{OPTION1}</Reply>
             <Chart
               data={genChartData([0.7836, 0.2164])}
@@ -182,7 +174,7 @@ const MBTIRankReport = () => {
 
   return (
     <Box>
-      <Title icon={rankIcon}>MBTI 단합 랭킹</Title>
+      <Title icon="/images/rank.png">MBTI 단합 랭킹</Title>
       <Chart.Summary value={myRank + "등"}>
         {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
       </Chart.Summary>
@@ -236,7 +228,7 @@ const Main = () => (
     <BasicReport />
     <DetailReport />
     <Notice
-      iconSrc={clockIcon}
+      iconSrc="/images/clock.png"
       alt="clock"
       className="mt-8 text-sm text-grayscale-60"
     >

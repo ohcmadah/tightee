@@ -9,14 +9,11 @@ import Header from "../components/Header";
 import Loading from "../components/Loading";
 import ErrorView from "../components/ErrorView";
 import Badge from "../components/Badge";
-
-import homeIcon from "../assets/home.png";
-import rightArrowIcon from "../assets/right_arrow.svg";
-import settingIcon from "../assets/setting.svg";
 import Box from "../components/Box";
+import Img from "../components/Img";
 
 const Content = ({
-  iconSrc = rightArrowIcon,
+  iconSrc = "/images/right_arrow.svg",
   alt,
   children,
 }: {
@@ -26,7 +23,7 @@ const Content = ({
 }) => (
   <div className="mt-4 flex w-full items-center justify-between px-1">
     <div className="mr-3">{children}</div>
-    <img src={iconSrc} alt={alt} />
+    <Img lazy src={iconSrc} alt={alt} />
   </div>
 );
 
@@ -47,7 +44,7 @@ const Main = ({
             <Badge className="bg-secondary-question font-bold text-white">
               오늘의 질문
             </Badge>
-            <Content iconSrc={rightArrowIcon} alt="right arrow">
+            <Content iconSrc="/images/right_arrow.svg" alt="right arrow">
               {question}
             </Content>
           </Box>
@@ -58,7 +55,7 @@ const Main = ({
             <Badge className="bg-secondary-answer font-bold text-white">
               나의 대답
             </Badge>
-            <Content iconSrc={rightArrowIcon} alt="right arrow">
+            <Content iconSrc="/images/right_arrow.svg" alt="right arrow">
               총 {answer?.count}개의 질문에 대답했어요.
             </Content>
           </Box>
@@ -69,7 +66,7 @@ const Main = ({
             <Badge className="bg-secondary-mbti font-bold text-white">
               나의 MBTI
             </Badge>
-            <Content iconSrc={settingIcon} alt="setting">
+            <Content iconSrc={"/images/setting.svg"} alt="setting">
               {MBTI
                 ? MBTI + " - " + getMBTIName(MBTI)
                 : "MBTI를 설정하면 더욱 재미있는 정보를 확인할 수 있어요 :)"}
@@ -140,7 +137,9 @@ const Home = () => {
         <>
           <Header>
             <Header.H1>
-              <Header.Icon iconSrc={homeIcon}>타이티입니다 :)</Header.Icon>
+              <Header.Icon iconSrc="/images/home.png">
+                타이티입니다 :)
+              </Header.Icon>
             </Header.H1>
           </Header>
           <Main

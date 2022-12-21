@@ -1,3 +1,4 @@
+import cn from "classnames";
 import { useIsElementInViewport } from "../hooks/useIsElementInViewport";
 
 export type ImgProps = {
@@ -14,12 +15,17 @@ export default function Img(
   const { elementRef, isVisible } = useIsElementInViewport({
     rootMargin: "0px 0px 500px 0px",
   });
+  const isLoaded = !props.lazy || isVisible;
+  const fallback = `bg-grayscale-20 w-[${props.width || 20}] h-[${
+    props.height || 20
+  }]`;
 
   return (
     <img
       {...props}
+      className={cn(props.className, { [fallback]: !isLoaded })}
       ref={elementRef}
-      src={props.lazy && isVisible ? props.src : ""}
+      src={isLoaded ? props.src : ""}
     />
   );
 }

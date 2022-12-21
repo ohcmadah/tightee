@@ -4,8 +4,6 @@ import { formatPercent } from "../common/utils";
 
 import Icon from "./Icon";
 
-import chartIcon from "../assets/chart.png";
-
 type ChartData = {
   id: string;
   title: string;
@@ -35,7 +33,7 @@ const Summary = ({
 
   return (
     <div className="flex items-start text-grayscale-80">
-      <Icon src={chartIcon} alt="chart" />
+      <Icon src="/images/chart.png" alt="chart" />
       <div className={className}>
         {elements?.map((element, index) =>
           element.match(regex) ? (
@@ -129,23 +127,21 @@ const Regend = () => {
 
   return (
     <div className="last:mb-0">
-      {data
-        .sort((a, b) => b.ratio - a.ratio)
-        .map(({ title, ratio, color, isSelected }) => (
-          <div
-            key={title}
-            className={cn("mb-3 flex items-center", {
-              "font-bold": isSelected,
-            })}
-          >
-            <span
-              className="mr-1.5 inline-block h-[16px] w-[24px] rounded-xl"
-              style={{ backgroundColor: color }}
-            />
-            {title}&nbsp;
-            <span className="text-grayscale-40">({formatPercent(ratio)})</span>
-          </div>
-        ))}
+      {data.map(({ title, ratio, color, isSelected }) => (
+        <div
+          key={title}
+          className={cn("mb-3 flex items-center", {
+            "font-bold": isSelected,
+          })}
+        >
+          <span
+            className="mr-1.5 inline-block h-[16px] w-[24px] rounded-xl"
+            style={{ backgroundColor: color }}
+          />
+          {title}&nbsp;
+          <span className="text-grayscale-40">({formatPercent(ratio)})</span>
+        </div>
+      ))}
     </div>
   );
 };
@@ -159,18 +155,20 @@ const Chart = ({
   id: string;
   children: React.ReactNode;
 }) => {
-  const value = Object.entries(data).reduce(
-    (acc: ChartData, [currentId, value], index) => [
-      ...acc,
-      {
-        ...value,
-        id,
-        color: DEFAULT_COLORS[index],
-        isSelected: currentId === id,
-      },
-    ],
-    []
-  );
+  const value = Object.entries(data)
+    .sort(([_a, a], [_b, b]) => b.ratio - a.ratio)
+    .reduce(
+      (acc: ChartData, [currentId, value], index) => [
+        ...acc,
+        {
+          ...value,
+          id,
+          color: DEFAULT_COLORS[index],
+          isSelected: currentId === id,
+        },
+      ],
+      []
+    );
   return (
     <ChartContext.Provider value={value}>{children}</ChartContext.Provider>
   );

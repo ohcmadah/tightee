@@ -5,8 +5,6 @@ import Header from "./Header";
 import Button from "./Button";
 import Footer from "./Footer";
 import ExternalLink from "./ExternalLink";
-
-import sadIcon from "../assets/sad.png";
 import Notice from "./Notice";
 
 const Base = ({
@@ -23,7 +21,11 @@ const Base = ({
       <Header.H1 className="text-center">{title}</Header.H1>
     </Header>
     <main>
-      <Notice iconSrc={sadIcon} alt="sad pensive face" className="text-base">
+      <Notice
+        iconSrc="/images/sad.png"
+        alt="sad pensive face"
+        className="text-base"
+      >
         {children}
       </Notice>
     </main>
