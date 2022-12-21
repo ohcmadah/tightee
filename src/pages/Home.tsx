@@ -11,6 +11,17 @@ import ErrorView from "../components/ErrorView";
 import Badge from "../components/Badge";
 import Box from "../components/Box";
 import Img from "../components/Img";
+import Notice from "../components/Notice";
+
+const Footer = () => (
+  <Notice
+    iconSrc="/images/star.png"
+    alt="clock"
+    className="mt-10 text-sm text-grayscale-60"
+  >
+    즐겨찾기하고 언제나 놀러오세요 :)
+  </Notice>
+);
 
 const Content = ({
   iconSrc = "/images/right_arrow.svg",
@@ -147,6 +158,7 @@ const Home = () => {
             answer={data.answer}
             MBTI={data.MBTI}
           />
+          <Footer />
         </>
       );
   }
