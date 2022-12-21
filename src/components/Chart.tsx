@@ -53,11 +53,24 @@ const Summary = ({
   );
 };
 
+const calcY = (ratio: number) => {
+  if (ratio <= 0.25) {
+    return 5;
+  }
+  if (ratio <= 0.5) {
+    return 3;
+  }
+  if (ratio <= 0.75) {
+    return -3;
+  }
+  return -5;
+};
+
 const calcXY = (isSelected: boolean, ratio: number) => {
   if (!isSelected || ratio === 1) {
     return { x: 0, y: 0 };
   }
-  return { x: 5, y: ratio <= 0.5 ? 3 : ratio < 0.75 ? -3 : -5 };
+  return { x: 5, y: calcY(ratio) };
 };
 
 const DEFAULT_COLORS = ["#30A9DE", "#EFDC05", "#E53A40", "#090707"];
