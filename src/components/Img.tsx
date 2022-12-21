@@ -13,7 +13,7 @@ export default function Img(
     <img
       {...imgProps}
       ref={elementRef}
-      src={isLoaded ? props.src : "/images/fallback"}
+      src={isLoaded ? props.src : "/images/fallback.png"}
     />
   );
 }
