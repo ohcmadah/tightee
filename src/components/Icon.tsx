@@ -1,4 +1,5 @@
 import cn from "classnames";
+import Img from "./Img";
 
 const Icon = ({
   className,
@@ -9,7 +10,8 @@ const Icon = ({
   src: string;
   alt: string;
 }) => (
-  <img
+  <Img
+    lazy
     width={20}
     height={20}
     className={cn("mr-1.5 inline-block", className)}

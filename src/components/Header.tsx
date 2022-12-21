@@ -1,5 +1,4 @@
 import cn from "classnames";
-
 import React, { MouseEventHandler } from "react";
 import leftArrowIcon from "../assets/left_arrow.svg";
 

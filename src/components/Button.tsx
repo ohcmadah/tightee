@@ -2,6 +2,7 @@ import cn from "classnames";
 import { GENDER_FEMALE, GENDER_MALE } from "../common/constants";
 
 import Icon from "./Icon";
+import Img from "./Img";
 
 import maleImage from "../assets/male.png";
 import femaleImage from "../assets/female.png";

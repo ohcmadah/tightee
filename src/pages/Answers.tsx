@@ -16,12 +16,13 @@ import Badge from "../components/Badge";
 import Box from "../components/Box";
 import Chart from "../components/Chart";
 import Icon from "../components/Icon";
+import Notice from "../components/Notice";
+import Img from "../components/Img";
 
 import answerIcon from "../assets/answer.png";
 import replyIcon from "../assets/reply.svg";
 import rightArrowIcon from "../assets/right_arrow.svg";
 import writingHand from "../assets/writing_hand.png";
-import Notice from "../components/Notice";
 
 type PageData = Awaited<ReturnType<typeof getAnswersPageData>>;
 
@@ -56,7 +57,7 @@ const Answer = ({
         <Chart.Summary value={ratio} className="mr-3 truncate text-ellipsis">
           {"전체 타이티 중에 {value}에 속해요."}
         </Chart.Summary>
-        <img src={rightArrowIcon} alt="arrow" />
+        <Img lazy src={rightArrowIcon} alt="arrow" />
       </Link>
     </Box>
   );
@@ -81,7 +82,7 @@ const TodayQuestion = () => {
       <Link to="/question" className="flex w-full items-center">
         <Icon src={replyIcon} alt="reply" />
         <div className="grow text-grayscale-20">대답하러 가기</div>
-        <img src={rightArrowIcon} alt="arrow" />
+        <Img lazy src={rightArrowIcon} alt="arrow" />
       </Link>
     </article>
   );

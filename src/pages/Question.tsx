@@ -19,13 +19,13 @@ import Loading from "../components/Loading";
 import ErrorView from "../components/ErrorView";
 import ExternalLink from "../components/ExternalLink";
 import Footer from "../components/Footer";
-import Badge from "../components/Badge";
 import ModalPortal from "../components/ModalPortal";
+import Notice from "../components/Notice";
+import Img from "../components/Img";
 
 import questionIcon from "../assets/question.png";
 import thinkingIcon from "../assets/thinking.png";
 import lightIcon from "../assets/light.png";
-import Notice from "../components/Notice";
 
 const Tip = () => (
   <Notice
@@ -61,7 +61,7 @@ const OptionSection = ({
 const QuestionSection = ({ title }: { title: string }) => {
   return (
     <section className="mb-14 flex flex-col items-center">
-      <img width={30} className="mb-3" src={thinkingIcon} alt="thinking" />
+      <Img lazy width={30} className="mb-3" src={thinkingIcon} alt="thinking" />
       <h2 className="text-center text-lg font-bold">{title}</h2>
     </section>
   );
