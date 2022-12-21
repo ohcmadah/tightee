@@ -1,16 +1,12 @@
 import cn from "classnames";
 import { Link, useMatch } from "react-router-dom";
-
-import homeIcon from "../assets/home.png";
-import questionIcon from "../assets/question.png";
-import answerIcon from "../assets/answer.png";
-import eyesIcon from "../assets/eyes.png";
+import Img from "./Img";
 
 const pages = [
-  { path: "/", icon: homeIcon },
-  { path: "/question", icon: questionIcon },
-  { path: "/answer", icon: answerIcon },
-  { path: "/profile", icon: eyesIcon },
+  { path: "/", icon: "/images/home.png" },
+  { path: "/question", icon: "/images/question.png" },
+  { path: "/answer", icon: "/images/answer.png" },
+  { path: "/profile", icon: "/images/eyes.png" },
 ];
 
 const Menu = ({ path, icon }: { path: string; icon: string }) => {
@@ -24,7 +20,7 @@ const Menu = ({ path, icon }: { path: string; icon: string }) => {
           { "bg-primary": isMatched }
         )}
       >
-        <img width={30} src={icon} alt={path} />
+        <Img lazy width={30} src={icon} alt={path} />
       </Link>
     </li>
   );

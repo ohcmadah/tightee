@@ -1,7 +1,6 @@
 import cn from "classnames";
-
 import React, { MouseEventHandler } from "react";
-import leftArrowIcon from "../assets/left_arrow.svg";
+import Img from "./Img";
 
 const Icon = ({
   iconSrc,
@@ -13,7 +12,13 @@ const Icon = ({
   children?: React.ReactNode;
 }) => (
   <>
-    <img width={40} className="mr-4 inline-block" src={iconSrc} alt={alt} />
+    <Img
+      lazy
+      width={40}
+      className="mr-4 inline-block"
+      src={iconSrc}
+      alt={alt}
+    />
     <span className="align-middle">{children}</span>
   </>
 );
@@ -27,10 +32,11 @@ const Back = ({
 }) => (
   <>
     <button className="mr-4" onClick={onClick}>
-      <img
+      <Img
+        lazy
         width={40}
         className="inline-block"
-        src={leftArrowIcon}
+        src="/images/left_arrow.svg"
         alt={"back"}
       />
     </button>

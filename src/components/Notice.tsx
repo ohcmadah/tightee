@@ -1,4 +1,5 @@
 import cn from "classnames";
+import Img from "./Img";
 
 const Notice = ({
   iconSrc,
@@ -14,7 +15,8 @@ const Notice = ({
   <section
     className={cn("text-center text-base text-grayscale-100", className)}
   >
-    <img
+    <Img
+      lazy
       src={iconSrc}
       alt={alt}
       width={30}

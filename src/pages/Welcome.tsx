@@ -4,8 +4,6 @@ import { loginWithKakao } from "../common/apis";
 import Layout from "../components/Layout";
 import Header from "../components/Header";
 import withAuth from "../hocs/withAuth";
-
-import chickIcon from "../assets/chick.png";
 import Button from "../components/Button";
 import Notice from "../components/Notice";
 
@@ -21,7 +19,7 @@ const Welcome = () => {
       <Header>
         <Header.H2>재미있는 리포트가 기다리고 있어요!</Header.H2>
       </Header>
-      <Notice iconSrc={chickIcon} alt="chick" className="leading-7">
+      <Notice iconSrc="/images/chick.png" alt="chick" className="leading-7">
         MBTI 맞춤 분석을 위해 간단한 회원가입이 필요해요.
         <br />
         하루에 하나씩 주어지는 질문에 대답하고

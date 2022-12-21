@@ -35,9 +35,6 @@ import ExternalLink from "../components/ExternalLink";
 import ErrorView from "../components/ErrorView";
 import Icon from "../components/Icon";
 
-import eyesIcon from "../assets/eyes.png";
-import answerIcon from "../assets/answer.png";
-
 const Settings = ({
   subscribe,
   onUpdateUser,
@@ -99,7 +96,7 @@ const Settings = ({
           className="inline-block rounded-full border border-secondary-question bg-white py-2 px-6 font-bold text-secondary-question hover:bg-secondary-question hover:text-white"
           href={URL_CONTACT}
         >
-          <Icon src={answerIcon} alt="contact" />
+          <Icon src="/images/answer.png" alt="contact" />
           자유롭게 1:1 문의하기
         </ExternalLink>
       </section>
@@ -242,7 +239,7 @@ const ActualProfile = ({
     <>
       <Header>
         <Header.H1>
-          <Header.Icon iconSrc={eyesIcon} alt="eyes">
+          <Header.Icon iconSrc="/images/eyes.png" alt="eyes">
             나의 프로필
           </Header.Icon>
         </Header.H1>

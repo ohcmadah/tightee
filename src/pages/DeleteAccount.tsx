@@ -9,8 +9,6 @@ import Footer from "../components/Footer";
 import Button from "../components/Button";
 import ModalPortal from "../components/ModalPortal";
 import Loading from "../components/Loading";
-
-import cryingIcon from "../assets/crying.png";
 import Notice from "../components/Notice";
 
 const DeleteAccount = () => {
@@ -41,7 +39,11 @@ const DeleteAccount = () => {
         </Header.H1>
       </Header>
       <main>
-        <Notice iconSrc={cryingIcon} alt="crying face" className="text-base">
+        <Notice
+          iconSrc="/images/crying.png"
+          alt="crying face"
+          className="text-base"
+        >
           <article className="mb-4 text-xl font-bold">
             정말 타이티를 탈퇴하시겠어요?
           </article>

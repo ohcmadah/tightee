@@ -16,12 +16,8 @@ import Badge from "../components/Badge";
 import Box from "../components/Box";
 import Chart from "../components/Chart";
 import Icon from "../components/Icon";
-
-import answerIcon from "../assets/answer.png";
-import replyIcon from "../assets/reply.svg";
-import rightArrowIcon from "../assets/right_arrow.svg";
-import writingHand from "../assets/writing_hand.png";
 import Notice from "../components/Notice";
+import Img from "../components/Img";
 
 type PageData = Awaited<ReturnType<typeof getAnswersPageData>>;
 
@@ -45,7 +41,7 @@ const Answer = ({
       <article className="my-6 px-2">
         <div className="mb-1.5 text-lg font-medium">{question.title}</div>
         <div className="text-primary">
-          <Icon src={replyIcon} alt="reply" />
+          <Icon src="/images/reply.svg" alt="reply" />
           <span className="align-middle">{option.text}</span>
         </div>
       </article>
@@ -56,7 +52,7 @@ const Answer = ({
         <Chart.Summary value={ratio} className="mr-3 truncate text-ellipsis">
           {"전체 타이티 중에 {value}에 속해요."}
         </Chart.Summary>
-        <img src={rightArrowIcon} alt="arrow" />
+        <Img lazy src="/images/right_arrow.svg" alt="arrow" />
       </Link>
     </Box>
   );
@@ -79,9 +75,9 @@ const TodayQuestion = () => {
       <Badge className="bg-primary-peach">TODAY</Badge>
       <div className="my-6 px-2 text-lg font-medium">{question}</div>
       <Link to="/question" className="flex w-full items-center">
-        <Icon src={replyIcon} alt="reply" />
+        <Icon src="/images/reply.svg" alt="reply" />
         <div className="grow text-grayscale-20">대답하러 가기</div>
-        <img src={rightArrowIcon} alt="arrow" />
+        <Img lazy src="/images/right_arrow.svg" alt="arrow" />
       </Link>
     </article>
   );
@@ -89,7 +85,7 @@ const TodayQuestion = () => {
 
 const AlreadyAnswered = () => (
   <Notice
-    iconSrc={writingHand}
+    iconSrc="/images/writing_hand.png"
     alt="writing hand"
     className="mb-8 text-grayscale-60"
   >
@@ -139,7 +135,7 @@ const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
   <>
     <Header>
       <Header.H1 className="flex items-center">
-        <Header.Icon iconSrc={answerIcon} alt="answer">
+        <Header.Icon iconSrc="/images/answer.png" alt="answer">
           나의 대답
         </Header.Icon>
       </Header.H1>

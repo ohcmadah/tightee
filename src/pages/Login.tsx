@@ -4,9 +4,7 @@ import { loginWithKakao } from "../common/apis";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
 import withAuth from "../hocs/withAuth";
-
-import tightee from "../assets/tightee.svg";
-import home from "../assets/home.png";
+import Img from "../components/Img";
 
 const Login = () => {
   if (!window.Kakao.isInitialized()) {
@@ -16,7 +14,7 @@ const Login = () => {
   return (
     <Layout className="flex h-[100vh] flex-col items-center justify-center">
       <h1>
-        <img src={tightee} alt="Tightee" />
+        <Img lazy src="/tightee.svg" alt="Tightee" />
       </h1>
       <h2 className="mt-2 select-none text-base font-bold text-grayscale-60">
         전국민 MBTI 검증 프로젝트
@@ -30,7 +28,7 @@ const Login = () => {
         target="_blank"
         className="mt-5 flex w-full items-center justify-center p-3.5 text-base text-grayscale-100"
       >
-        <img className="mr-2 w-[14px]" src={home} alt="cs" />
+        <Img lazy className="mr-2 w-[14px]" src="/images/home.png" alt="cs" />
         고객센터
       </a>
     </Layout>
