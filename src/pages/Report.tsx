@@ -1,3 +1,4 @@
+import React, { useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import cn from "classnames";
 import { getAnswer, getAnswerGroups, getOptions } from "../common/apis";
@@ -61,7 +62,7 @@ const genChartData = (
   return calcRatio(group, total, defaultOptions);
 };
 
-const calcMBTIrank = (group: Record<string, Option[]>, options: Option[]) => {
+const calcMBTIRatio = (group: Record<string, Option[]>, options: Option[]) => {
   return Object.entries(group)
     .filter(([mbti, _]) => mbti !== "null")
     .map(([mbti, answers]) => {
@@ -72,6 +73,27 @@ const calcMBTIrank = (group: Record<string, Option[]>, options: Option[]) => {
       return { mbti, option: title, ratio };
     })
     .sort((a, b) => b.ratio - a.ratio);
+};
+
+const calcMBTIRank = (data: ReturnType<typeof calcMBTIRatio>) => {
+  const rank = Array.from({ length: data.length }, () => 1);
+
+  for (let i = 0; i < data.length; i++) {
+    const currentItem = data[i];
+    const compared = new Set();
+    for (let j = 0; j < data.length; j++) {
+      const otherItem = data[j];
+      if (
+        otherItem.ratio > currentItem.ratio &&
+        !compared.has(otherItem.ratio)
+      ) {
+        compared.add(otherItem.ratio);
+        rank[i]++;
+      }
+    }
+  }
+
+  return rank;
 };
 
 const FloatingFooter = ({
@@ -281,10 +303,60 @@ const DetailReport = () => {
   );
 };
 
-const MBTIRankReport = () => {
-  const { answer, options, groups } = useReportState();
+const ToggleButton = ({
+  onClick,
+  children,
+}: {
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  children: React.ReactNode;
+}) => (
+  <button
+    className="flex w-full items-center justify-center font-medium text-grayscale-60"
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
 
-  if (answer.user.MBTI === null) {
+const RankItem = ({
+  item,
+  rank,
+  mbti,
+}: {
+  item: { mbti: string; option: string; ratio: number };
+  rank: number;
+  mbti: string;
+}) => {
+  const { mbti: itemMBTI, option, ratio } = item;
+  const icon = rank <= 3 ? RANK_ICONS[rank - 1] : "/images/white_heart.png";
+  return (
+    <li
+      className={cn("mb-3 inline-flex items-start", {
+        "font-bold": itemMBTI === mbti,
+      })}
+    >
+      <Icon src={icon} alt={`${rank}등`} />
+      <div>
+        {itemMBTI}{" "}
+        <span className="text-grayscale-60">
+          ({option}, {formatPercent(ratio)})
+        </span>
+      </div>
+    </li>
+  );
+};
+
+const MBTIRankReport = () => {
+  const {
+    answer: {
+      user: { MBTI },
+    },
+    options,
+    groups,
+  } = useReportState();
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (MBTI === null) {
     return (
       <Box>
         <Title icon="/images/rank.png">MBTI 단합 랭킹</Title>
@@ -293,8 +365,13 @@ const MBTIRankReport = () => {
     );
   }
 
-  const rank = calcMBTIrank(groups["user.MBTI"], options);
-  const myRank = rank.map((value) => value.mbti).indexOf(answer.user.MBTI) + 1;
+  const mbtiData = calcMBTIRatio(groups["user.MBTI"], options);
+  const rank = calcMBTIRank(mbtiData);
+  const myRank = mbtiData.map((value) => value.mbti).indexOf(MBTI) + 1;
+  const visibleItems = useMemo(
+    () => (isOpen ? mbtiData : mbtiData.slice(0, 3)),
+    [isOpen]
+  );
 
   return (
     <Box>
@@ -302,20 +379,26 @@ const MBTIRankReport = () => {
       <Chart.Summary value={myRank + "등"}>
         {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
       </Chart.Summary>
-      <div className="mt-5 last:mb-0">
-        {rank.slice(0, 3).map(({ mbti, option, ratio }, index) => (
-          <div
-            key={mbti}
-            className={cn("mb-3", { "font-bold": mbti === answer.user.MBTI })}
-          >
-            <Icon src={RANK_ICONS[index]} alt={`${index + 1}등`} />
-            {mbti}{" "}
-            <span className="text-grayscale-60">
-              ({option}, {formatPercent(ratio)})
-            </span>
-          </div>
+
+      <ul className="my-5 last:mb-0">
+        {visibleItems.map((item, index) => (
+          <RankItem
+            key={item.mbti}
+            item={item}
+            rank={rank[index]}
+            mbti={MBTI}
+          />
         ))}
-      </div>
+      </ul>
+
+      <ToggleButton onClick={() => setIsOpen(!isOpen)}>
+        {isOpen ? "접기" : "펼치기"}
+        <img
+          src="/images/down_arrow.svg"
+          alt="up arrow"
+          className={cn("ml-1.5", { "rotate-180": isOpen })}
+        />
+      </ToggleButton>
     </Box>
   );
 };
