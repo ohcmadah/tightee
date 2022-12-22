@@ -252,7 +252,7 @@ const DetailReport = () => {
             {user.MBTI ? (
               <Chart data={mbtiData} id={option.id}>
                 <Chart.Summary>{`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
-                <Chart.Pie className="m-auto my-7" size="40%" />
+                <Chart.Pie className="m-auto my-4" size="45%" />
                 <Chart.Regend />
               </Chart>
             ) : (
@@ -269,7 +269,7 @@ const DetailReport = () => {
                   convertRegionCodeToReadable(user.region) +
                   "'에 사는 타이티 중에 {value}가 같은 응답을 했어요."}
               </Chart.Summary>
-              <Chart.Pie className="m-auto my-7" size="40%" />
+              <Chart.Pie className="m-auto my-4" size="45%" />
               <Chart.Regend />
             </Chart>
           </Box>
@@ -279,7 +279,7 @@ const DetailReport = () => {
             <Reply>{option.text}</Reply>
             <Chart data={ageData} id={option.id}>
               <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
-              <Chart.Pie className="m-auto my-7" size="40%" />
+              <Chart.Pie className="m-auto my-4" size="45%" />
               <Chart.Regend />
             </Chart>
           </Box>
@@ -293,7 +293,7 @@ const DetailReport = () => {
                   user.gender
                 )}'인 타이티 중에 {value}가 같은 응답을 했어요.`}
               </Chart.Summary>
-              <Chart.Pie className="m-auto my-7" size="40%" />
+              <Chart.Pie className="m-auto my-4" size="45%" />
               <Chart.Regend />
             </Chart>
           </Box>
@@ -430,7 +430,7 @@ const BasicReport = () => {
             id={answer.option.id}
           >
             <Chart.Summary>{`전체 타이티 중에 {value}를 차지하고 있어요.`}</Chart.Summary>
-            <Chart.Pie className="m-auto my-7" size="40%" />
+            <Chart.Pie className="m-auto my-4" size="45%" />
             <Chart.Regend />
           </Chart>
         </Box>
