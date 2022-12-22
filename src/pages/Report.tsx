@@ -190,13 +190,6 @@ const PublicFooter = () => {
   );
 };
 
-const Reply = ({ children }: { children?: React.ReactNode }) => (
-  <div className="mb-5 flex items-center text-primary">
-    <Icon src="/images/reply.svg" alt="reply" />
-    {children}
-  </div>
-);
-
 const Title = ({ icon, children }: { icon: string; children: string }) => (
   <Badge className="m-auto mb-5 flex items-center bg-system-yellow text-base font-normal">
     <Icon src={icon} alt={children} />
@@ -251,7 +244,6 @@ const DetailReport = () => {
         <Box.Container>
           <Box>
             <Title icon="/images/genie.png">MBTI별 분석</Title>
-            <Reply>{option.text}</Reply>
             {user.MBTI ? (
               <Chart data={mbtiData} id={option.id}>
                 <Chart.Summary>{`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
@@ -265,7 +257,6 @@ const DetailReport = () => {
 
           <Box>
             <Title icon="/images/location.png">지역별 분석</Title>
-            <Reply>{option.text}</Reply>
             <Chart data={regionData} id={option.id}>
               <Chart.Summary>
                 {"'" +
@@ -279,7 +270,6 @@ const DetailReport = () => {
 
           <Box>
             <Title icon="/images/hourglass.png">나이별 분석</Title>
-            <Reply>{option.text}</Reply>
             <Chart data={ageData} id={option.id}>
               <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
               <Chart.Pie className="m-auto my-4" size="45%" />
@@ -289,7 +279,6 @@ const DetailReport = () => {
 
           <Box>
             <Title icon="/images/heart.png">성별 분석</Title>
-            <Reply>{option.text}</Reply>
             <Chart data={genderData} id={option.id}>
               <Chart.Summary>
                 {`성별이 '${convertGenderCodeToReadable(
@@ -334,7 +323,7 @@ const RankItem = ({
   const icon = rank <= 3 ? RANK_ICONS[rank - 1] : "/images/white_heart.png";
   return (
     <li
-      className={cn("mb-3 inline-flex items-start", {
+      className={cn("mb-3 inline-flex items-start last:mb-0", {
         "font-bold": itemMBTI === mbti,
       })}
     >
@@ -385,7 +374,7 @@ const MBTIRankReport = () => {
         {"16개 MBTI 중에서 {value}으로 대답이 일치해요."}
       </Chart.Summary>
 
-      <ul className="my-5 last:mb-0">
+      <ul className="my-5">
         {visibleItems.map((item, index) => (
           <RankItem
             key={item.mbti}
@@ -421,11 +410,14 @@ const BasicReport = () => {
           <Badge className="bg-question-not-today">
             {getFormattedDate(answer.question.createdAt)}
           </Badge>
-          <div className="mt-3">{answer.question.title}</div>
+          <div className="mt-3 ml-2">{answer.question.title}</div>
+          <div className="mt-3 ml-1 flex items-center font-medium text-primary">
+            <Icon src="/images/reply.svg" alt="reply" />
+            {answer.option.text}
+          </div>
         </Box>
 
         <Box>
-          <Reply>{answer.option.text}</Reply>
           <Chart
             data={calcRatio(
               new Map(Object.entries(optionsByOptionIdMap)),

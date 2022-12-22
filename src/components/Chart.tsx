@@ -139,11 +139,11 @@ const Regend = () => {
   }
 
   return (
-    <div className="last:mb-0">
+    <ul>
       {data.map(({ title, ratio, color, isSelected }) => (
-        <div
+        <li
           key={title}
-          className={cn("mb-3 flex items-center", {
+          className={cn("mb-3 flex items-center last:mb-0", {
             "font-bold": isSelected,
           })}
         >
@@ -153,9 +153,9 @@ const Regend = () => {
           />
           {title}&nbsp;
           <span className="text-grayscale-40">({formatPercent(ratio)})</span>
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 };
 
