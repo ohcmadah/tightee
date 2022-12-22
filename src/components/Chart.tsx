@@ -55,7 +55,7 @@ const Summary = ({
 
 const calcY = (ratio: number) => {
   if (ratio <= 0.25) {
-    return 5;
+    return 12 * (1 - ratio);
   }
   if (ratio <= 0.5) {
     return 3;
@@ -88,7 +88,7 @@ const Pie = ({
     return <>ChartProvider not found.</>;
   }
 
-  const RADIUS = 22.5;
+  const RADIUS = 18;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
   let filled = 0;

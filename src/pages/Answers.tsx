@@ -110,23 +110,21 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
       ) : (
         <AlreadyAnswered />
       )}
-      <section>
-        <Box.Container>
-          {isEmptyMyAnswers ? (
-            <div className="mt-12 text-center text-base text-grayscale-80">
-              아직 질문에 응답한 내역이 없어요 :)
-            </div>
-          ) : (
-            myAnswers.map((myAnswer) => (
-              <Answer
-                key={myAnswer.id}
-                answer={myAnswer}
-                options={answersByQuestionIdMap[myAnswer.question.id]}
-              />
-            ))
-          )}
-        </Box.Container>
-      </section>
+      <Box.Container>
+        {isEmptyMyAnswers ? (
+          <div className="mt-12 text-center text-base text-grayscale-80">
+            아직 질문에 응답한 내역이 없어요 :)
+          </div>
+        ) : (
+          myAnswers.map((myAnswer) => (
+            <Answer
+              key={myAnswer.id}
+              answer={myAnswer}
+              options={answersByQuestionIdMap[myAnswer.question.id]}
+            />
+          ))
+        )}
+      </Box.Container>
     </main>
   );
 };
