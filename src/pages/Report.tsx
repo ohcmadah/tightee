@@ -75,7 +75,10 @@ const calcMBTIRatio = (group: Record<string, Option[]>, options: Option[]) => {
     .sort((a, b) => b.ratio - a.ratio);
 };
 
-const calcMBTIRank = (data: ReturnType<typeof calcMBTIRatio>) => {
+const calcMBTIRank = (
+  data: ReturnType<typeof calcMBTIRatio>,
+  isSkip = false
+) => {
   const rank = Array.from({ length: data.length }, () => 1);
 
   for (let i = 0; i < data.length; i++) {
@@ -85,7 +88,7 @@ const calcMBTIRank = (data: ReturnType<typeof calcMBTIRatio>) => {
       const otherItem = data[j];
       if (
         otherItem.ratio > currentItem.ratio &&
-        !compared.has(otherItem.ratio)
+        (isSkip || !compared.has(otherItem.ratio))
       ) {
         compared.add(otherItem.ratio);
         rank[i]++;
@@ -367,7 +370,9 @@ const MBTIRankReport = () => {
 
   const mbtiData = calcMBTIRatio(groups["user.MBTI"], options);
   const rank = calcMBTIRank(mbtiData);
-  const myRank = mbtiData.map((value) => value.mbti).indexOf(MBTI) + 1;
+  const rankWithSkipping = calcMBTIRank(mbtiData, true);
+  const myRank =
+    rankWithSkipping[mbtiData.map(({ mbti }) => mbti).indexOf(MBTI)];
   const visibleItems = useMemo(
     () => (isOpen ? mbtiData : mbtiData.slice(0, 3)),
     [isOpen]
