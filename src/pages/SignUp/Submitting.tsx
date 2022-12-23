@@ -37,16 +37,8 @@ const convertStateToUser = (state: SignUpState): User | null => {
 const register = async (state: SignUpState) => {
   const user = convertStateToUser(state);
   if (user) {
-    const [createUserResult, signInResult] = await Promise.allSettled([
-      createUser(user),
-      signInWithCustomToken(auth, state.token),
-    ]);
-    if (createUserResult.status === "rejected") {
-      throw new Error(createUserResult.reason);
-    }
-    if (signInResult.status === "rejected") {
-      throw new Error(signInResult.reason);
-    }
+    await createUser(user);
+    await signInWithCustomToken(auth, state.token);
   }
 };
 
