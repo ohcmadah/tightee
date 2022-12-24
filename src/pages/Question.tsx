@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { answer, getOptions, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
-import { Option as OptionType } from "../@types";
+import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
 import { useTodayQuestion } from "../contexts/TodayQuestionContext";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
@@ -17,6 +17,7 @@ import Footer from "../components/Footer";
 import ModalPortal from "../components/ModalPortal";
 import Notice from "../components/Notice";
 import Img from "../components/Img";
+import Spinner from "../components/Spinner";
 
 const Tip = () => (
   <Notice
@@ -30,24 +31,44 @@ const Tip = () => (
 );
 
 const OptionSection = ({
-  options,
+  optionIds,
   onAnswer,
 }: {
-  options: OptionType[];
+  optionIds: string[];
   onAnswer: (id: string) => any;
-}) => (
-  <section className="flex flex-col gap-y-4">
-    {options.map((option) => (
-      <Button.Basic
-        key={option.text}
-        className="leading-8"
-        onClick={() => onAnswer(option.id)}
-      >
-        {option.text}
-      </Button.Basic>
-    ))}
-  </section>
-);
+}) => {
+  const { state, data: options } = useAsyncAPI(getOptions, { ids: optionIds });
+  switch (state) {
+    case "loading":
+      return (
+        <section className="flex flex-col gap-y-4">
+          {optionIds.map((id) => (
+            <Button.Basic key={id} className="leading-8">
+              <Spinner.Small />
+            </Button.Basic>
+          ))}
+        </section>
+      );
+
+    case "error":
+      return <section>문제가 발생했습니다. 다시 시도해 주세요 :(</section>;
+
+    case "loaded":
+      return (
+        <section className="flex flex-col gap-y-4">
+          {options.data.map((option) => (
+            <Button.Basic
+              key={option.text}
+              className="leading-8"
+              onClick={() => onAnswer(option.id)}
+            >
+              {option.text}
+            </Button.Basic>
+          ))}
+        </section>
+      );
+  }
+};
 
 const QuestionSection = ({ title }: { title: string }) => {
   return (
@@ -65,32 +86,21 @@ const QuestionSection = ({ title }: { title: string }) => {
 };
 
 const Main = ({
-  title,
-  options,
+  question,
   onAnswer,
 }: {
-  title: string;
-  options: OptionType[];
+  question: QuestionType;
   onAnswer: (id: string) => any;
 }) => (
   <main>
-    <QuestionSection title={title} />
-    <OptionSection options={options} onAnswer={onAnswer} />
+    <QuestionSection title={question.title} />
+    <OptionSection optionIds={question.options} onAnswer={onAnswer} />
   </main>
 );
 
 type QuestionError = "expired-question" | "already-answered";
 
-const ActualQuestion = ({
-  question,
-}: {
-  question: {
-    id: string;
-    createdAt: string;
-    title: string;
-    options: OptionType[];
-  };
-}) => {
+const ActualQuestion = ({ question }: { question: QuestionType }) => {
   const navigate = useNavigate();
   const { forceUpdate } = useTodayQuestion();
   const [isLoading, setIsLoading] = useState(false);
@@ -139,11 +149,7 @@ const ActualQuestion = ({
               </Header.Icon>
             </Header.H1>
           </Header>
-          <Main
-            title={question.title}
-            options={question.options}
-            onAnswer={onAnswer}
-          />
+          <Main question={question} onAnswer={onAnswer} />
           <Footer className="text-center">
             <Tip />
           </Footer>
@@ -170,47 +176,13 @@ const TodayQuestion = () => {
       </ErrorView.Default>
     );
   }
-  const { state, data: options } = useAsyncAPI(getOptions, {
-    ids: todayQuestion.options,
-  });
 
-  switch (state) {
-    case "loading":
-      return <Loading.Full />;
-
-    case "error":
-      return <ErrorView.Default />;
-
-    case "loaded":
-      return (
-        <ActualQuestion
-          question={{ ...todayQuestion, options: options.data }}
-        />
-      );
-  }
-};
-
-const getQuestionPageData = async (questionId: string) => {
-  const question = await getQuestion(questionId);
-  if (question.status === 204) {
-    return { question: null };
-  }
-
-  const today = getLocalTime().format("YYYYMMDD");
-  const isTodayQuestion = question.data.createdAt === today;
-
-  const optionIds = question.data.options;
-  const options = await getOptions({ ids: optionIds });
-
-  return {
-    question: { ...question.data, options: options.data },
-    isExpired: !isTodayQuestion,
-  };
+  return <ActualQuestion question={todayQuestion} />;
 };
 
 const Question = ({ questionId }: { questionId: string }) => {
   const navigate = useNavigate();
-  const { state, data } = useAsyncAPI(getQuestionPageData, questionId);
+  const { state, data } = useAsyncAPI(getQuestion, questionId);
 
   switch (state) {
     case "loading":
@@ -220,7 +192,16 @@ const Question = ({ questionId }: { questionId: string }) => {
       return <ErrorView.Default />;
 
     case "loaded":
-      if (data.isExpired) {
+      if (data.status === 204) {
+        return (
+          <ErrorView.Default>
+            <article>질문이 존재하지 않습니다.</article>
+          </ErrorView.Default>
+        );
+      }
+
+      const today = getLocalTime().format("YYYYMMDD");
+      if (today !== data.data.createdAt) {
         return (
           <ErrorView.ExpiredQuestion
             onReload={() => {
@@ -230,13 +211,7 @@ const Question = ({ questionId }: { questionId: string }) => {
         );
       }
 
-      return data.question ? (
-        <ActualQuestion question={data.question} />
-      ) : (
-        <ErrorView.Default>
-          <article>질문이 존재하지 않습니다.</article>
-        </ErrorView.Default>
-      );
+      return <ActualQuestion question={data.data} />;
   }
 };
 
