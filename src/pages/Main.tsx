@@ -43,27 +43,33 @@ const Home = () => {
   }
 
   return (
-    <TodayQuestionContextProvider
-      value={{
-        data:
-          todayQuestion.data.status === 204 ? null : todayQuestion.data.data,
-        forceUpdate: todayQuestion.forceUpdate,
-      }}
-    >
-      <UserContextProvider
-        value={{ data: user.data, forceUpdate: user.forceUpdate }}
+    <Layout className="flex flex-col">
+      <TodayQuestionContextProvider
+        value={{
+          data:
+            todayQuestion.data.status === 204 ? null : todayQuestion.data.data,
+          forceUpdate: todayQuestion.forceUpdate,
+        }}
       >
-        <MyAnswersContextProvider
-          value={{ data: myAnswers.data, forceUpdate: myAnswers.forceUpdate }}
+        <UserContextProvider
+          value={{ data: user.data, forceUpdate: user.forceUpdate }}
         >
-          <Layout className="flex flex-col">
+          <MyAnswersContextProvider
+            value={{ data: myAnswers.data, forceUpdate: myAnswers.forceUpdate }}
+          >
             <Outlet />
-          </Layout>
-          <Nav />
-        </MyAnswersContextProvider>
-      </UserContextProvider>
-    </TodayQuestionContextProvider>
+          </MyAnswersContextProvider>
+        </UserContextProvider>
+      </TodayQuestionContextProvider>
+    </Layout>
   );
 };
 
-export default withAuth(Home);
+const Main = () => (
+  <>
+    <Home />
+    <Nav />
+  </>
+);
+
+export default withAuth(Main);
