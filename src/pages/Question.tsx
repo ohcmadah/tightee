@@ -120,7 +120,6 @@ const ExpiredError = ({
 };
 
 const ActualQuestion = ({ question }: { question: QuestionType }) => {
-  const navigate = useNavigate();
   const { forceUpdate } = useMyAnswers();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<QuestionError | null>(null);
