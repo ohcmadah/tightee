@@ -20,4 +20,5 @@ export default {
       <Base width={32} height={32} />
     </div>
   ),
+  Small: () => <Base width={14} height={14} />,
 };

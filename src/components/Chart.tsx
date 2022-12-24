@@ -60,7 +60,7 @@ const calcY = (ratio: number) => {
   if (ratio <= 0.5) {
     return 3;
   }
-  if (ratio <= 0.75) {
+  if (ratio < 0.75) {
     return -3;
   }
   return -5;
@@ -143,16 +143,18 @@ const Regend = () => {
       {data.map(({ title, ratio, color, isSelected }) => (
         <li
           key={title}
-          className={cn("mb-3 flex items-center last:mb-0", {
+          className={cn("mb-3 flex items-start last:mb-0", {
             "font-bold": isSelected,
           })}
         >
           <span
-            className="mr-1.5 inline-block h-[16px] w-[24px] rounded-xl"
+            className="mr-1.5 mt-1 inline-block h-[16px] w-[24px] flex-none rounded-xl"
             style={{ backgroundColor: color }}
           />
-          {title}&nbsp;
-          <span className="text-grayscale-40">({formatPercent(ratio)})</span>
+          <div>
+            {title}&nbsp;
+            <span className="text-grayscale-40">({formatPercent(ratio)})</span>
+          </div>
         </li>
       ))}
     </ul>

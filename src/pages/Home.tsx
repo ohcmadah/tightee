@@ -1,13 +1,12 @@
-import useAsyncAPI from "../hooks/useAsyncAPI";
-import { getMyAnswers, getTodayQuestion, getUser } from "../common/apis";
-import { useAuthenticatedState } from "../contexts/AuthContext";
+import { useMemo } from "react";
 import { MBTI } from "../@types";
 import { getMBTIName } from "../common/utils";
+import { useUser } from "../contexts/UserContext";
+import { useTodayQuestion } from "../contexts/TodayQuestionContext";
+import { useMyAnswers } from "../contexts/MyAnswersContext";
 
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
-import Loading from "../components/Loading";
-import ErrorView from "../components/ErrorView";
 import Badge from "../components/Badge";
 import Box from "../components/Box";
 import Img from "../components/Img";
@@ -89,79 +88,37 @@ const Main = ({
   );
 };
 
-const getHomeData = async (uid: string) => {
-  const userPromise = getUser(uid);
-  const questionPromise = getTodayQuestion();
-  const answersPromise = getMyAnswers(uid);
-
-  const results = await Promise.allSettled([
-    userPromise,
-    questionPromise,
-    answersPromise,
-  ]);
-  const [user, question, answers] = results;
-
-  if (user.status === "rejected") {
-    throw new Error(user.reason);
-  }
-  if (question.status === "rejected") {
-    throw new Error(question.reason);
-  }
-  if (answers.status === "rejected") {
-    throw new Error(answers.reason);
-  }
-
-  const todayAnswer = answers.value.find(
-    (answer) => answer.question.id === question.value.data.id
+const Home = () => {
+  const user = useUser();
+  const todayQuestion = useTodayQuestion();
+  const myAnswers = useMyAnswers();
+  const todayAnswer = useMemo(
+    () =>
+      myAnswers.data.find(
+        (answer) => answer.question.id === todayQuestion.data?.id
+      ),
+    [myAnswers]
   );
 
-  return {
-    question:
-      question.value.status === 204
-        ? "오늘의 질문이 존재하지 않아요 :("
-        : question.value.data.title,
-    answer: {
-      id: todayAnswer?.id,
-      count: answers.value.length,
-    },
-    MBTI: user.value?.MBTI,
-  };
-};
-
-const Home = () => {
-  const { user } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getHomeData, user.uid);
-
-  switch (state) {
-    case "loading":
-      return <Loading.Full />;
-
-    case "error":
-      return (
-        <ErrorView.Default>
-          <div>{`${data}`}</div>
-        </ErrorView.Default>
-      );
-
-    case "loaded":
-      return (
-        <>
-          <Header>
-            <Header.H1>
-              <Header.Icon iconSrc="/images/home.png">
-                타이티입니다 :)
-              </Header.Icon>
-            </Header.H1>
-          </Header>
-          <Main
-            question={data.question}
-            answer={data.answer}
-            MBTI={data.MBTI}
-          />
-          <Footer />
-        </>
-      );
-  }
+  return (
+    <>
+      <Header>
+        <Header.H1>
+          <Header.Icon iconSrc="/images/home.png">타이티입니다 :)</Header.Icon>
+        </Header.H1>
+      </Header>
+      <Main
+        question={
+          todayQuestion.data
+            ? todayQuestion.data.title
+            : "오늘의 질문이 존재하지 않아요 :("
+        }
+        answer={{ id: todayAnswer?.id, count: myAnswers.data.length }}
+        MBTI={user.data.MBTI}
+      />
+      <Footer />
+    </>
+  );
 };
 
 export default Home;

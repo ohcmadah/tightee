@@ -34,6 +34,7 @@ import ModalPortal from "../components/ModalPortal";
 import ExternalLink from "../components/ExternalLink";
 import ErrorView from "../components/ErrorView";
 import Icon from "../components/Icon";
+import { useUser } from "../contexts/UserContext";
 
 const Settings = ({
   subscribe,
@@ -107,11 +108,11 @@ const Settings = ({
 const ProfileForm = ({
   user,
   onUpdateUser,
-  existentNicknameSet,
+  nicknames,
 }: {
   user: User;
   onUpdateUser: (data: UpdateData<User>) => any;
-  existentNicknameSet: Set<string>;
+  nicknames: string[];
 }) => {
   const initialValues = useMemo(
     () => ({
@@ -123,6 +124,10 @@ const ProfileForm = ({
     }),
     [user]
   );
+  const existentNicknameSet = useMemo(() => {
+    const filtered = nicknames.filter((nickname) => nickname !== user.nickname);
+    return new Set(filtered);
+  }, [user]);
 
   const { values, errors, handleChange, handleSubmit } = useForm<ProfileValues>(
     {
@@ -205,15 +210,8 @@ const ProfileForm = ({
   );
 };
 
-const ActualProfile = ({
-  init,
-  user,
-  existentNicknameSet,
-}: {
-  init: Function;
-  user: User;
-  existentNicknameSet: Set<string>;
-}) => {
+const ActualProfile = ({ nicknames }: { nicknames: string[] }) => {
+  const { data: user, forceUpdate } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -232,7 +230,7 @@ const ActualProfile = ({
       await updateUser(user.id, data);
     } catch (error) {}
     setIsLoading(false);
-    init();
+    forceUpdate();
   };
 
   return (
@@ -247,7 +245,7 @@ const ActualProfile = ({
       <ProfileForm
         user={user}
         onUpdateUser={onUpdateUser}
-        existentNicknameSet={existentNicknameSet}
+        nicknames={nicknames}
       />
       <Settings
         subscribe={user.subscribe.marketing}
@@ -263,41 +261,10 @@ const ActualProfile = ({
   );
 };
 
-const getProfileData = async (uid: string) => {
-  const userPromise = getUser(uid);
-  const nicknamesPromise = getNicknames();
-  const [userResult, nicknames] = await Promise.allSettled([
-    userPromise,
-    nicknamesPromise,
-  ]);
-
-  if (userResult.status === "rejected") {
-    throw new Error(userResult.reason);
-  }
-  if (nicknames.status === "rejected") {
-    throw new Error(nicknames.reason);
-  }
-
-  const user = userResult.value;
-  if (!user) {
-    await auth.signOut();
-    throw new Error("다시 로그인해 주세요.");
-  }
-
-  return {
-    user,
-    nicknames: nicknames.value.filter((nickame) => nickame !== user.nickname),
-  };
-};
-
 const Profile = () => {
-  const auth = useAuthenticatedState();
-  const { state, data, forceUpdate } = useAsyncAPI(
-    getProfileData,
-    auth.user.uid
-  );
+  const nicknames = useAsyncAPI(getNicknames);
 
-  switch (state) {
+  switch (nicknames.state) {
     case "loading":
       return <Loading.Full />;
 
@@ -305,13 +272,7 @@ const Profile = () => {
       return <ErrorView.Default />;
 
     case "loaded":
-      return (
-        <ActualProfile
-          init={forceUpdate}
-          user={data.user}
-          existentNicknameSet={new Set(data.nicknames)}
-        />
-      );
+      return <ActualProfile nicknames={nicknames.data} />;
   }
 };
 
