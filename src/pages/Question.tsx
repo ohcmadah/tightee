@@ -132,10 +132,9 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
     }
     setIsLoading(true);
     try {
-      const { data } = await answer(question.id, optionId);
+      await answer(question.id, optionId);
       setIsLoading(false);
       forceUpdate();
-      navigate("/answer/" + data.id + "/report");
     } catch (error: any) {
       setIsLoading(false);
       if (error.code === 400) {
