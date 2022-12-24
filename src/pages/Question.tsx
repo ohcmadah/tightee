@@ -1,17 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import {
-  answer,
-  getMyAnswers,
-  getOptions,
-  getQuestion,
-  getTodayQuestion,
-} from "../common/apis";
+import { answer, getOptions, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Option as OptionType } from "../@types";
 import { getLocalTime } from "../common/utils";
-import { useAuthenticatedState } from "../contexts/AuthContext";
+import { useTodayQuestion } from "../contexts/TodayQuestionContext";
+import { useMyAnswers } from "../contexts/MyAnswersContext";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -88,7 +83,6 @@ type QuestionError = "expired-question" | "already-answered";
 
 const ActualQuestion = ({
   question,
-  forceUpdate,
 }: {
   question: {
     id: string;
@@ -96,9 +90,9 @@ const ActualQuestion = ({
     title: string;
     options: OptionType[];
   };
-  forceUpdate: React.DispatchWithoutAction;
 }) => {
   const navigate = useNavigate();
+  const { forceUpdate } = useTodayQuestion();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<QuestionError | null>(null);
 
@@ -126,6 +120,7 @@ const ActualQuestion = ({
         <ErrorView.ExpiredQuestion
           onReload={() => {
             forceUpdate();
+            navigate("/question");
             setError(null);
           }}
         />
@@ -158,107 +153,26 @@ const ActualQuestion = ({
   }
 };
 
-const TodayQuestion = ({
-  data,
-  forceUpdate,
-}: {
-  data: Awaited<ReturnType<typeof getQuestionPageData>>;
-  forceUpdate: React.DispatchWithoutAction;
-}) => {
-  const { question } = data;
+const TodayQuestion = () => {
+  const { data: todayQuestion } = useTodayQuestion();
 
-  return question ? (
-    <ActualQuestion question={question} forceUpdate={forceUpdate} />
-  ) : (
-    <ErrorView.Default>
-      <article>
-        오늘의 질문이 존재하지 않습니다.
-        <br />
-        <ExternalLink className="text-primary" href={URL_CS}>
-          고객센터
-        </ExternalLink>
-        로 문의해 주세요.
-      </article>
-    </ErrorView.Default>
-  );
-};
-
-const Question = ({
-  data,
-  forceUpdate,
-}: {
-  data: Awaited<ReturnType<typeof getQuestionPageData>>;
-  forceUpdate: React.DispatchWithoutAction;
-}) => {
-  const navigate = useNavigate();
-  const { isExpired, question } = data;
-
-  if (isExpired) {
+  if (!todayQuestion) {
     return (
-      <ErrorView.ExpiredQuestion
-        onReload={() => {
-          forceUpdate();
-          navigate("/question");
-        }}
-      />
+      <ErrorView.Default>
+        <article>
+          오늘의 질문이 존재하지 않습니다.
+          <br />
+          <ExternalLink className="text-primary" href={URL_CS}>
+            고객센터
+          </ExternalLink>
+          로 문의해 주세요.
+        </article>
+      </ErrorView.Default>
     );
   }
-
-  return question ? (
-    <ActualQuestion question={question} forceUpdate={forceUpdate} />
-  ) : (
-    <ErrorView.Default>
-      <article>질문이 존재하지 않습니다.</article>
-    </ErrorView.Default>
-  );
-};
-
-const getQuestionPageData = async (uid: string, questionId?: string) => {
-  const question = await (questionId
-    ? getQuestion(questionId)
-    : getTodayQuestion());
-  if (question.status === 204) {
-    return { question: null };
-  }
-
-  const today = getLocalTime().format("YYYYMMDD");
-  const isTodayQuestion = question.data.createdAt === today;
-
-  const optionIds = question.data.options;
-
-  const optionsPromise = getOptions({ ids: optionIds });
-  const answersPromise = getMyAnswers(uid);
-  const [options, answers] = await Promise.allSettled([
-    optionsPromise,
-    answersPromise,
-  ]);
-
-  if (options.status === "rejected") {
-    throw new Error(options.reason);
-  }
-  if (answers.status === "rejected") {
-    throw new Error(answers.reason);
-  }
-
-  const answer = answers.value.find(
-    (answer) => answer.question.id === question.data.id
-  );
-
-  return {
-    question: { ...question.data, options: options.value.data },
-    answer,
-    isExpired: !isTodayQuestion,
-  };
-};
-
-const QuestionWrapper = () => {
-  const { questionId } = useParams();
-  const { user } = useAuthenticatedState();
-  const { state, data, forceUpdate } = useAsyncAPI(
-    getQuestionPageData,
-    user.uid,
-    questionId
-  );
+  const { state, data: options } = useAsyncAPI(getOptions, {
+    ids: todayQuestion.options,
+  });
 
   switch (state) {
     case "loading":
@@ -268,16 +182,75 @@ const QuestionWrapper = () => {
       return <ErrorView.Default />;
 
     case "loaded":
-      if (data.answer) {
-        return <Navigate to={"/answer/" + data.answer.id + "/report"} />;
-      }
-
-      return questionId ? (
-        <Question data={data} forceUpdate={forceUpdate} />
-      ) : (
-        <TodayQuestion data={data} forceUpdate={forceUpdate} />
+      return (
+        <ActualQuestion
+          question={{ ...todayQuestion, options: options.data }}
+        />
       );
   }
+};
+
+const getQuestionPageData = async (questionId: string) => {
+  const question = await getQuestion(questionId);
+  if (question.status === 204) {
+    return { question: null };
+  }
+
+  const today = getLocalTime().format("YYYYMMDD");
+  const isTodayQuestion = question.data.createdAt === today;
+
+  const optionIds = question.data.options;
+  const options = await getOptions({ ids: optionIds });
+
+  return {
+    question: { ...question.data, options: options.data },
+    isExpired: !isTodayQuestion,
+  };
+};
+
+const Question = ({ questionId }: { questionId: string }) => {
+  const navigate = useNavigate();
+  const { state, data } = useAsyncAPI(getQuestionPageData, questionId);
+
+  switch (state) {
+    case "loading":
+      return <Loading.Full />;
+
+    case "error":
+      return <ErrorView.Default />;
+
+    case "loaded":
+      if (data.isExpired) {
+        return (
+          <ErrorView.ExpiredQuestion
+            onReload={() => {
+              navigate("/question");
+            }}
+          />
+        );
+      }
+
+      return data.question ? (
+        <ActualQuestion question={data.question} />
+      ) : (
+        <ErrorView.Default>
+          <article>질문이 존재하지 않습니다.</article>
+        </ErrorView.Default>
+      );
+  }
+};
+
+const QuestionWrapper = () => {
+  const { questionId } = useParams();
+  const { data: todayQuestion } = useTodayQuestion();
+  const { data: myAnswers } = useMyAnswers();
+  const answer = myAnswers.find(
+    (answer) => answer.question.id === (questionId || todayQuestion?.id)
+  );
+  if (answer) {
+    return <Navigate to={"/answer/" + answer.id + "/report"} />;
+  }
+  return questionId ? <Question questionId={questionId} /> : <TodayQuestion />;
 };
 
 export default QuestionWrapper;
