@@ -73,21 +73,17 @@ app.get("/", checkUserIdContained, async (req, res) => {
 
     const { user: userId, question: questionId, groups } = req.query;
 
-    const { empty, docs } = await db.collection("answers").get();
-    if (empty) {
-      return res.status(204).json();
-    }
-    const answers = await convertDocsToAnswers(db, docs);
-
     if (userId) {
       if (userId === req.body.uid) {
-        const filteredAnswers = answers.filter(
-          (answer) => answer.user.id === userId
-        );
-        if (filteredAnswers.length === 0) {
+        const { empty, docs } = await db
+          .collection("answers")
+          .where("user.id", "==", userId)
+          .get();
+        const answers = await convertDocsToAnswers(db, docs);
+        if (empty) {
           return res.status(204).json();
         }
-        return res.status(200).json(filteredAnswers);
+        return res.status(200).json(answers);
       }
       return res
         .status(403)
@@ -95,23 +91,22 @@ app.get("/", checkUserIdContained, async (req, res) => {
     }
 
     if (groups && Array.isArray(groups)) {
-      const filteredAnswers = questionId
-        ? answers.filter((answer) => answer.question.id === questionId)
-        : answers;
-      if (filteredAnswers.length === 0) {
+      const coll = db.collection("answers");
+      const query = questionId
+        ? coll.where("question", "==", db.doc("questions/" + questionId))
+        : coll;
+      const { empty, docs } = await query.get();
+      if (empty) {
         return res.status(204).json();
       }
+      const answers = await convertDocsToAnswers(db, docs);
 
       const result = (groups as string[]).reduce((acc, groupKey) => {
         const keyGetter = (answer: ReturnAnswer) => {
           const key = getProperty(answer, groupKey);
           return groupKey.match(/birthdate/) ? calcAgeGroup(key) : key;
         };
-        const group = toMap(
-          filteredAnswers,
-          keyGetter,
-          (answer) => answer.option
-        );
+        const group = toMap(answers, keyGetter, (answer) => answer.option);
         return { ...acc, [groupKey]: Object.fromEntries(group) };
       }, {});
 
