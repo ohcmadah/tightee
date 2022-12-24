@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { answer, getOptions, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
@@ -100,9 +100,28 @@ const Main = ({
 
 type QuestionError = "expired-question" | "already-answered";
 
-const ActualQuestion = ({ question }: { question: QuestionType }) => {
+const ExpiredError = ({
+  setError,
+}: {
+  setError: React.Dispatch<React.SetStateAction<QuestionError | null>>;
+}) => {
   const navigate = useNavigate();
   const { forceUpdate } = useTodayQuestion();
+
+  return (
+    <ErrorView.ExpiredQuestion
+      onReload={() => {
+        forceUpdate();
+        navigate("/question");
+        setError(null);
+      }}
+    />
+  );
+};
+
+const ActualQuestion = ({ question }: { question: QuestionType }) => {
+  const navigate = useNavigate();
+  const { forceUpdate } = useMyAnswers();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<QuestionError | null>(null);
 
@@ -115,6 +134,7 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
     try {
       const { data } = await answer(question.id, optionId);
       setIsLoading(false);
+      forceUpdate();
       navigate("/answer/" + data.id + "/report");
     } catch (error: any) {
       setIsLoading(false);
@@ -126,15 +146,7 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
 
   switch (error) {
     case "expired-question":
-      return (
-        <ErrorView.ExpiredQuestion
-          onReload={() => {
-            forceUpdate();
-            navigate("/question");
-            setError(null);
-          }}
-        />
-      );
+      return <ExpiredError setError={setError} />;
 
     case "already-answered":
       return <Navigate to="/answer" />;

@@ -1,12 +1,9 @@
-import {
-  getAnswerGroups,
-  getMyAnswers,
-  getTodayQuestion,
-} from "../common/apis";
+import { getAnswerGroups } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType, Option } from "../@types";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
-import { useAuthenticatedState } from "../contexts/AuthContext";
+import { useMyAnswers } from "../contexts/MyAnswersContext";
+import { useTodayQuestion } from "../contexts/TodayQuestionContext";
 
 import { Link } from "react-router-dom";
 import ErrorView from "../components/ErrorView";
@@ -19,7 +16,7 @@ import Icon from "../components/Icon";
 import Notice from "../components/Notice";
 import Img from "../components/Img";
 
-type PageData = Awaited<ReturnType<typeof getAnswersPageData>>;
+type PageData = Awaited<ReturnType<typeof getAnswerGroups>>;
 
 const Answer = ({
   answer,
@@ -38,13 +35,13 @@ const Answer = ({
       <Badge className="bg-question-not-today">
         {getFormattedDate(question.createdAt)}
       </Badge>
-      <article className="my-6 px-2">
+      <div className="my-6 px-2">
         <div className="mb-1.5 text-lg font-medium">{question.title}</div>
-        <div className="text-primary">
+        <div className="mt-1.5 inline-flex items-start text-primary">
           <Icon src="/images/reply.svg" alt="reply" />
-          <span className="align-middle">{option.text}</span>
+          <div>{option.text}</div>
         </div>
-      </article>
+      </div>
       <Link
         to={`${id}/report`}
         className="flex w-full items-center justify-between"
@@ -59,21 +56,13 @@ const Answer = ({
 };
 
 const TodayQuestion = () => {
-  const { state, data } = useAsyncAPI(getTodayQuestion);
-
-  const question =
-    state === "loading"
-      ? "오늘의 질문을 불러오고 있어요..."
-      : state === "error"
-      ? "에러가 발생했어요 :("
-      : data.status === 204
-      ? "오늘의 질문이 없어요 :("
-      : data.data.title;
+  const { data: todayQuestion } = useTodayQuestion();
+  const title = todayQuestion ? todayQuestion.title : "오늘의 질문이 없어요 :(";
 
   return (
     <article className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
       <Badge className="bg-primary-peach">TODAY</Badge>
-      <div className="my-6 px-2 text-lg font-medium">{question}</div>
+      <div className="my-6 px-2 text-lg font-medium">{title}</div>
       <Link to="/question" className="flex w-full items-center">
         <Icon src="/images/reply.svg" alt="reply" />
         <div className="grow text-grayscale-20">대답하러 가기</div>
@@ -95,7 +84,8 @@ const AlreadyAnswered = () => (
   </Notice>
 );
 
-const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
+const Main = ({ answersByQuestionIdMap }: PageData) => {
+  const { data: myAnswers } = useMyAnswers();
   const isEmptyMyAnswers = myAnswers.length === 0;
   const isAnsweredTodayQuestion =
     !isEmptyMyAnswers &&
@@ -129,7 +119,7 @@ const Main = ({ answersByQuestionIdMap, myAnswers }: PageData) => {
   );
 };
 
-const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
+const ActualAnswers = ({ answersByQuestionIdMap }: PageData) => (
   <>
     <Header>
       <Header.H1 className="flex items-center">
@@ -138,35 +128,14 @@ const ActualAnswers = ({ answersByQuestionIdMap, myAnswers }: PageData) => (
         </Header.Icon>
       </Header.H1>
     </Header>
-    <Main
-      answersByQuestionIdMap={answersByQuestionIdMap}
-      myAnswers={myAnswers}
-    />
+    <Main answersByQuestionIdMap={answersByQuestionIdMap} />
   </>
 );
 
-const getAnswersPageData = async (uid: string) => {
-  const myAnswersPromise = getMyAnswers(uid);
-  const answerGroupsPromise = getAnswerGroups({ groups: ["question.id"] });
-  const [myAnswers, answerGroups] = await Promise.allSettled([
-    myAnswersPromise,
-    answerGroupsPromise,
-  ]);
-  if (myAnswers.status === "rejected") {
-    throw new Error(myAnswers.reason);
-  }
-  if (answerGroups.status === "rejected") {
-    throw new Error(answerGroups.reason);
-  }
-  return {
-    myAnswers: myAnswers.value,
-    answersByQuestionIdMap: answerGroups.value["question.id"],
-  };
-};
-
 const Answers = () => {
-  const { user } = useAuthenticatedState();
-  const { state, data } = useAsyncAPI(getAnswersPageData, user.uid);
+  const { state, data: answerGroups } = useAsyncAPI(getAnswerGroups, {
+    groups: ["question.id"],
+  });
 
   switch (state) {
     case "loading":
@@ -177,10 +146,7 @@ const Answers = () => {
 
     case "loaded":
       return (
-        <ActualAnswers
-          answersByQuestionIdMap={data.answersByQuestionIdMap}
-          myAnswers={data.myAnswers}
-        />
+        <ActualAnswers answersByQuestionIdMap={answerGroups["question.id"]} />
       );
   }
 };
