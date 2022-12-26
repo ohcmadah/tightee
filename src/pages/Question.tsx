@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { answer, getOptions, getQuestion } from "../common/apis";
+import { answer, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { URL_CS } from "../common/constants";
 import { Question as QuestionType } from "../@types";
@@ -17,7 +17,6 @@ import Footer from "../components/Footer";
 import ModalPortal from "../components/ModalPortal";
 import Notice from "../components/Notice";
 import Img from "../components/Img";
-import Spinner from "../components/Spinner";
 
 const Tip = () => (
   <Notice
@@ -31,44 +30,20 @@ const Tip = () => (
 );
 
 const OptionSection = ({
-  optionIds,
+  options,
   onAnswer,
 }: {
-  optionIds: string[];
+  options: QuestionType["options"];
   onAnswer: (id: string) => any;
-}) => {
-  const { state, data: options } = useAsyncAPI(getOptions, { ids: optionIds });
-  switch (state) {
-    case "loading":
-      return (
-        <section className="flex flex-col gap-y-4">
-          {optionIds.map((id) => (
-            <Button.Basic key={id} className="leading-8">
-              <Spinner.Small />
-            </Button.Basic>
-          ))}
-        </section>
-      );
-
-    case "error":
-      return <section>문제가 발생했습니다. 다시 시도해 주세요 :(</section>;
-
-    case "loaded":
-      return (
-        <section className="flex flex-col gap-y-4">
-          {options.data.map((option) => (
-            <Button.Basic
-              key={option.text}
-              className="leading-8"
-              onClick={() => onAnswer(option.id)}
-            >
-              {option.text}
-            </Button.Basic>
-          ))}
-        </section>
-      );
-  }
-};
+}) => (
+  <section className="flex flex-col gap-y-4">
+    {Object.entries(options).map(([id, text]) => (
+      <Button.Basic key={id} className="leading-8" onClick={() => onAnswer(id)}>
+        {text}
+      </Button.Basic>
+    ))}
+  </section>
+);
 
 const QuestionSection = ({ title }: { title: string }) => {
   return (
@@ -94,7 +69,7 @@ const Main = ({
 }) => (
   <main>
     <QuestionSection title={question.title} />
-    <OptionSection optionIds={question.options} onAnswer={onAnswer} />
+    <OptionSection options={question.options} onAnswer={onAnswer} />
   </main>
 );
 
@@ -230,7 +205,7 @@ const QuestionWrapper = () => {
   const { data: todayQuestion } = useTodayQuestion();
   const { data: myAnswers } = useMyAnswers();
   const answer = myAnswers.find(
-    (answer) => answer.question.id === (questionId || todayQuestion?.id)
+    (answer) => answer.question === (questionId || todayQuestion?.id)
   );
   if (answer) {
     return <Navigate to={"/answer/" + answer.id + "/report"} />;

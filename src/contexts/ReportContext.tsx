@@ -1,11 +1,11 @@
 import { createContext, useContext } from "react";
-import { Answer, Option } from "../@types";
+import { Answer, Question } from "../@types";
 
 type ReportState = {
   isPublic: boolean;
   answer: Answer;
-  options: Option[];
-  groups: { [groupKey: string]: { [id: string]: Option[] } };
+  question: Question;
+  groups: { [groupKey: string]: { [id: string]: string[] } };
 };
 
 const ReportStateContext = createContext<ReportState | undefined>(undefined);

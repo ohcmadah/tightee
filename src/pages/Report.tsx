@@ -1,9 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import cn from "classnames";
-import { getAnswer, getAnswerGroups, getOptions } from "../common/apis";
+import { getAnswer, getAnswerGroups, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { Option } from "../@types";
+import { Question } from "../@types";
 import {
   calcAgeGroup,
   convertGenderCodeToReadable,
@@ -41,32 +47,35 @@ const RANK_ICONS = [
 ];
 
 const calcRatio = (
-  group: Map<string, Option[]>,
+  group: Map<string, string[]>,
   total: number,
-  defaultOptions: Option[]
+  defaultOptions: Record<string, string>
 ) => {
-  return defaultOptions.reduce((acc, option) => {
-    const sameOptions = group.get(option.id);
+  return Object.entries(defaultOptions).reduce((acc, [id, text]) => {
+    const sameOptions = group.get(id);
 
     const ratio = (sameOptions?.length || 0) / total;
-    return { ...acc, [option.id]: { title: option.text, ratio } };
+    return { ...acc, [id]: { title: text, ratio } };
   }, {});
 };
 
 const genChartData = (
-  options: Option[],
-  defaultOptions: Option[]
+  options: string[],
+  defaultOptions: Record<string, string>
 ): { [optionId: string]: { title: string; ratio: number } } => {
   const total = options.length;
-  const group = groupBy(options, (option) => option.id);
+  const group = groupBy(options, (option) => option);
   return calcRatio(group, total, defaultOptions);
 };
 
-const calcMBTIRatio = (group: Record<string, Option[]>, options: Option[]) => {
+const calcMBTIRatio = (
+  group: Record<string, string[]>,
+  defaultOptions: Record<string, string>
+) => {
   return Object.entries(group)
     .filter(([mbti, _]) => mbti !== "null")
-    .map(([mbti, answers]) => {
-      const data = genChartData(answers, options);
+    .map(([mbti, options]) => {
+      const data = genChartData(options, defaultOptions);
       const { title, ratio } = Object.values(data).sort(
         (a, b) => b.ratio - a.ratio
       )[0];
@@ -171,14 +180,13 @@ const PublicFooter = () => {
   } = useReportState();
   const authState = useAuthState();
   const onStart = () => {
-    const questionId = question.id;
     const isAuthentication =
       authState.state === "loaded" && authState.isAuthentication;
     if (isAuthentication) {
-      return navigate("/question/" + questionId);
+      return navigate("/question/" + question);
     }
     return navigate("/welcome", {
-      state: { questionId },
+      state: { question },
     });
   };
   return (
@@ -224,8 +232,8 @@ const EmptyMBTI = () => {
 const DetailReport = () => {
   const {
     answer: { user, option },
-    options,
     groups,
+    question: { options },
   } = useReportState();
 
   const mbtiData = genChartData(
@@ -245,7 +253,7 @@ const DetailReport = () => {
           <Box>
             <Title icon="/images/genie.png">MBTI별 분석</Title>
             {user.MBTI ? (
-              <Chart data={mbtiData} id={option.id}>
+              <Chart data={mbtiData} id={option}>
                 <Chart.Summary>{`'${user.MBTI}' 유형의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
                 <Chart.Pie className="m-auto my-4" size="45%" />
                 <Chart.Regend />
@@ -257,7 +265,7 @@ const DetailReport = () => {
 
           <Box>
             <Title icon="/images/location.png">지역별 분석</Title>
-            <Chart data={regionData} id={option.id}>
+            <Chart data={regionData} id={option}>
               <Chart.Summary>
                 {"'" +
                   convertRegionCodeToReadable(user.region) +
@@ -270,7 +278,7 @@ const DetailReport = () => {
 
           <Box>
             <Title icon="/images/hourglass.png">나이별 분석</Title>
-            <Chart data={ageData} id={option.id}>
+            <Chart data={ageData} id={option}>
               <Chart.Summary>{`'${ageGroup}대'의 타이티 중에 {value}가 같은 응답을 했어요.`}</Chart.Summary>
               <Chart.Pie className="m-auto my-4" size="45%" />
               <Chart.Regend />
@@ -279,7 +287,7 @@ const DetailReport = () => {
 
           <Box>
             <Title icon="/images/heart.png">성별 분석</Title>
-            <Chart data={genderData} id={option.id}>
+            <Chart data={genderData} id={option}>
               <Chart.Summary>
                 {`성별이 '${convertGenderCodeToReadable(
                   user.gender
@@ -343,8 +351,8 @@ const MBTIRankReport = () => {
     answer: {
       user: { MBTI },
     },
-    options,
     groups,
+    question,
   } = useReportState();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -357,7 +365,7 @@ const MBTIRankReport = () => {
     );
   }
 
-  const mbtiData = calcMBTIRatio(groups["user.MBTI"], options);
+  const mbtiData = calcMBTIRatio(groups["user.MBTI"], question.options);
   const rank = calcMBTIRank(mbtiData);
   const rankWithSkipping = calcMBTIRank(mbtiData, true);
   const myRank =
@@ -398,9 +406,9 @@ const MBTIRankReport = () => {
 };
 
 const BasicReport = () => {
-  const { answer, options, groups } = useReportState();
+  const { answer, groups, question } = useReportState();
 
-  const optionsByOptionIdMap = groups["option.id"];
+  const optionsByOptionIdMap = groups["option"];
   const total = Object.values(optionsByOptionIdMap).flat().length;
 
   return (
@@ -408,12 +416,12 @@ const BasicReport = () => {
       <Box.Container>
         <Box>
           <Badge className="bg-question-not-today">
-            {getFormattedDate(answer.question.createdAt)}
+            {getFormattedDate(question.createdAt)}
           </Badge>
-          <div className="mt-3 ml-2">{answer.question.title}</div>
+          <div className="mt-3 ml-2">{question.title}</div>
           <div className="mt-3 ml-1 flex items-center font-medium text-primary">
             <Icon src="/images/reply.svg" alt="reply" />
-            {answer.option.text}
+            {question.options[answer.option]}
           </div>
         </Box>
 
@@ -422,9 +430,9 @@ const BasicReport = () => {
             data={calcRatio(
               new Map(Object.entries(optionsByOptionIdMap)),
               total,
-              options
+              question.options
             )}
-            id={answer.option.id}
+            id={answer.option}
           >
             <Chart.Summary>{`전체 타이티 중에 {value}를 차지하고 있어요.`}</Chart.Summary>
             <Chart.Pie className="m-auto my-4" size="45%" />
@@ -488,27 +496,57 @@ const PublicReport = () => {
   );
 };
 
-const getMyAnswerAndAnswers = async (answerId: string, user: User | null) => {
+const getMyAnswerAndAnswers = async (
+  answerId: string,
+  user: User | null,
+  question?: Question
+) => {
+  const groupKeys = [
+    "user.MBTI",
+    "user.region",
+    "user.birthdate",
+    "user.gender",
+    "option",
+  ];
+  if (question) {
+    const answerPromise = user
+      ? user.getIdToken().then((token) => getAnswer(answerId, { token }))
+      : getAnswer(answerId);
+    const groupsPromise = getAnswerGroups({
+      groups: groupKeys,
+      questionId: question.id,
+    });
+    const [answerResult, groupsResult] = await Promise.allSettled([
+      answerPromise,
+      groupsPromise,
+    ]);
+    if (answerResult.status === "rejected") {
+      throw new Error(answerResult.reason);
+    }
+    if (groupsResult.status === "rejected") {
+      throw new Error(groupsResult.reason);
+    }
+    return {
+      answer: answerResult.value.data,
+      question,
+      groups: groupsResult.value,
+    };
+  }
+
   const token = await user?.getIdToken();
   const answer = await getAnswer(answerId, { token });
 
-  const optionsPromise = getOptions({ ids: answer.data.question.options });
+  const questionPromise = getQuestion(answer.data.question);
   const groupsPromise = getAnswerGroups({
-    groups: [
-      "user.MBTI",
-      "user.region",
-      "user.birthdate",
-      "user.gender",
-      "option.id",
-    ],
-    questionId: answer.data.question.id,
+    groups: groupKeys,
+    questionId: answer.data.question,
   });
-  const [optionsResult, groupsResult] = await Promise.allSettled([
-    optionsPromise,
+  const [questionResult, groupsResult] = await Promise.allSettled([
+    questionPromise,
     groupsPromise,
   ]);
-  if (optionsResult.status === "rejected") {
-    throw new Error(optionsResult.reason);
+  if (questionResult.status === "rejected") {
+    throw new Error(questionResult.reason);
   }
   if (groupsResult.status === "rejected") {
     throw new Error(groupsResult.reason);
@@ -516,13 +554,14 @@ const getMyAnswerAndAnswers = async (answerId: string, user: User | null) => {
 
   return {
     answer: answer.data,
-    options: optionsResult.value.data,
+    question: questionResult.value.data,
     groups: groupsResult.value,
   };
 };
 
 const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   const { answerId } = useParams();
+  const location = useLocation();
   const authState = useAuthState();
   const isAuthentication =
     authState.state === "loaded" && authState.isAuthentication;
@@ -535,7 +574,8 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   const { state, data } = useAsyncAPI(
     getMyAnswerAndAnswers,
     answerId,
-    isAuthentication && !isPublic ? authState.user : null
+    isAuthentication && !isPublic ? authState.user : null,
+    location.state?.question
   );
 
   switch (state) {

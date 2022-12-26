@@ -95,7 +95,7 @@ const Home = () => {
   const todayAnswer = useMemo(
     () =>
       myAnswers.data.find(
-        (answer) => answer.question.id === todayQuestion.data?.id
+        (answer) => answer.question === todayQuestion.data?.id
       ),
     [myAnswers]
   );
