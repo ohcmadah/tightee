@@ -1,7 +1,7 @@
-import { getAnswerGroups } from "../common/apis";
+import { getAnswerGroups, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { Answer as AnswerType, Option } from "../@types";
-import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
+import { Answer as AnswerType, Question as QuestionType } from "../@types";
+import { getFormattedDate, groupBy } from "../common/utils";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
 import { useTodayQuestion } from "../contexts/TodayQuestionContext";
 
@@ -18,38 +18,64 @@ import Img from "../components/Img";
 
 type PageData = Awaited<ReturnType<typeof getAnswerGroups>>;
 
+const Question = ({
+  question,
+  optionId,
+}: {
+  question?: QuestionType;
+  optionId: string;
+}) => (
+  <>
+    <Badge className="bg-question-not-today">
+      {getFormattedDate(question?.createdAt)}
+    </Badge>
+    <div className="my-6 px-2">
+      <div className="mb-1.5 text-lg font-medium">
+        {question ? question.title : "데이터를 불러오고 있어요 :)"}
+      </div>
+      <div className="mt-1.5 inline-flex items-start text-primary">
+        <Icon src="/images/reply.svg" alt="reply" />
+        <div>{question?.options[optionId]}</div>
+      </div>
+    </div>
+  </>
+);
+
 const Answer = ({
   answer,
   options,
 }: {
   answer: AnswerType;
-  options: Option[];
+  options: string[];
 }) => {
-  const { id, question, option } = answer;
+  const { id, question: questionId, option: optionId } = answer;
+  const { state, data: question } = useAsyncAPI(getQuestion, questionId);
 
-  const sameAnswers = groupBy(options, (option) => option.id).get(option.id);
+  const sameAnswers = groupBy(options, (option) => option).get(optionId);
   const ratio = (sameAnswers?.length || 0) / options.length;
 
   return (
     <Box>
-      <Badge className="bg-question-not-today">
-        {getFormattedDate(question.createdAt)}
-      </Badge>
-      <div className="my-6 px-2">
-        <div className="mb-1.5 text-lg font-medium">{question.title}</div>
-        <div className="mt-1.5 inline-flex items-start text-primary">
-          <Icon src="/images/reply.svg" alt="reply" />
-          <div>{option.text}</div>
-        </div>
-      </div>
+      {state === "loaded" ? (
+        <Question question={question.data} optionId={optionId} />
+      ) : (
+        <Question optionId={optionId} />
+      )}
       <Link
         to={`${id}/report`}
+        state={state === "loaded" && { question: question.data }}
         className="flex w-full items-center justify-between"
       >
         <Chart.Summary value={ratio} className="mr-3 truncate text-ellipsis">
           {"전체 타이티 중에 {value}에 속해요."}
         </Chart.Summary>
-        <Img lazy src="/images/right_arrow.svg" alt="arrow" />
+        <Img
+          lazy
+          src="/images/right_arrow.svg"
+          width={9}
+          height={16}
+          alt="arrow"
+        />
       </Link>
     </Box>
   );
@@ -66,7 +92,13 @@ const TodayQuestion = () => {
       <Link to="/question" className="flex w-full items-center">
         <Icon src="/images/reply.svg" alt="reply" />
         <div className="grow text-grayscale-20">대답하러 가기</div>
-        <Img lazy src="/images/right_arrow.svg" alt="arrow" />
+        <Img
+          lazy
+          src="/images/right_arrow.svg"
+          width={9}
+          height={16}
+          alt="arrow"
+        />
       </Link>
     </article>
   );
@@ -85,11 +117,12 @@ const AlreadyAnswered = () => (
 );
 
 const Main = ({ answersByQuestionIdMap }: PageData) => {
+  const { data: todayQuestion } = useTodayQuestion();
   const { data: myAnswers } = useMyAnswers();
+
   const isEmptyMyAnswers = myAnswers.length === 0;
   const isAnsweredTodayQuestion =
-    !isEmptyMyAnswers &&
-    myAnswers[0].question.createdAt === getLocalTime().format("YYYYMMDD");
+    !isEmptyMyAnswers && myAnswers[0].question === todayQuestion?.id;
 
   return (
     <main>
@@ -110,7 +143,7 @@ const Main = ({ answersByQuestionIdMap }: PageData) => {
             <Answer
               key={myAnswer.id}
               answer={myAnswer}
-              options={answersByQuestionIdMap[myAnswer.question.id]}
+              options={answersByQuestionIdMap[myAnswer.question]}
             />
           ))
         )}
@@ -134,7 +167,7 @@ const ActualAnswers = ({ answersByQuestionIdMap }: PageData) => (
 
 const Answers = () => {
   const { state, data: answerGroups } = useAsyncAPI(getAnswerGroups, {
-    groups: ["question.id"],
+    groups: ["question"],
   });
 
   switch (state) {
@@ -146,7 +179,7 @@ const Answers = () => {
 
     case "loaded":
       return (
-        <ActualAnswers answersByQuestionIdMap={answerGroups["question.id"]} />
+        <ActualAnswers answersByQuestionIdMap={answerGroups["question"]} />
       );
   }
 };

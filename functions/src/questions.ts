@@ -26,12 +26,10 @@ app.get("/", async (req, res) => {
     }
 
     const question = questions[0].data() as Question;
-    const options = question.options.map((option) => option.id);
 
     return res.status(200).json({
       ...question,
       id: questions[0].id,
-      options,
     });
   } catch (error) {
     return res.status(500).json(error);
@@ -48,8 +46,7 @@ app.get("/:id", async (req, res) => {
     const questionDoc = await db.doc("questions/" + id).get();
     if (questionDoc.exists) {
       const question = questionDoc.data() as Question;
-      const options = question.options.map((option) => option.id);
-      return res.status(200).json({ ...question, id: questionDoc.id, options });
+      return res.status(200).json({ ...question, id: questionDoc.id });
     } else {
       return res.status(204).json({});
     }

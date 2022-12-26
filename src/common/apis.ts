@@ -3,7 +3,7 @@ import { UpdateData } from "firebase/firestore";
 import { auth } from "../config";
 import { getLocalTime } from "./utils";
 
-import { Answer, Auth, Option, Question, User } from "../@types";
+import { Answer, Auth, Question, User } from "../@types";
 import {
   KAKAO_SCOPE_BIRTHDAY,
   KAKAO_SCOPE_EMAIL,
@@ -127,7 +127,7 @@ export const getMyAnswers = async (userId: string): Promise<Answer[]> => {
 export const getAnswerGroups = async (params: {
   groups: string[];
   questionId?: string;
-}): Promise<{ [groupKey: string]: { [id: string]: Option[] } }> => {
+}): Promise<{ [groupKey: string]: { [id: string]: string[] } }> => {
   const { groups, questionId } = params;
   const config = {
     params: { groups, ...(questionId ? { question: questionId } : {}) },
@@ -142,10 +142,4 @@ export const getAnswer = (
 ): Promise<AxiosResponse<Answer>> => {
   const headers = params && { Authorization: `Bearer ${params.token}` };
   return axios.get("/api/answers/" + answerId, { headers });
-};
-
-export const getOptions = (params?: {
-  ids: string[];
-}): Promise<AxiosResponse<Option[]>> => {
-  return axios.get("/api/options", { params });
 };

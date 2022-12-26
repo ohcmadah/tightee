@@ -28,7 +28,7 @@ const Login = () => {
         target="_blank"
         className="mt-5 flex w-full items-center justify-center p-3.5 text-base text-grayscale-100"
       >
-        <Img lazy className="mr-2 w-[14px]" src="/images/home.png" alt="cs" />
+        <Img lazy className="mr-2" width={14} src="/images/home.png" alt="cs" />
         고객센터
       </a>
     </Layout>

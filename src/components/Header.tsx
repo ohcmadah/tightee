@@ -37,7 +37,7 @@ const Back = ({
         width={40}
         className="inline-block"
         src="/images/left_arrow.svg"
-        alt={"back"}
+        alt="back"
       />
     </button>
     <span className="align-middle">{children}</span>

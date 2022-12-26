@@ -2,9 +2,8 @@ import * as admin from "firebase-admin";
 import * as express from "express";
 import * as cors from "cors";
 import * as moment from "moment-timezone";
-import { Answer, Option, Question } from "./@types";
-import { getAdminApp, getProperty, https, promiseAll, toMap } from "./common";
-import { DocumentReference } from "firebase/firestore";
+import { Answer } from "./@types";
+import { getAdminApp, getProperty, https, toMap } from "./common";
 import { checkUserIdContained } from "./middleware";
 
 const app = express();
@@ -13,49 +12,27 @@ app.use(cors({ origin: true }));
 type ReturnAnswer = {
   id: string;
   user: Answer["user"];
-  question: { id: string } & Question;
-  option: { id: string } & Option;
+  question: string;
+  option: Answer["option"];
   createdAt: number;
 };
 
-const convertDocToAnswer = async (
-  db: admin.firestore.Firestore,
+const convertDocToAnswer = (
   doc: admin.firestore.QueryDocumentSnapshot | admin.firestore.DocumentSnapshot
 ) => {
   const answer = doc.data() as Answer;
-  const questionPromise = db.doc("questions/" + answer.question.id).get();
-  const optionPromise = db.doc("options/" + answer.option.id).get();
-  const [question, option] = await promiseAll([questionPromise, optionPromise]);
-
-  const options = question
-    .get("options")
-    .map((doc: DocumentReference) => doc.id);
-
   const converted: ReturnAnswer = {
     ...answer,
     id: doc.id,
-    question: {
-      id: question.id,
-      ...(question.data() as Question),
-      options,
-    },
-    option: { id: option.id, ...(option.data() as Option) },
+    question: answer.question.id,
   };
   return converted;
 };
 
-const convertDocsToAnswers = async (
-  db: admin.firestore.Firestore,
+const convertDocsToAnswers = (
   docs: admin.firestore.QueryDocumentSnapshot<admin.firestore.DocumentData>[]
 ) => {
-  const answersPromise = docs.map((doc) => convertDocToAnswer(db, doc));
-
-  const answers = (await Promise.allSettled(answersPromise)).reduce(
-    (acc: ReturnAnswer[], result) =>
-      result.status === "fulfilled" ? [...acc, result.value] : acc,
-    []
-  );
-
+  const answers = docs.map((doc) => convertDocToAnswer(doc));
   return answers.sort((a, b) => b.createdAt - a.createdAt);
 };
 
@@ -79,7 +56,7 @@ app.get("/", checkUserIdContained, async (req, res) => {
           .collection("answers")
           .where("user.id", "==", userId)
           .get();
-        const answers = await convertDocsToAnswers(db, docs);
+        const answers = convertDocsToAnswers(docs);
         if (empty) {
           return res.status(204).json();
         }
@@ -99,7 +76,7 @@ app.get("/", checkUserIdContained, async (req, res) => {
       if (empty) {
         return res.status(204).json();
       }
-      const answers = await convertDocsToAnswers(db, docs);
+      const answers = convertDocsToAnswers(docs);
 
       const result = (groups as string[]).reduce((acc, groupKey) => {
         const keyGetter = (answer: ReturnAnswer) => {
@@ -134,7 +111,7 @@ app.get("/:id", async (req, res) => {
       return res.status(204).json({});
     }
 
-    const answer = await convertDocToAnswer(db, answerDoc);
+    const answer = convertDocToAnswer(answerDoc);
     const { id, nickname, region, birthdate, gender, MBTI } = answer.user;
 
     const token = req.headers.authorization?.split("Bearer ")[1];
@@ -174,11 +151,12 @@ app.post("/", async (req, res) => {
       });
     }
 
-    const { docs: answers } = await db.collection("answers").get();
+    const { docs: answers } = await db
+      .collection("answers")
+      .where("user.id", "==", userId)
+      .get();
     const isAlreadyAnswered = answers.find(
-      (answer) =>
-        answer.get("question").id === questionId &&
-        answer.data().user.id === userId
+      (answer) => answer.get("question").id === questionId
     );
 
     if (isAlreadyAnswered) {
@@ -187,12 +165,11 @@ app.post("/", async (req, res) => {
         .json({ code: 400, message: "You have already answered." });
     }
 
-    const option = db.doc("options/" + optionId);
     const question = db.doc("questions/" + questionId);
     const user = await db.doc("users/" + userId).get();
 
     const data = {
-      option,
+      option: optionId,
       question,
       user: user.data(),
       createdAt: admin.firestore.Timestamp.now(),

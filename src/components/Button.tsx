@@ -121,7 +121,7 @@ const Kakao = ({
     )}
     onClick={onClick}
   >
-    <Img lazy className="w-[14px]" src="/images/kakao.svg" alt="Kakao" />
+    <Img lazy width={14} src="/images/kakao.svg" alt="Kakao" />
     카카오로 시작하기
     <div />
   </button>
