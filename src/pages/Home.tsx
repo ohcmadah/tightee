@@ -25,15 +25,17 @@ const Footer = () => (
 const Content = ({
   iconSrc = "/images/right_arrow.svg",
   alt,
+  iconWidth = 9,
   children,
 }: {
   iconSrc: string;
   alt: string;
+  iconWidth?: string | number;
   children: React.ReactNode;
 }) => (
   <div className="mt-4 flex w-full items-center justify-between px-1">
     <div className="mr-3">{children}</div>
-    <Img lazy src={iconSrc} alt={alt} />
+    <Img lazy src={iconSrc} alt={alt} width={iconWidth} />
   </div>
 );
 
@@ -76,7 +78,7 @@ const Main = ({
             <Badge className="bg-secondary-mbti font-bold text-white">
               나의 MBTI
             </Badge>
-            <Content iconSrc={"/images/setting.svg"} alt="setting">
+            <Content iconSrc="/images/setting.svg" alt="setting" iconWidth={20}>
               {MBTI
                 ? MBTI + " - " + getMBTIName(MBTI)
                 : "MBTI를 설정하면 더욱 재미있는 정보를 확인할 수 있어요 :)"}
