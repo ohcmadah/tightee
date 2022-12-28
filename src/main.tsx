@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthContextProvider } from "./contexts/AuthContext";
 import useGoogleAnalytics from "./hooks/useGoogleAnalytics";
 import useGoogleTagManager from "./hooks/useGoogleTagManager";
-import useBackground from "./hooks/useBackground";
 import useMetaPixcel from "./hooks/useMetaPixel";
 
 import Main from "./pages/Main";
@@ -26,7 +25,6 @@ const App = () => {
   useGoogleAnalytics();
   useGoogleTagManager();
   useMetaPixcel();
-  useBackground("/christmas.png");
 
   return (
     <Routes>

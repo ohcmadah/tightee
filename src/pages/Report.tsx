@@ -331,7 +331,7 @@ const RankItem = ({
   const icon = rank <= 3 ? RANK_ICONS[rank - 1] : "/images/white_heart.png";
   return (
     <li
-      className={cn("mb-3 inline-flex items-start last:mb-0", {
+      className={cn("mb-3 flex items-start last:mb-0", {
         "font-bold": itemMBTI === mbti,
       })}
     >
