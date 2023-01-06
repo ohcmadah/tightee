@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { MBTI } from "../@types";
 import { getMBTIName } from "../common/utils";
 import { useUser } from "../contexts/UserContext";
-import { useTodayQuestion } from "../contexts/TodayQuestionContext";
+import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
 
 import { Link } from "react-router-dom";
@@ -92,12 +92,13 @@ const Main = ({
 
 const Home = () => {
   const user = useUser();
-  const todayQuestion = useTodayQuestion();
+  const todayQuestions = useTodayQuestions();
   const myAnswers = useMyAnswers();
   const todayAnswer = useMemo(
     () =>
       myAnswers.data.find(
-        (answer) => answer.question === todayQuestion.data?.id
+        (answer) =>
+          answer.question === (todayQuestions.data && todayQuestions.data[0].id)
       ),
     [myAnswers]
   );
@@ -111,8 +112,8 @@ const Home = () => {
       </Header>
       <Main
         question={
-          todayQuestion.data
-            ? todayQuestion.data.title
+          todayQuestions.data
+            ? todayQuestions.data[0].title
             : "오늘의 질문이 존재하지 않아요 :("
         }
         answer={{ id: todayAnswer?.id, count: myAnswers.data.length }}

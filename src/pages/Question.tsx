@@ -1,18 +1,21 @@
 import React, { useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import {
+  Navigate,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { answer, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { URL_CS } from "../common/constants";
 import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
-import { useTodayQuestion } from "../contexts/TodayQuestionContext";
+import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
 import Loading from "../components/Loading";
 import ErrorView from "../components/ErrorView";
-import ExternalLink from "../components/ExternalLink";
 import Footer from "../components/Footer";
 import ModalPortal from "../components/ModalPortal";
 import Notice from "../components/Notice";
@@ -81,13 +84,13 @@ const ExpiredError = ({
   setError: React.Dispatch<React.SetStateAction<QuestionError | null>>;
 }) => {
   const navigate = useNavigate();
-  const { forceUpdate } = useTodayQuestion();
+  const { forceUpdate } = useTodayQuestions();
 
   return (
     <ErrorView.ExpiredQuestion
       onReload={() => {
         forceUpdate();
-        navigate("/question");
+        navigate("/questions");
         setError(null);
       }}
     />
@@ -144,27 +147,6 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
   }
 };
 
-const TodayQuestion = () => {
-  const { data: todayQuestion } = useTodayQuestion();
-
-  if (!todayQuestion) {
-    return (
-      <ErrorView.Default>
-        <article>
-          오늘의 질문이 존재하지 않습니다.
-          <br />
-          <ExternalLink className="text-primary" href={URL_CS}>
-            고객센터
-          </ExternalLink>
-          로 문의해 주세요.
-        </article>
-      </ErrorView.Default>
-    );
-  }
-
-  return <ActualQuestion question={todayQuestion} />;
-};
-
 const Question = ({ questionId }: { questionId: string }) => {
   const navigate = useNavigate();
   const { state, data } = useAsyncAPI(getQuestion, questionId);
@@ -202,15 +184,23 @@ const Question = ({ questionId }: { questionId: string }) => {
 
 const QuestionWrapper = () => {
   const { questionId } = useParams();
-  const { data: todayQuestion } = useTodayQuestion();
+  const { state } = useLocation();
   const { data: myAnswers } = useMyAnswers();
-  const answer = myAnswers.find(
-    (answer) => answer.question === (questionId || todayQuestion?.id)
-  );
+
+  const answer = myAnswers.find((answer) => answer.question === questionId);
   if (answer) {
     return <Navigate to={"/answer/" + answer.id + "/report"} />;
   }
-  return questionId ? <Question questionId={questionId} /> : <TodayQuestion />;
+
+  if (state && state.question) {
+    return <ActualQuestion question={state.question} />;
+  }
+
+  return questionId ? (
+    <Question questionId={questionId} />
+  ) : (
+    <Navigate to="/questions" />
+  );
 };
 
 export default QuestionWrapper;

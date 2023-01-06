@@ -4,7 +4,7 @@ import Img from "./Img";
 
 const pages = [
   { path: "/", icon: "/images/home.png" },
-  { path: "/question", icon: "/images/question.png" },
+  { path: "/questions", icon: "/images/question.png" },
   { path: "/answer", icon: "/images/answer.png" },
   { path: "/profile", icon: "/images/eyes.png" },
 ];

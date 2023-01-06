@@ -3,7 +3,7 @@ import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType, Question as QuestionType } from "../@types";
 import { getFormattedDate, groupBy } from "../common/utils";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
-import { useTodayQuestion } from "../contexts/TodayQuestionContext";
+import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 
 import { Link } from "react-router-dom";
 import ErrorView from "../components/ErrorView";
@@ -82,14 +82,20 @@ const Answer = ({
 };
 
 const TodayQuestion = () => {
-  const { data: todayQuestion } = useTodayQuestion();
-  const title = todayQuestion ? todayQuestion.title : "오늘의 질문이 없어요 :(";
+  const { data: todayQuestions } = useTodayQuestions();
+  const title = todayQuestions
+    ? todayQuestions[0].title
+    : "오늘의 질문이 없어요 :(";
 
   return (
     <article className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
       <Badge className="bg-primary-peach">TODAY</Badge>
       <div className="my-6 px-2 text-lg font-medium">{title}</div>
-      <Link to="/question" className="flex w-full items-center">
+      <Link
+        to={todayQuestions ? "/questions/" + todayQuestions[0].id : "/answer"}
+        state={{ question: todayQuestions && todayQuestions[0] }}
+        className="flex w-full items-center"
+      >
         <Icon src="/images/reply.svg" alt="reply" />
         <div className="grow text-grayscale-20">대답하러 가기</div>
         <Img
@@ -117,12 +123,13 @@ const AlreadyAnswered = () => (
 );
 
 const Main = ({ answersByQuestionIdMap }: PageData) => {
-  const { data: todayQuestion } = useTodayQuestion();
+  const { data: todayQuestions } = useTodayQuestions();
   const { data: myAnswers } = useMyAnswers();
 
   const isEmptyMyAnswers = myAnswers.length === 0;
   const isAnsweredTodayQuestion =
-    !isEmptyMyAnswers && myAnswers[0].question === todayQuestion?.id;
+    !isEmptyMyAnswers &&
+    myAnswers[0].question === (todayQuestions && todayQuestions[0].id);
 
   return (
     <main>

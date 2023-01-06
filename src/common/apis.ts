@@ -91,7 +91,7 @@ export const getNicknames = async (): Promise<string[]> => {
   return users.data.map((user: { nickname: string }) => user.nickname);
 };
 
-export const getTodayQuestion = (): Promise<AxiosResponse<Question>> => {
+export const getTodayQuestions = (): Promise<AxiosResponse<Question[]>> => {
   const today = getLocalTime().format("YYYYMMDD");
   return axios.get("/api/questions", { params: { date: today } });
 };
