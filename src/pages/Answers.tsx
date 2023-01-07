@@ -30,7 +30,7 @@ const MyAnswer = ({
   if (state !== "loaded") {
     return (
       <Question
-        createdAt=" "
+        createdAt="📅 ..."
         title="데이터를 불러오고 있어요 :)"
         option=" "
         linkProps={{
