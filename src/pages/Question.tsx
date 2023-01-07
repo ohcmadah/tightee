@@ -172,7 +172,7 @@ const Question = ({ questionId }: { questionId: string }) => {
         return (
           <ErrorView.ExpiredQuestion
             onReload={() => {
-              navigate("/question");
+              navigate("/questions");
             }}
           />
         );

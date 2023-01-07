@@ -51,7 +51,7 @@ const Main = ({
   return (
     <main>
       <Box.Container>
-        <Link to={answer.id ? `/answer/${answer.id}/report` : "/question"}>
+        <Link to={answer.id ? `/answer/${answer.id}/report` : "/questions"}>
           <Box>
             <Badge className="bg-secondary-question font-bold text-white">
               오늘의 질문

@@ -101,7 +101,7 @@ export const SignUpContextProvider = ({
       },
       gender: kakaoUser.gender,
     },
-    nextUrl: data.questionId ? "/question/" + data.questionId : "/",
+    nextUrl: data.questionId ? "/questions/" + data.questionId : "/",
   });
 
   return (
