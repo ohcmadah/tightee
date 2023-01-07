@@ -14,23 +14,23 @@ app.get("/", async (req, res) => {
     const app = getAdminApp();
     const db = admin.firestore(app);
 
-    const { docs: questions } = await db
+    const { docs } = await db
       .collection("questions")
       .where("createdAt", "==", date)
       .get();
 
-    if (questions.length === 0) {
+    if (docs.length === 0) {
       return res
         .status(204)
         .json({ code: 204, message: "오늘의 질문이 존재하지 않습니다." });
     }
 
-    const question = questions[0].data() as Question;
+    const questions = docs.map((doc) => ({
+      ...(doc.data() as Question),
+      id: doc.id,
+    }));
 
-    return res.status(200).json({
-      ...question,
-      id: questions[0].id,
-    });
+    return res.status(200).json(questions);
   } catch (error) {
     return res.status(500).json(error);
   }

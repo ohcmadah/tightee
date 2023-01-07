@@ -183,7 +183,7 @@ const PublicFooter = () => {
     const isAuthentication =
       authState.state === "loaded" && authState.isAuthentication;
     if (isAuthentication) {
-      return navigate("/question/" + question);
+      return navigate("/questions/" + question);
     }
     return navigate("/welcome", {
       state: { question },

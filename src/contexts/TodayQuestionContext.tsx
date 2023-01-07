@@ -1,30 +1,31 @@
 import React, { createContext, useContext } from "react";
 import { Question } from "../@types";
 
-type TodayQuestion = {
-  data: Question | null;
+type TodayQuestions = {
+  data: Question[] | null;
   forceUpdate: React.DispatchWithoutAction;
 };
-const TodayQuestionContext = createContext<TodayQuestion | undefined>(
+const TodayQuestionsContext = createContext<TodayQuestions | undefined>(
   undefined
 );
 
-export const TodayQuestionContextProvider = ({
+export const TodayQuestionsContextProvider = ({
   value,
   children,
 }: {
-  value: TodayQuestion;
+  value: TodayQuestions;
   children: React.ReactNode;
 }) => {
   return (
-    <TodayQuestionContext.Provider value={{ ...value }}>
+    <TodayQuestionsContext.Provider value={{ ...value }}>
       {children}
-    </TodayQuestionContext.Provider>
+    </TodayQuestionsContext.Provider>
   );
 };
 
-export const useTodayQuestion = () => {
-  const todayQuestion = useContext(TodayQuestionContext);
-  if (!todayQuestion) throw new Error("TodayQuestionContextProvider not found");
-  return todayQuestion;
+export const useTodayQuestions = () => {
+  const todayQuestions = useContext(TodayQuestionsContext);
+  if (!todayQuestions)
+    throw new Error("TodayQuestionsContextProvider not found");
+  return todayQuestions;
 };

@@ -1,5 +1,11 @@
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useParams,
+} from "react-router-dom";
 import { AuthContextProvider } from "./contexts/AuthContext";
 import useGoogleAnalytics from "./hooks/useGoogleAnalytics";
 import useGoogleTagManager from "./hooks/useGoogleTagManager";
@@ -11,6 +17,7 @@ import Login from "./pages/Login";
 import Welcome from "./pages/Welcome";
 import KakaoLogin from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
+import QuestionList from "./pages/QuestionList";
 import Question from "./pages/Question";
 import Profile from "./pages/Profile";
 import Answers from "./pages/Answers";
@@ -21,6 +28,11 @@ import Ad from "./pages/Ad";
 import "./styles/index.scss";
 import "react-toastify/dist/ReactToastify.css";
 
+const RedirectQuestion = () => {
+  const { questionId } = useParams();
+  return <Navigate to={"/questions/" + questionId} replace />;
+};
+
 const App = () => {
   useGoogleAnalytics();
   useGoogleTagManager();
@@ -30,8 +42,10 @@ const App = () => {
     <Routes>
       <Route path="/" element={<Main />}>
         <Route index element={<Home />} />
-        <Route path="question" element={<Question />} />
-        <Route path="question/:questionId" element={<Question />} />
+        <Route path="questions" element={<QuestionList />} />
+        <Route path="questions/:questionId" element={<Question />} />
+        <Route path="question" element={<Navigate to="/questions" replace />} />
+        <Route path="question/:questionId" element={<RedirectQuestion />} />
         <Route path="profile" element={<Profile />} />
         <Route path="delete-account" element={<DeleteAccount />} />
         <Route path="answer" element={<Answers />} />

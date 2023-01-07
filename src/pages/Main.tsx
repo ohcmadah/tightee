@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom";
-import { getMyAnswers, getTodayQuestion, getUser } from "../common/apis";
+import { getMyAnswers, getTodayQuestions, getUser } from "../common/apis";
 import withAuth from "../hocs/withAuth";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { TodayQuestionContextProvider } from "../contexts/TodayQuestionContext";
+import { TodayQuestionsContextProvider } from "../contexts/TodayQuestionContext";
 import { UserContextProvider } from "../contexts/UserContext";
 import { MyAnswersContextProvider } from "../contexts/MyAnswersContext";
 
@@ -16,7 +16,7 @@ const Home = () => {
   const auth = useAuthenticatedState();
   const user = useAsyncAPI(getUser, auth.user.uid);
   const myAnswers = useAsyncAPI(getMyAnswers, auth.user.uid);
-  const todayQuestion = useAsyncAPI(getTodayQuestion);
+  const todayQuestion = useAsyncAPI(getTodayQuestions);
 
   if (
     user.state === "loading" ||
@@ -44,7 +44,7 @@ const Home = () => {
 
   return (
     <Layout className="flex flex-col">
-      <TodayQuestionContextProvider
+      <TodayQuestionsContextProvider
         value={{
           data:
             todayQuestion.data.status === 204 ? null : todayQuestion.data.data,
@@ -60,7 +60,7 @@ const Home = () => {
             <Outlet />
           </MyAnswersContextProvider>
         </UserContextProvider>
-      </TodayQuestionContextProvider>
+      </TodayQuestionsContextProvider>
     </Layout>
   );
 };

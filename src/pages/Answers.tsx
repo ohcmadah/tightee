@@ -1,47 +1,20 @@
 import { getAnswerGroups, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
-import { Answer as AnswerType, Question as QuestionType } from "../@types";
+import { Answer as AnswerType } from "../@types";
 import { getFormattedDate, groupBy } from "../common/utils";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
-import { useTodayQuestion } from "../contexts/TodayQuestionContext";
+import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 
-import { Link } from "react-router-dom";
 import ErrorView from "../components/ErrorView";
 import Loading from "../components/Loading";
 import Header from "../components/Header";
-import Badge from "../components/Badge";
 import Box from "../components/Box";
-import Chart from "../components/Chart";
-import Icon from "../components/Icon";
 import Notice from "../components/Notice";
-import Img from "../components/Img";
+import Question from "../components/Question";
 
 type PageData = Awaited<ReturnType<typeof getAnswerGroups>>;
 
-const Question = ({
-  question,
-  optionId,
-}: {
-  question?: QuestionType;
-  optionId: string;
-}) => (
-  <>
-    <Badge className="bg-question-not-today">
-      {getFormattedDate(question?.createdAt)}
-    </Badge>
-    <div className="my-6 px-2">
-      <div className="mb-1.5 text-lg font-medium">
-        {question ? question.title : "데이터를 불러오고 있어요 :)"}
-      </div>
-      <div className="mt-1.5 inline-flex items-start text-primary">
-        <Icon src="/images/reply.svg" alt="reply" />
-        <div>{question?.options[optionId]}</div>
-      </div>
-    </div>
-  </>
-);
-
-const Answer = ({
+const MyAnswer = ({
   answer,
   options,
 }: {
@@ -54,53 +27,47 @@ const Answer = ({
   const sameAnswers = groupBy(options, (option) => option).get(optionId);
   const ratio = (sameAnswers?.length || 0) / options.length;
 
+  if (state !== "loaded") {
+    return (
+      <Question
+        createdAt="📅 ..."
+        title="데이터를 불러오고 있어요 :)"
+        option=" "
+        linkProps={{
+          to: id + "/report",
+        }}
+        ratio={ratio}
+      />
+    );
+  }
+
   return (
-    <Box>
-      {state === "loaded" ? (
-        <Question question={question.data} optionId={optionId} />
-      ) : (
-        <Question optionId={optionId} />
-      )}
-      <Link
-        to={`${id}/report`}
-        state={state === "loaded" && { question: question.data }}
-        className="flex w-full items-center justify-between"
-      >
-        <Chart.Summary value={ratio} className="mr-3 truncate text-ellipsis">
-          {"전체 타이티 중에 {value}에 속해요."}
-        </Chart.Summary>
-        <Img
-          lazy
-          src="/images/right_arrow.svg"
-          width={9}
-          height={16}
-          alt="arrow"
-        />
-      </Link>
-    </Box>
+    <Question
+      createdAt={getFormattedDate(question.data.createdAt)}
+      title={question.data.title}
+      option={question.data.options[optionId]}
+      linkProps={{ to: id + "/report", state: { question: question.data } }}
+      ratio={ratio}
+    />
   );
 };
 
 const TodayQuestion = () => {
-  const { data: todayQuestion } = useTodayQuestion();
-  const title = todayQuestion ? todayQuestion.title : "오늘의 질문이 없어요 :(";
+  const { data: todayQuestions } = useTodayQuestions();
+  const title = todayQuestions
+    ? todayQuestions[0].title
+    : "오늘의 질문이 없어요 :(";
 
   return (
-    <article className="mb-8 flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-6 text-base drop-shadow-lg">
-      <Badge className="bg-primary-peach">TODAY</Badge>
-      <div className="my-6 px-2 text-lg font-medium">{title}</div>
-      <Link to="/question" className="flex w-full items-center">
-        <Icon src="/images/reply.svg" alt="reply" />
-        <div className="grow text-grayscale-20">대답하러 가기</div>
-        <Img
-          lazy
-          src="/images/right_arrow.svg"
-          width={9}
-          height={16}
-          alt="arrow"
-        />
-      </Link>
-    </article>
+    <Question
+      className="mb-8"
+      createdAt="TODAY"
+      title={title}
+      linkProps={{
+        to: todayQuestions ? "/questions/" + todayQuestions[0].id : "/answer",
+        state: { question: todayQuestions && todayQuestions[0] },
+      }}
+    />
   );
 };
 
@@ -117,12 +84,13 @@ const AlreadyAnswered = () => (
 );
 
 const Main = ({ answersByQuestionIdMap }: PageData) => {
-  const { data: todayQuestion } = useTodayQuestion();
+  const { data: todayQuestions } = useTodayQuestions();
   const { data: myAnswers } = useMyAnswers();
 
   const isEmptyMyAnswers = myAnswers.length === 0;
   const isAnsweredTodayQuestion =
-    !isEmptyMyAnswers && myAnswers[0].question === todayQuestion?.id;
+    !isEmptyMyAnswers &&
+    myAnswers[0].question === (todayQuestions && todayQuestions[0].id);
 
   return (
     <main>
@@ -140,7 +108,7 @@ const Main = ({ answersByQuestionIdMap }: PageData) => {
           </div>
         ) : (
           myAnswers.map((myAnswer) => (
-            <Answer
+            <MyAnswer
               key={myAnswer.id}
               answer={myAnswer}
               options={answersByQuestionIdMap[myAnswer.question]}

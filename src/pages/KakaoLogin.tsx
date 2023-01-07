@@ -44,7 +44,7 @@ const KakaoLogin = () => {
     case "loaded":
       if (auth.data.isLoggedIn) {
         return questionId ? (
-          <Navigate to={"/question/" + questionId} replace />
+          <Navigate to={"/questions/" + questionId} replace />
         ) : (
           <Navigate to="/" replace />
         );

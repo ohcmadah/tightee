@@ -1,7 +1,7 @@
 import cn from "classnames";
 
 const Container = ({ children }: { children?: React.ReactNode }) => (
-  <section className="flex flex-col gap-y-6">{children}</section>
+  <section className="flex w-full flex-col gap-y-6">{children}</section>
 );
 
 const Box = ({
