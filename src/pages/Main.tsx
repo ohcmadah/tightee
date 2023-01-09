@@ -31,14 +31,20 @@ const Home = () => {
     myAnswers.state === "error" ||
     todayQuestion.state === "error"
   ) {
-    return <ErrorView.Default />;
+    return (
+      <Layout>
+        <ErrorView.Default />
+      </Layout>
+    );
   }
 
   if (!user.data) {
     return (
-      <ErrorView.Default>
-        <div>유저 정보를 불러올 수 없습니다.</div>
-      </ErrorView.Default>
+      <Layout>
+        <ErrorView.Default>
+          <div>유저 정보를 불러올 수 없습니다.</div>
+        </ErrorView.Default>
+      </Layout>
     );
   }
 
