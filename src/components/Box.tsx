@@ -1,7 +1,15 @@
 import cn from "classnames";
 
-const Container = ({ children }: { children?: React.ReactNode }) => (
-  <section className="flex w-full flex-col gap-y-6">{children}</section>
+const Container = ({
+  className,
+  children,
+}: {
+  className?: cn.Argument;
+  children?: React.ReactNode;
+}) => (
+  <section className={cn("flex w-full flex-col gap-y-6", className)}>
+    {children}
+  </section>
 );
 
 const Box = ({

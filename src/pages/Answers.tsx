@@ -12,7 +12,7 @@ import Box from "../components/Box";
 import Notice from "../components/Notice";
 import Question from "../components/Question";
 
-type PageData = Awaited<ReturnType<typeof getAnswerGroups>>;
+type AnswerGroups = Awaited<ReturnType<typeof getAnswerGroups>>;
 
 const MyAnswer = ({
   answer,
@@ -52,22 +52,26 @@ const MyAnswer = ({
   );
 };
 
-const TodayQuestion = () => {
-  const { data: todayQuestions } = useTodayQuestions();
-  const title = todayQuestions
-    ? todayQuestions[0].title
-    : "오늘의 질문이 없어요 :(";
+const MyAnswers = ({ groups }: { groups: AnswerGroups }) => {
+  const { data: myAnswers } = useMyAnswers();
+  const isEmptyMyAnswers = myAnswers.length === 0;
 
   return (
-    <Question
-      className="mb-8"
-      createdAt="TODAY"
-      title={title}
-      linkProps={{
-        to: todayQuestions ? "/questions/" + todayQuestions[0].id : "/answer",
-        state: { question: todayQuestions && todayQuestions[0] },
-      }}
-    />
+    <Box.Container>
+      {isEmptyMyAnswers ? (
+        <div className="mt-12 text-center text-base text-grayscale-80">
+          아직 질문에 응답한 내역이 없어요 :)
+        </div>
+      ) : (
+        myAnswers.map((myAnswer) => (
+          <MyAnswer
+            key={myAnswer.id}
+            answer={myAnswer}
+            options={groups["question"][myAnswer.question]}
+          />
+        ))
+      )}
+    </Box.Container>
   );
 };
 
@@ -77,61 +81,58 @@ const AlreadyAnswered = () => (
     alt="writing hand"
     className="mb-8 text-grayscale-60"
   >
-    오늘 질문에 이미 대답하셨네요!
+    오늘 질문들에 모두 대답하셨네요!
     <br />
     내일 또 재미있는 질문이 기다리고 있어요 :)
   </Notice>
 );
 
-const Main = ({ answersByQuestionIdMap }: PageData) => {
+const TodayQuestions = () => {
   const { data: todayQuestions } = useTodayQuestions();
   const { data: myAnswers } = useMyAnswers();
 
-  const isEmptyMyAnswers = myAnswers.length === 0;
-  const isAnsweredTodayQuestion =
-    !isEmptyMyAnswers &&
-    myAnswers[0].question === (todayQuestions && todayQuestions[0].id);
+  if (!todayQuestions) {
+    return (
+      <section className="mb-8">
+        <Question
+          createdAt="TODAY"
+          title="오늘의 질문이 존재하지 않아요 :("
+          linkProps={{ to: "/answer" }}
+        />
+      </section>
+    );
+  }
+
+  const answeredQuestionIds = new Set(
+    myAnswers.map(({ question }) => question)
+  );
+  const isAllAnswered = todayQuestions.every(({ id }) =>
+    answeredQuestionIds.has(id)
+  );
+
+  if (isAllAnswered) {
+    return <AlreadyAnswered />;
+  }
 
   return (
-    <main>
-      {!isAnsweredTodayQuestion ? (
-        <section>
-          <TodayQuestion />
-        </section>
-      ) : (
-        <AlreadyAnswered />
-      )}
-      <Box.Container>
-        {isEmptyMyAnswers ? (
-          <div className="mt-12 text-center text-base text-grayscale-80">
-            아직 질문에 응답한 내역이 없어요 :)
-          </div>
-        ) : (
-          myAnswers.map((myAnswer) => (
-            <MyAnswer
-              key={myAnswer.id}
-              answer={myAnswer}
-              options={answersByQuestionIdMap[myAnswer.question]}
+    <Box.Container className="mb-8">
+      {todayQuestions.map(
+        (question) =>
+          !answeredQuestionIds.has(question.id) && (
+            <Question
+              key={question.id}
+              createdAt="TODAY"
+              title={question.title}
+              linkProps={{
+                to: "/questions/" + question.id,
+                state: { question },
+              }}
             />
-          ))
-        )}
-      </Box.Container>
-    </main>
+          )
+      )}
+    </Box.Container>
   );
 };
-
-const ActualAnswers = ({ answersByQuestionIdMap }: PageData) => (
-  <>
-    <Header>
-      <Header.H1 className="flex items-center">
-        <Header.Icon iconSrc="/images/answer.png" alt="answer">
-          나의 대답
-        </Header.Icon>
-      </Header.H1>
-    </Header>
-    <Main answersByQuestionIdMap={answersByQuestionIdMap} />
-  </>
-);
 
 const Answers = () => {
   const { state, data: answerGroups } = useAsyncAPI(getAnswerGroups, {
@@ -147,7 +148,19 @@ const Answers = () => {
 
     case "loaded":
       return (
-        <ActualAnswers answersByQuestionIdMap={answerGroups["question"]} />
+        <>
+          <Header>
+            <Header.H1 className="flex items-center">
+              <Header.Icon iconSrc="/images/answer.png" alt="answer">
+                나의 대답
+              </Header.Icon>
+            </Header.H1>
+          </Header>
+          <main>
+            <TodayQuestions />
+            <MyAnswers groups={answerGroups} />
+          </main>
+        </>
       );
   }
 };
