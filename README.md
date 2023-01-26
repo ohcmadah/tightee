@@ -48,6 +48,17 @@
 <img src="https://user-images.githubusercontent.com/52340070/214520525-7ea51fc4-6b9d-4c77-aae7-7e8368f60712.gif" align="center" />
 
 <br />
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="https://user-images.githubusercontent.com/52340070/214881369-00555b66-43cd-4476-8abc-918765a13095.png" alt="광고용 페이지" /></td>
+      <td><img src="https://user-images.githubusercontent.com/52340070/214881548-64e402d6-e03a-4c23-8cf1-9937250471a7.png" alt="리포트에서 유입되었을 때 보이는 로그인 화면" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<br />
 <br />
 
 ## Members
