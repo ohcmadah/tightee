@@ -4,7 +4,7 @@ import useAsyncAPI from "../hooks/useAsyncAPI";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
 import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { Question as QuestionType } from "../@types";
-import { URL_CS } from "../common/constants";
+import { URL_CS, URL_QUESTION_GOOGLE_FORM } from "../common/constants";
 
 import Box from "../components/Box";
 import Badge from "../components/Badge";
@@ -14,6 +14,37 @@ import ExternalLink from "../components/ExternalLink";
 import Header from "../components/Header";
 import Question from "../components/Question";
 import Notice from "../components/Notice";
+import Icon from "../components/Icon";
+import Footer from "../components/Footer";
+import Img from "../components/Img";
+
+const FormButton = () => {
+  const openInNewTab = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <Footer.Floating
+      className="bottom-nav mt-4"
+      color="violet"
+      onClick={() => openInNewTab(URL_QUESTION_GOOGLE_FORM)}
+    >
+      <Icon src="/images/letter.png" alt="letter" className="mr-3" />
+      <div className="text-left font-medium">
+        평소에 궁금한 게 있었나요?
+        <br />
+        질문을 접수하면 타이티에 올려드려요!
+      </div>
+      <Img
+        width={9}
+        lazy
+        src="/images/right_arrow_white.svg"
+        alt="right arrow"
+        className="ml-auto inline-block"
+      />
+    </Footer.Floating>
+  );
+};
 
 const TodayQuestion = ({
   question,
@@ -132,6 +163,7 @@ const QuestionList = () => {
             </Header.H1>
           </Header>
           <Main answersByQuestionIdMap={answerGroups["question"]} />
+          <FormButton />
         </>
       );
   }
