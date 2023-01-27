@@ -35,10 +35,8 @@ import Box from "../components/Box";
 import Badge from "../components/Badge";
 import Chart from "../components/Chart";
 import Icon from "../components/Icon";
-import Button, {
-  ColoredProps as ColoredButtonProps,
-} from "../components/Button";
 import Notice from "../components/Notice";
+import Footer from "../components/Footer";
 
 const RANK_ICONS = [
   "/images/gold.png",
@@ -108,28 +106,6 @@ const calcMBTIRank = (
   return rank;
 };
 
-const FloatingFooter = ({
-  className,
-  color,
-  onClick,
-  children,
-}: {
-  className: cn.Argument;
-  color: ColoredButtonProps["color"];
-  onClick: ColoredButtonProps["onClick"];
-  children: React.ReactNode;
-}) => (
-  <footer className={cn("sticky z-nav w-full pb-[20px] pt-6", className)}>
-    <Button.Colored
-      color={color}
-      className="flex w-full items-center py-4 text-white"
-      onClick={onClick}
-    >
-      {children}
-    </Button.Colored>
-  </footer>
-);
-
 const ShareFooter = () => {
   const { answer } = useReportState();
   const onShare = async () => {
@@ -149,11 +125,11 @@ const ShareFooter = () => {
     }
   };
   return (
-    <FloatingFooter className="bottom-nav" color="violet" onClick={onShare}>
+    <Footer.Floating className="bottom-nav" color="violet" onClick={onShare}>
       <Icon src="/images/letter.png" alt="letter" className="mr-3" />
       친구에게 리포트 공유하기
       <Icon src="/images/share.svg" alt="share" className="ml-auto mr-0" />
-    </FloatingFooter>
+    </Footer.Floating>
   );
 };
 
@@ -190,11 +166,11 @@ const PublicFooter = () => {
     });
   };
   return (
-    <FloatingFooter className="bottom-0" color="primary" onClick={onStart}>
+    <Footer.Floating className="bottom-0" color="primary" onClick={onStart}>
       <Icon src="/images/star_eyes.png" alt="star eyes" className="mr-3" />
       질문에 대답하고 나만의 리포트 보러가기
       <RightArrowIcon />
-    </FloatingFooter>
+    </Footer.Floating>
   );
 };
 
