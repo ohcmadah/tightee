@@ -14,12 +14,15 @@ const Container = ({
 
 const Box = ({
   className,
+  onClick,
   children,
 }: {
   className?: cn.Argument;
+  onClick?: React.MouseEventHandler;
   children?: React.ReactNode;
 }) => (
   <article
+    onClick={onClick}
     className={cn(
       "flex w-full flex-col items-start rounded-2xl border border-grayscale-20 bg-white p-5 text-base drop-shadow-lg",
       className
