@@ -110,7 +110,7 @@ const Question = () => {
         </Badge>
         <Content iconSrc="/images/right_arrow.svg" alt="right arrow">
           {isAllAnswered
-            ? "모든 질문에 대답을 완료했어요 👏"
+            ? "모든 질문에 대답했어요 👏"
             : remaining + "개의 질문이 남아있어요 🐰"}
         </Content>
       </Box>
