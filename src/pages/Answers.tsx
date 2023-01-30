@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { getAnswerGroups, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
@@ -9,8 +10,8 @@ import ErrorView from "../components/ErrorView";
 import Loading from "../components/Loading";
 import Header from "../components/Header";
 import Box from "../components/Box";
-import Notice from "../components/Notice";
 import Question from "../components/Question";
+import Img from "../components/Img";
 
 type AnswerGroups = Awaited<ReturnType<typeof getAnswerGroups>>;
 
@@ -75,19 +76,8 @@ const MyAnswers = ({ groups }: { groups: AnswerGroups }) => {
   );
 };
 
-const AlreadyAnswered = () => (
-  <Notice
-    iconSrc="/images/writing_hand.png"
-    alt="writing hand"
-    className="mb-8 text-grayscale-60"
-  >
-    오늘 질문들에 모두 대답하셨네요!
-    <br />
-    내일 또 재미있는 질문이 기다리고 있어요 :)
-  </Notice>
-);
-
 const TodayQuestions = () => {
+  const navigate = useNavigate();
   const { data: todayQuestions } = useTodayQuestions();
   const { data: myAnswers } = useMyAnswers();
 
@@ -110,28 +100,22 @@ const TodayQuestions = () => {
     answeredQuestionIds.has(id)
   );
 
-  if (isAllAnswered) {
-    return <AlreadyAnswered />;
+  if (!isAllAnswered) {
+    return (
+      <Box.Container className="mb-8">
+        <Box className="cursor-pointer" onClick={() => navigate("/questions")}>
+          <div className="flex w-full items-center justify-between text-sm">
+            <span className="mr-3">
+              아직 대답하지 않은 오늘의 질문이 있어요
+            </span>
+            <Img src="/images/right_arrow.svg" />
+          </div>
+        </Box>
+      </Box.Container>
+    );
   }
 
-  return (
-    <Box.Container className="mb-8">
-      {todayQuestions.map(
-        (question) =>
-          !answeredQuestionIds.has(question.id) && (
-            <Question
-              key={question.id}
-              createdAt="TODAY"
-              title={question.title}
-              linkProps={{
-                to: "/questions/" + question.id,
-                state: { question },
-              }}
-            />
-          )
-      )}
-    </Box.Container>
-  );
+  return null;
 };
 
 const Answers = () => {
