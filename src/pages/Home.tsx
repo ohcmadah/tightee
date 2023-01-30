@@ -103,7 +103,7 @@ const Question = () => {
   const isAllAnswered = remaining === 0;
 
   return (
-    <Link to={isAllAnswered ? "/answer" : "/questions"}>
+    <Link to="/questions">
       <Box>
         <Badge className="bg-secondary-question font-bold text-white">
           오늘의 질문
