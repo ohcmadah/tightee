@@ -17,10 +17,12 @@ const Login = () => {
         <Img src="/tightee.svg" alt="Tightee" />
       </h1>
       <h2 className="mt-2 select-none text-base font-bold text-grayscale-60">
-        전국민 MBTI 검증 프로젝트
+        하루에 질문 세 개로 만드는 나만의 다이어리
       </h2>
-      <div className="mt-3 select-none text-base font-bold text-grayscale-80">
-        MBTI, 나이, 지역별로 나의 성향을 분석해보세요.
+      <div className="mt-3 select-none text-center text-base font-bold text-grayscale-80">
+        매일마다 나의 취향을 기록하고
+        <br />
+        MBTI 등 다양한 분석을 경험해보세요.
       </div>
       <Button.Kakao className="mt-12" onClick={() => loginWithKakao()} />
       <a
