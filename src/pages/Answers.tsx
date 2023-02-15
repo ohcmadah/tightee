@@ -17,10 +17,10 @@ import { useEffect } from "react";
 const AnswerPlaceholder = () => (
   <Box>
     <Skeleton.Container viewBox="0 0 340 147">
-      <rect x="0" y="0" rx="18" ry="18" width="120" height="30" />
-      <rect x="7" y="50" rx="8" ry="8" width="330" height="20" />
-      <rect x="7" y="84" rx="10" ry="10" width="80" height="20" />
-      <rect x="0" y="126" rx="10" ry="10" width="200" height="21" />
+      <Skeleton.Badge width={120} />
+      <Skeleton.Text x={7} y={50} width={330} size={20} />
+      <Skeleton.Text x={7} y={84} width={80} size={20} />
+      <Skeleton.Text y={126} width={200} size={20} />
     </Skeleton.Container>
   </Box>
 );

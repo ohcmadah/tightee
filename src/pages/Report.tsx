@@ -37,6 +37,7 @@ import Chart from "../components/Chart";
 import Icon from "../components/Icon";
 import Notice from "../components/Notice";
 import Footer from "../components/Footer";
+import Skeleton from "../components/Skeleton";
 
 const RANK_ICONS = [
   "/images/gold.png",
@@ -283,7 +284,7 @@ const ToggleButton = ({
   onClick,
   children,
 }: {
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   children: React.ReactNode;
 }) => (
   <button
@@ -535,6 +536,46 @@ const getMyAnswerAndAnswers = async (
   };
 };
 
+const ReportPlaceholder = () => (
+  <>
+    <Header>
+      <Skeleton.Container viewBox="0 0 340 40">
+        <Skeleton.Text y={0} width={150} size={40} />
+      </Skeleton.Container>
+    </Header>
+    <Box.Container>
+      <Box>
+        <Skeleton.Container viewBox="0 0 340 92">
+          <Skeleton.Badge width={120} />
+          <Skeleton.Text x={3} y={42} width={330} size={18} />
+          <Skeleton.Text y={72} width={200} size={20} />
+        </Skeleton.Container>
+      </Box>
+      <Box>
+        <Skeleton.Container viewBox="0 0 340 260">
+          <Skeleton.Text y={0} width={200} size={20} />
+          <circle r={60} cx="50%" cy={115} />
+          <Skeleton.Text y={205} width={160} size={18} />
+          <Skeleton.Text y={235} width={190} size={18} />
+        </Skeleton.Container>
+      </Box>
+      <Box>
+        <Skeleton.Container viewBox="0 0 340 190">
+          <Skeleton.Badge x={110} width={120} />
+          <Skeleton.Text y={50} width={300} size={20} />
+          <Skeleton.Text y={90} width={320} size={20} />
+          <Skeleton.Text y={120} width={320} size={20} />
+          <Skeleton.Text y={150} width={320} size={20} />
+        </Skeleton.Container>
+        <ToggleButton>
+          <span className="text-grayscale-20">펼치기</span>
+          <img src="/images/down_arrow.svg" className="ml-1.5" />
+        </ToggleButton>
+      </Box>
+    </Box.Container>
+  </>
+);
+
 const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   const { answerId } = useParams();
   const location = useLocation();
@@ -556,7 +597,7 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
 
   switch (state) {
     case "loading":
-      return <Loading.Full />;
+      return <ReportPlaceholder />;
 
     case "error":
       return <ErrorView.Default />;

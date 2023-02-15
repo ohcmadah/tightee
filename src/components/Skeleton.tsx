@@ -20,16 +20,47 @@ const Container = ({
   </ContentLoader>
 );
 
+const Text = ({
+  x,
+  y,
+  width,
+  size = 14,
+}: {
+  x?: string | number;
+  y: string | number;
+  width?: number | string;
+  size?: number;
+}) => (
+  <rect
+    x={x || 0}
+    y={y}
+    rx={(size - 14) / 2 + 6}
+    ry={(size - 14) / 2 + 6}
+    width={width || "160"}
+    height={size}
+  />
+);
+
+const Badge = ({
+  x,
+  width = "100",
+}: {
+  x?: number | string;
+  width?: number | string;
+}) => <rect x={x || "0"} y="0" rx="18" ry="18" width={width} height="30" />;
+
 const BoxLoader = () => (
   <Box>
     <Container viewBox="0 0 340 66">
-      <rect x="0" y="0" rx="18" ry="18" width="100" height="30" />
-      <rect x="0" y="52" rx="6" ry="6" width="160" height="14" />
+      <Badge />
+      <Text y={52} />
     </Container>
   </Box>
 );
 
 export default {
   Container: Container,
+  Text: Text,
+  Badge: Badge,
   BoxLoader: BoxLoader,
 };
