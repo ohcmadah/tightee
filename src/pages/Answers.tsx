@@ -7,13 +7,23 @@ import { useMyAnswers } from "../contexts/MyAnswersContext";
 import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 
 import ErrorView from "../components/ErrorView";
-import Loading from "../components/Loading";
+import Skeleton from "../components/Skeleton";
 import Header from "../components/Header";
 import Box from "../components/Box";
 import Question from "../components/Question";
 import Img from "../components/Img";
+import { useEffect } from "react";
 
-type AnswerGroups = Awaited<ReturnType<typeof getAnswerGroups>>;
+const AnswerPlaceholder = () => (
+  <Box>
+    <Skeleton.Container viewBox="0 0 340 147">
+      <rect x="0" y="0" rx="18" ry="18" width="120" height="30" />
+      <rect x="7" y="50" rx="8" ry="8" width="330" height="20" />
+      <rect x="7" y="84" rx="10" ry="10" width="80" height="20" />
+      <rect x="0" y="126" rx="10" ry="10" width="200" height="21" />
+    </Skeleton.Container>
+  </Box>
+);
 
 const MyAnswer = ({
   answer,
@@ -29,17 +39,7 @@ const MyAnswer = ({
   const ratio = (sameAnswers?.length || 0) / options.length;
 
   if (state !== "loaded") {
-    return (
-      <Question
-        createdAt="📅 ..."
-        title="데이터를 불러오고 있어요 :)"
-        option=" "
-        linkProps={{
-          to: id + "/report",
-        }}
-        ratio={ratio}
-      />
-    );
+    return <AnswerPlaceholder />;
   }
 
   return (
@@ -53,8 +53,26 @@ const MyAnswer = ({
   );
 };
 
-const MyAnswers = ({ groups }: { groups: AnswerGroups }) => {
-  const { data: myAnswers } = useMyAnswers();
+const MyAnswers = () => {
+  const { state, data: groups } = useAsyncAPI(getAnswerGroups, {
+    groups: ["question"],
+  });
+  const { isLoading, data: myAnswers } = useMyAnswers();
+
+  if (isLoading || state === "loading") {
+    return (
+      <Box.Container>
+        {[0, 1, 2].map((i) => (
+          <AnswerPlaceholder key={i} />
+        ))}
+      </Box.Container>
+    );
+  }
+
+  if (myAnswers instanceof Error || state === "error") {
+    return <ErrorView.Default />;
+  }
+
   const isEmptyMyAnswers = myAnswers.length === 0;
 
   return (
@@ -78,10 +96,24 @@ const MyAnswers = ({ groups }: { groups: AnswerGroups }) => {
 
 const TodayQuestions = () => {
   const navigate = useNavigate();
-  const { data: todayQuestions } = useTodayQuestions();
-  const { data: myAnswers } = useMyAnswers();
+  const todayQuestions = useTodayQuestions();
+  const myAnswers = useMyAnswers();
 
-  if (!todayQuestions) {
+  if (todayQuestions.isLoading || myAnswers.isLoading) {
+    return (
+      <Box className="mb-8">
+        <Skeleton.Container viewBox="0 0 100 5">
+          <rect x="0" y="0" rx="3" ry="3" width="60" height="5" />
+        </Skeleton.Container>
+      </Box>
+    );
+  }
+
+  if (todayQuestions.data instanceof Error || myAnswers.data instanceof Error) {
+    return <ErrorView.Default />;
+  }
+
+  if (!todayQuestions.data) {
     return (
       <section className="mb-8">
         <Question
@@ -94,9 +126,9 @@ const TodayQuestions = () => {
   }
 
   const answeredQuestionIds = new Set(
-    myAnswers.map(({ question }) => question)
+    myAnswers.data.map(({ question }) => question)
   );
-  const isAllAnswered = todayQuestions.every(({ id }) =>
+  const isAllAnswered = todayQuestions.data.every(({ id }) =>
     answeredQuestionIds.has(id)
   );
 
@@ -119,34 +151,26 @@ const TodayQuestions = () => {
 };
 
 const Answers = () => {
-  const { state, data: answerGroups } = useAsyncAPI(getAnswerGroups, {
-    groups: ["question"],
-  });
+  useEffect(() => {
+    const imgs = ["reply.svg", "right_arrow.svg", "chart.png"];
+    imgs.forEach((src) => (new Image().src = "/images/" + src));
+  }, []);
 
-  switch (state) {
-    case "loading":
-      return <Loading.Full />;
-
-    case "error":
-      return <ErrorView.Default />;
-
-    case "loaded":
-      return (
-        <>
-          <Header>
-            <Header.H1 className="flex items-center">
-              <Header.Icon iconSrc="/images/answer.png" alt="answer">
-                나의 대답
-              </Header.Icon>
-            </Header.H1>
-          </Header>
-          <main>
-            <TodayQuestions />
-            <MyAnswers groups={answerGroups} />
-          </main>
-        </>
-      );
-  }
+  return (
+    <>
+      <Header>
+        <Header.H1 className="flex items-center">
+          <Header.Icon iconSrc="/images/answer.png" alt="answer">
+            나의 대답
+          </Header.Icon>
+        </Header.H1>
+      </Header>
+      <main>
+        <TodayQuestions />
+        <MyAnswers />
+      </main>
+    </>
+  );
 };
 
 export default Answers;

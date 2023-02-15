@@ -56,13 +56,7 @@ const Question = ({
           <span className="align-middle">대답하러 가기</span>
         </div>
       )}
-      <Img
-        lazy
-        src="/images/right_arrow.svg"
-        width={9}
-        height={16}
-        alt="arrow"
-      />
+      <Img src="/images/right_arrow.svg" width={9} height={16} alt="arrow" />
     </Link>
   </Box>
 );
