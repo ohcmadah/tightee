@@ -21,13 +21,20 @@ const isEmpty = (value: any) => {
   }
 };
 
-const nicknameValidator = (nickname: string) => {
+const nicknameValidator = (
+  existentNicknameSet: Set<string>,
+  nickname: string
+) => {
   if (isEmpty(nickname)) {
     return "닉네임이 입력되지 않았어요.";
   }
 
   if (nickname.length > 20) {
     return "20자 이내로 입력해 주세요.";
+  }
+
+  if (existentNicknameSet.has(nickname)) {
+    return "이미 존재하는 닉네임입니다.";
   }
 };
 
@@ -65,7 +72,10 @@ const emptyValidator = (value: any, msg?: string) => {
   return false;
 };
 
-export const profileValidator = (values: ProfileValues): FormError => {
+export const profileValidator = (
+  values: ProfileValues,
+  existentNicknameSet: Set<string>
+): FormError => {
   const validators: Record<string, Function> = {
     region: (value: ProfileValues["region"]) =>
       emptyValidator(value, "지역이 선택되지 않았어요."),
@@ -75,7 +85,8 @@ export const profileValidator = (values: ProfileValues): FormError => {
 
     birthdate: birthdateValidator,
 
-    nickname: (value: ProfileValues["nickname"]) => nicknameValidator(value),
+    nickname: (value: ProfileValues["nickname"]) =>
+      nicknameValidator(existentNicknameSet, value),
 
     MBTI: () => false,
   };

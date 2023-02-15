@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UpdateData } from "firebase/firestore";
+import { FieldValue, UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
 import { profileValidator } from "../common/validators";
-import { updateUser } from "../common/apis";
+import { getNicknames, updateUser } from "../common/apis";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -113,9 +113,11 @@ const Subscribe = ({
 
 const ProfileForm = ({
   user,
+  nicknameErrorMsg,
   onUpdateUser,
 }: {
   user: User;
+  nicknameErrorMsg?: string;
   onUpdateUser: (id: string, data: UpdateData<User>) => any;
 }) => {
   const initialValues = useMemo(
@@ -140,7 +142,7 @@ const ProfileForm = ({
         };
         onUpdateUser(user.id, newProfile);
       },
-      validator: (values) => profileValidator(values),
+      validator: (values) => profileValidator(values, new Set()),
     }
   );
 
@@ -153,7 +155,7 @@ const ProfileForm = ({
       <Form.Section
         required
         label="닉네임"
-        error={getFormErrorMessage(errors, "nickname")}
+        error={nicknameErrorMsg || getFormErrorMessage(errors, "nickname")}
       >
         <Input.Basic
           type="text"
@@ -221,7 +223,7 @@ const EditProfileLoader = () => {
   return (
     <main>
       {[0, 1, 2, 3, 4].map((i) => (
-        <Form.Section required={i !== 4} label={labels[i]}>
+        <Form.Section key={i} required={i !== 4} label={labels[i]}>
           <RectLoader />
           {i === 4 && (
             <ExternalLink href={URL_MBTI_TEST} className="mt-3">
@@ -249,15 +251,7 @@ const EditProfile = ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const { isLoading, data: user, forceUpdate } = useUser();
-
-  const onUpdateUser = async (id: string, data: UpdateData<User>) => {
-    setIsLoading(true);
-    try {
-      await updateUser(id, data);
-    } catch (error) {}
-    setIsLoading(false);
-    forceUpdate();
-  };
+  const [nicknameErrorMsg, setNicknameErrorMsg] = useState<string>();
 
   if (isLoading) {
     return <EditProfileLoader />;
@@ -271,9 +265,34 @@ const EditProfile = ({
     );
   }
 
+  const checkDuplicateNickname = async (nickname?: string | FieldValue) => {
+    const nicknames = await getNicknames();
+    return nickname !== user.nickname && nicknames.includes(nickname as string);
+  };
+
+  const onUpdateUser = async (id: string, data: UpdateData<User>) => {
+    setIsLoading(true);
+    try {
+      // TODO: 백엔드에서 처리하도록 변경
+      const isDuplicateNickname = await checkDuplicateNickname(data.nickname);
+      if (isDuplicateNickname) {
+        throw new Error("이미 존재하는 닉네임입니다.");
+      }
+      await updateUser(id, data);
+      forceUpdate();
+    } catch (error) {
+      setNicknameErrorMsg((error as Error).message);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <>
-      <ProfileForm user={user} onUpdateUser={onUpdateUser} />
+      <ProfileForm
+        user={user}
+        onUpdateUser={onUpdateUser}
+        nicknameErrorMsg={nicknameErrorMsg}
+      />
       <Subscribe
         id={user.id}
         subscribe={user.subscribe.marketing}
@@ -307,11 +326,7 @@ const Profile = () => {
       </Header>
       <EditProfile setIsLoading={setIsLoading} />
       <Settings onLogout={onLogout} />
-      {isLoading && (
-        <ModalPortal>
-          <Loading.Modal />
-        </ModalPortal>
-      )}
+      <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
     </>
   );
 };
