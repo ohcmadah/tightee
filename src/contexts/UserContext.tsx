@@ -1,21 +1,42 @@
 import React, { createContext, useContext } from "react";
 import { User } from "../@types";
+import { getUser } from "../common/apis";
+import useAsyncAPI from "../hooks/useAsyncAPI";
 
-type Value = {
-  data: User;
-  forceUpdate: React.DispatchWithoutAction;
-};
+type APIResponse = ReturnType<typeof useAsyncAPI<typeof getUser>>;
+type Value =
+  | { isLoading: true; data: null; forceUpdate: React.DispatchWithoutAction }
+  | {
+      isLoading: false;
+      data: User | null | Error;
+      forceUpdate: React.DispatchWithoutAction;
+    };
 const UserContext = createContext<Value | undefined>(undefined);
 
 export const UserContextProvider = ({
-  value,
+  response,
   children,
 }: {
-  value: Value;
+  response: APIResponse;
   children: React.ReactNode;
 }) => {
   return (
-    <UserContext.Provider value={{ ...value }}>{children}</UserContext.Provider>
+    <UserContext.Provider
+      value={
+        response.state === "loading"
+          ? { isLoading: true, data: null, forceUpdate: response.forceUpdate }
+          : {
+              isLoading: false,
+              data:
+                response.state === "error"
+                  ? new Error(response.data as string)
+                  : response.data,
+              forceUpdate: response.forceUpdate,
+            }
+      }
+    >
+      {children}
+    </UserContext.Provider>
   );
 };
 
