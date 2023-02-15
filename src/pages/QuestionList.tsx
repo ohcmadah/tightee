@@ -8,7 +8,7 @@ import { URL_CS, URL_QUESTION_GOOGLE_FORM } from "../common/constants";
 
 import Box from "../components/Box";
 import Badge from "../components/Badge";
-import Loading from "../components/Loading";
+import Skeleton from "../components/Skeleton";
 import ErrorView from "../components/ErrorView";
 import ExternalLink from "../components/ExternalLink";
 import Header from "../components/Header";
@@ -109,7 +109,7 @@ const Main = () => {
         </Badge>
         <Box.Container>
           {[1, 2, 3].map((n) => (
-            <Loading.BoxLoader key={n} />
+            <Skeleton.BoxLoader key={n} />
           ))}
         </Box.Container>
       </main>

@@ -1,4 +1,3 @@
-import ContentLoader from "react-content-loader";
 import { Link } from "react-router-dom";
 
 import { getMBTIName } from "../common/utils";
@@ -12,7 +11,7 @@ import Box from "../components/Box";
 import Img from "../components/Img";
 import Notice from "../components/Notice";
 import ErrorView from "../components/ErrorView";
-import Loading from "../components/Loading";
+import Skeleton from "../components/Skeleton";
 
 const Footer = () => (
   <Notice
@@ -45,7 +44,7 @@ const MBTI = () => {
   const { isLoading, data: user } = useUser();
 
   if (isLoading) {
-    return <Loading.BoxLoader />;
+    return <Skeleton.BoxLoader />;
   }
 
   if (user instanceof Error) {
@@ -80,7 +79,7 @@ const Answer = () => {
   const { isLoading, data: myAnswers } = useMyAnswers();
 
   if (isLoading) {
-    return <Loading.BoxLoader />;
+    return <Skeleton.BoxLoader />;
   }
 
   if (myAnswers instanceof Error) {
@@ -107,7 +106,7 @@ const Question = () => {
   const { isLoading: isLoadingAnswers, data: myAnswers } = useMyAnswers();
 
   if (isLoadingQuestions || isLoadingAnswers) {
-    return <Loading.BoxLoader />;
+    return <Skeleton.BoxLoader />;
   }
 
   if (todayQuestions instanceof Error || myAnswers instanceof Error) {
