@@ -1,11 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UpdateData } from "firebase/firestore";
+import { FieldValue, UpdateData } from "firebase/firestore";
 import useForm from "../hooks/useForm";
-import { useAuthenticatedState } from "../contexts/AuthContext";
 import { profileValidator } from "../common/validators";
-import { getNicknames, getUser, updateUser } from "../common/apis";
-import { User as AuthUser } from "firebase/auth";
+import { getNicknames, updateUser } from "../common/apis";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -15,14 +13,14 @@ import {
   URL_PERSONAL_AGREEMENT,
   URL_TERMS,
 } from "../common/constants";
-import { auth, auth as firebaseAuth } from "../config";
+import { auth as firebaseAuth } from "../config";
 import {
   convertBirthdateToUTC,
   convertUTCToBirthdate,
   getFormErrorMessage,
 } from "../common/utils";
 import { ProfileValues } from "../contexts/SignUpContext";
-import useAsyncAPI from "../hooks/useAsyncAPI";
+import { useUser } from "../contexts/UserContext";
 
 import Button from "../components/Button";
 import Form from "../components/Form";
@@ -34,33 +32,17 @@ import ModalPortal from "../components/ModalPortal";
 import ExternalLink from "../components/ExternalLink";
 import ErrorView from "../components/ErrorView";
 import Icon from "../components/Icon";
-import { useUser } from "../contexts/UserContext";
+import Skeleton from "../components/Skeleton";
 
 const Settings = ({
-  subscribe,
-  onUpdateUser,
   onLogout,
 }: {
-  subscribe: boolean;
-  onUpdateUser: (data: UpdateData<User>) => any;
   onLogout: React.MouseEventHandler<HTMLButtonElement>;
 }) => {
   const navigate = useNavigate();
 
-  const toggleSubscribe = () => {
-    onUpdateUser({ subscribe: { marketing: !subscribe } });
-  };
-
   return (
     <>
-      <section className="my-28">
-        <Form.Label className="mb-2">맞춤형 혜택</Form.Label>
-        <div className="flex items-center justify-between text-base">
-          이벤트 등 다양한 혜택을 제공받을 수 있어요
-          <Input.Switch checked={subscribe} onChange={toggleSubscribe} />
-        </div>
-      </section>
-
       <section className="mb-6 flex items-center">
         <Button.Outline className="mr-6 min-w-[50%]" onClick={onLogout}>
           로그아웃
@@ -105,14 +87,38 @@ const Settings = ({
   );
 };
 
+const Subscribe = ({
+  id,
+  subscribe,
+  onUpdateUser,
+}: {
+  id: User["id"];
+  subscribe: boolean;
+  onUpdateUser: (id: string, data: UpdateData<User>) => any;
+}) => {
+  const toggleSubscribe = () => {
+    onUpdateUser(id, { subscribe: { marketing: !subscribe } });
+  };
+
+  return (
+    <section className="my-28">
+      <Form.Label className="mb-2">맞춤형 혜택</Form.Label>
+      <div className="flex items-center justify-between text-base">
+        이벤트 등 다양한 혜택을 제공받을 수 있어요
+        <Input.Switch checked={subscribe} onChange={toggleSubscribe} />
+      </div>
+    </section>
+  );
+};
+
 const ProfileForm = ({
   user,
+  nicknameErrorMsg,
   onUpdateUser,
-  nicknames,
 }: {
   user: User;
-  onUpdateUser: (data: UpdateData<User>) => any;
-  nicknames: string[];
+  nicknameErrorMsg?: string;
+  onUpdateUser: (id: string, data: UpdateData<User>) => any;
 }) => {
   const initialValues = useMemo(
     () => ({
@@ -124,10 +130,6 @@ const ProfileForm = ({
     }),
     [user]
   );
-  const existentNicknameSet = useMemo(() => {
-    const filtered = nicknames.filter((nickname) => nickname !== user.nickname);
-    return new Set(filtered);
-  }, [user]);
 
   const { values, errors, handleChange, handleSubmit } = useForm<ProfileValues>(
     {
@@ -138,9 +140,9 @@ const ProfileForm = ({
           birthdate: convertBirthdateToUTC(values.birthdate),
           MBTI: values.MBTI || null,
         };
-        onUpdateUser(newProfile);
+        onUpdateUser(user.id, newProfile);
       },
-      validator: (values) => profileValidator(values, existentNicknameSet),
+      validator: (values) => profileValidator(values, new Set()),
     }
   );
 
@@ -153,7 +155,7 @@ const ProfileForm = ({
       <Form.Section
         required
         label="닉네임"
-        error={getFormErrorMessage(errors, "nickname")}
+        error={nicknameErrorMsg || getFormErrorMessage(errors, "nickname")}
       >
         <Input.Basic
           type="text"
@@ -210,8 +212,97 @@ const ProfileForm = ({
   );
 };
 
-const ActualProfile = ({ nicknames }: { nicknames: string[] }) => {
-  const { data: user, forceUpdate } = useUser();
+const RectLoader = () => (
+  <Skeleton.Container viewBox="0 0 340 45">
+    <rect x="0" y="0" rx="8" ry="8" width="340" height="45" />
+  </Skeleton.Container>
+);
+
+const EditProfileLoader = () => {
+  const labels = ["닉네임", "지역", "생년월일", "성별", "MBTI"];
+  return (
+    <main>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <Form.Section key={i} required={i !== 4} label={labels[i]}>
+          <RectLoader />
+          {i === 4 && (
+            <ExternalLink href={URL_MBTI_TEST} className="mt-3">
+              {"MBTI 검사 바로가기 >"}
+            </ExternalLink>
+          )}
+        </Form.Section>
+      ))}
+      <Button.Colored className="w-full" color="yellow" disabled>
+        수정하기
+      </Button.Colored>
+      <section className="my-28">
+        <Form.Label className="mb-2">맞춤형 혜택</Form.Label>
+        <div className="flex items-center justify-between text-base">
+          이벤트 등 다양한 혜택을 제공받을 수 있어요
+        </div>
+      </section>
+    </main>
+  );
+};
+
+const EditProfile = ({
+  setIsLoading,
+}: {
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const { isLoading, data: user, forceUpdate } = useUser();
+  const [nicknameErrorMsg, setNicknameErrorMsg] = useState<string>();
+
+  if (isLoading) {
+    return <EditProfileLoader />;
+  }
+
+  if (user instanceof Error || !user) {
+    return (
+      <ErrorView.Default>
+        <article>유저 정보를 불러올 수 없습니다.</article>
+      </ErrorView.Default>
+    );
+  }
+
+  const checkDuplicateNickname = async (nickname?: string | FieldValue) => {
+    const nicknames = await getNicknames();
+    return nickname !== user.nickname && nicknames.includes(nickname as string);
+  };
+
+  const onUpdateUser = async (id: string, data: UpdateData<User>) => {
+    setIsLoading(true);
+    try {
+      // TODO: 백엔드에서 처리하도록 변경
+      const isDuplicateNickname = await checkDuplicateNickname(data.nickname);
+      if (isDuplicateNickname) {
+        throw new Error("이미 존재하는 닉네임입니다.");
+      }
+      await updateUser(id, data);
+      forceUpdate();
+    } catch (error) {
+      setNicknameErrorMsg((error as Error).message);
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <>
+      <ProfileForm
+        user={user}
+        onUpdateUser={onUpdateUser}
+        nicknameErrorMsg={nicknameErrorMsg}
+      />
+      <Subscribe
+        id={user.id}
+        subscribe={user.subscribe.marketing}
+        onUpdateUser={onUpdateUser}
+      />
+    </>
+  );
+};
+
+const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -224,15 +315,6 @@ const ActualProfile = ({ nicknames }: { nicknames: string[] }) => {
     } catch (error) {}
   };
 
-  const onUpdateUser = async (data: UpdateData<User>) => {
-    setIsLoading(true);
-    try {
-      await updateUser(user.id, data);
-    } catch (error) {}
-    setIsLoading(false);
-    forceUpdate();
-  };
-
   return (
     <>
       <Header>
@@ -242,38 +324,11 @@ const ActualProfile = ({ nicknames }: { nicknames: string[] }) => {
           </Header.Icon>
         </Header.H1>
       </Header>
-      <ProfileForm
-        user={user}
-        onUpdateUser={onUpdateUser}
-        nicknames={nicknames}
-      />
-      <Settings
-        subscribe={user.subscribe.marketing}
-        onUpdateUser={onUpdateUser}
-        onLogout={onLogout}
-      />
-      {isLoading && (
-        <ModalPortal>
-          <Loading.Modal />
-        </ModalPortal>
-      )}
+      <EditProfile setIsLoading={setIsLoading} />
+      <Settings onLogout={onLogout} />
+      <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
     </>
   );
-};
-
-const Profile = () => {
-  const nicknames = useAsyncAPI(getNicknames);
-
-  switch (nicknames.state) {
-    case "loading":
-      return <Loading.Full />;
-
-    case "error":
-      return <ErrorView.Default />;
-
-    case "loaded":
-      return <ActualProfile nicknames={nicknames.data} />;
-  }
 };
 
 export default Profile;

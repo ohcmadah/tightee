@@ -1,21 +1,42 @@
 import React, { createContext, useContext } from "react";
 import { Answer } from "../@types";
+import { getMyAnswers } from "../common/apis";
+import useAsyncAPI from "../hooks/useAsyncAPI";
 
-type MyAnswers = {
-  data: Answer[];
-  forceUpdate: React.DispatchWithoutAction;
-};
+type APIReponse = ReturnType<typeof useAsyncAPI<typeof getMyAnswers>>;
+type MyAnswers =
+  | {
+      isLoading: true;
+      data: null;
+      forceUpdate: React.DispatchWithoutAction;
+    }
+  | {
+      isLoading: false;
+      data: Answer[] | Error;
+      forceUpdate: React.DispatchWithoutAction;
+    };
 const MyAnswersContext = createContext<MyAnswers | undefined>(undefined);
 
 export const MyAnswersContextProvider = ({
-  value,
+  response,
   children,
 }: {
-  value: MyAnswers;
+  response: APIReponse;
   children: React.ReactNode;
 }) => {
+  const { forceUpdate } = response;
   return (
-    <MyAnswersContext.Provider value={{ ...value }}>
+    <MyAnswersContext.Provider
+      value={
+        response.state === "loading"
+          ? { isLoading: true, data: null, forceUpdate }
+          : {
+              isLoading: false,
+              data: response.state === "error" ? new Error() : response.data,
+              forceUpdate,
+            }
+      }
+    >
       {children}
     </MyAnswersContext.Provider>
   );

@@ -1,14 +1,17 @@
+import { Link } from "react-router-dom";
+
 import { getMBTIName } from "../common/utils";
 import { useUser } from "../contexts/UserContext";
 import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
 
-import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Badge from "../components/Badge";
 import Box from "../components/Box";
 import Img from "../components/Img";
 import Notice from "../components/Notice";
+import ErrorView from "../components/ErrorView";
+import Skeleton from "../components/Skeleton";
 
 const Footer = () => (
   <Notice
@@ -38,9 +41,23 @@ const Content = ({
 );
 
 const MBTI = () => {
-  const {
-    data: { MBTI: mbti },
-  } = useUser();
+  const { isLoading, data: user } = useUser();
+
+  if (isLoading) {
+    return <Skeleton.BoxLoader />;
+  }
+
+  if (user instanceof Error) {
+    return <ErrorView.Default />;
+  }
+
+  if (!user) {
+    return (
+      <ErrorView.Default>
+        <article>유저 정보를 불러올 수 없습니다.</article>
+      </ErrorView.Default>
+    );
+  }
 
   return (
     <Link to="/profile">
@@ -49,8 +66,8 @@ const MBTI = () => {
           나의 MBTI
         </Badge>
         <Content iconSrc="/images/setting.svg" alt="setting" iconWidth={20}>
-          {mbti
-            ? mbti + " - " + getMBTIName(mbti)
+          {user.MBTI
+            ? user.MBTI + " - " + getMBTIName(user.MBTI)
             : "MBTI를 설정하면 더욱 재미있는 정보를 확인할 수 있어요 :)"}
         </Content>
       </Box>
@@ -59,7 +76,15 @@ const MBTI = () => {
 };
 
 const Answer = () => {
-  const { data: myAnswers } = useMyAnswers();
+  const { isLoading, data: myAnswers } = useMyAnswers();
+
+  if (isLoading) {
+    return <Skeleton.BoxLoader />;
+  }
+
+  if (myAnswers instanceof Error) {
+    return <Box>에러가 발생했습니다.</Box>;
+  }
 
   return (
     <Link to="/answer">
@@ -76,8 +101,17 @@ const Answer = () => {
 };
 
 const Question = () => {
-  const { data: todayQuestions } = useTodayQuestions();
-  const { data: myAnswers } = useMyAnswers();
+  const { isLoading: isLoadingQuestions, data: todayQuestions } =
+    useTodayQuestions();
+  const { isLoading: isLoadingAnswers, data: myAnswers } = useMyAnswers();
+
+  if (isLoadingQuestions || isLoadingAnswers) {
+    return <Skeleton.BoxLoader />;
+  }
+
+  if (todayQuestions instanceof Error || myAnswers instanceof Error) {
+    return <ErrorView.Default />;
+  }
 
   if (!todayQuestions) {
     return (

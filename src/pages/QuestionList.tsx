@@ -3,12 +3,12 @@ import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
 import { useTodayQuestions } from "../contexts/TodayQuestionContext";
-import { Question as QuestionType } from "../@types";
+import { Answer, Question as QuestionType } from "../@types";
 import { URL_CS, URL_QUESTION_GOOGLE_FORM } from "../common/constants";
 
 import Box from "../components/Box";
 import Badge from "../components/Badge";
-import Loading from "../components/Loading";
+import Skeleton from "../components/Skeleton";
 import ErrorView from "../components/ErrorView";
 import ExternalLink from "../components/ExternalLink";
 import Header from "../components/Header";
@@ -47,15 +47,14 @@ const FormButton = () => {
 };
 
 const TodayQuestion = ({
+  myAnswer,
   question,
   options,
 }: {
+  myAnswer?: Answer;
   question: QuestionType;
   options: string[];
 }) => {
-  const { data: myAnswers } = useMyAnswers();
-  const myAnswer = myAnswers.find((v) => v.question === question.id);
-
   if (myAnswer) {
     const sameAnswers = groupBy(options, (option) => option).get(
       myAnswer?.option
@@ -95,11 +94,37 @@ const AlreadyAnswered = () => (
   </Notice>
 );
 
-const Main = ({ answersByQuestionIdMap }: PageData) => {
-  const { data: questions } = useTodayQuestions();
-  const { data: myAnswers } = useMyAnswers();
+const Main = () => {
+  const { state, data: answerGroups } = useAsyncAPI(getAnswerGroups, {
+    groups: ["question"],
+  });
+  const questions = useTodayQuestions();
+  const myAnswers = useMyAnswers();
 
-  if (!questions) {
+  if (state === "loading" || questions.isLoading || myAnswers.isLoading) {
+    return (
+      <main className="flex flex-col items-center">
+        <Badge className="mb-10 bg-primary-peach">
+          {getFormattedDate(getLocalTime())}
+        </Badge>
+        <Box.Container>
+          {[1, 2, 3].map((n) => (
+            <Skeleton.BoxLoader key={n} />
+          ))}
+        </Box.Container>
+      </main>
+    );
+  }
+
+  if (
+    state === "error" ||
+    questions.data instanceof Error ||
+    myAnswers.data instanceof Error
+  ) {
+    return <ErrorView.Default />;
+  }
+
+  if (!questions.data) {
     return (
       <ErrorView.Default>
         <article>
@@ -115,9 +140,9 @@ const Main = ({ answersByQuestionIdMap }: PageData) => {
   }
 
   const answeredQuestionIds = new Set(
-    myAnswers.map(({ question }) => question)
+    myAnswers.data.map(({ question }) => question)
   );
-  const isAlreadyAnswered = questions.every(({ id }) =>
+  const isAlreadyAnswered = questions.data.every(({ id }) =>
     answeredQuestionIds.has(id)
   );
 
@@ -128,11 +153,16 @@ const Main = ({ answersByQuestionIdMap }: PageData) => {
       </Badge>
       {isAlreadyAnswered && <AlreadyAnswered />}
       <Box.Container>
-        {questions.map((question) => (
+        {questions.data.map((question) => (
           <TodayQuestion
             key={question.id}
+            myAnswer={
+              myAnswers.data instanceof Error
+                ? undefined
+                : myAnswers.data.find((v) => v.question === question.id)
+            }
             question={question}
-            options={answersByQuestionIdMap[question.id]}
+            options={answerGroups["question"][question.id]}
           />
         ))}
       </Box.Container>
@@ -140,33 +170,18 @@ const Main = ({ answersByQuestionIdMap }: PageData) => {
   );
 };
 
-const QuestionList = () => {
-  const { state, data: answerGroups } = useAsyncAPI(getAnswerGroups, {
-    groups: ["question"],
-  });
-
-  switch (state) {
-    case "loading":
-      return <Loading.Full />;
-
-    case "error":
-      return <ErrorView.Default />;
-
-    case "loaded":
-      return (
-        <>
-          <Header className="flex items-center">
-            <Header.H1>
-              <Header.Icon iconSrc="/images/question.png" alt="question">
-                오늘의 질문
-              </Header.Icon>
-            </Header.H1>
-          </Header>
-          <Main answersByQuestionIdMap={answerGroups["question"]} />
-          <FormButton />
-        </>
-      );
-  }
-};
+const QuestionList = () => (
+  <>
+    <Header className="flex items-center">
+      <Header.H1>
+        <Header.Icon iconSrc="/images/question.png" alt="question">
+          오늘의 질문
+        </Header.Icon>
+      </Header.H1>
+    </Header>
+    <Main />
+    <FormButton />
+  </>
+);
 
 export default QuestionList;

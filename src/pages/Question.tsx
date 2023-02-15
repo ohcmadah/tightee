@@ -185,7 +185,14 @@ const Question = ({ questionId }: { questionId: string }) => {
 const QuestionWrapper = () => {
   const { questionId } = useParams();
   const { state } = useLocation();
-  const { data: myAnswers } = useMyAnswers();
+  const { isLoading, data: myAnswers } = useMyAnswers();
+
+  if (isLoading) {
+    return <Loading.Full />;
+  }
+  if (myAnswers instanceof Error) {
+    return <ErrorView.Default />;
+  }
 
   const answer = myAnswers.find((answer) => answer.question === questionId);
   if (answer) {
