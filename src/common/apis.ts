@@ -64,7 +64,19 @@ export const getUser = async (id: string): Promise<User | null> => {
   return res.data;
 };
 
-export const updateUser = async (id: string, data: UpdateData<User>) => {
+export const updateUser = async (
+  id: string,
+  original: User,
+  data: UpdateData<User>
+) => {
+  if (data.nickname && original.nickname !== data.nickname) {
+    const nicknames = await getNicknames();
+    const set = new Set(nicknames);
+    set.delete(original.nickname);
+    if (set.has(data.nickname as string)) {
+      throw new Error("이미 존재하는 닉네임입니다.");
+    }
+  }
   const token = await getAuthIdToken();
   return await axios.patch(
     "/api/users/" + id,

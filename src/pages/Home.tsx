@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 
 import { getMBTIName } from "../common/utils";
-import { useUser } from "../contexts/UserContext";
 import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { useMyAnswers } from "../contexts/MyAnswersContext";
+import { useUserQuery } from "../hooks/queries/useUserQuery";
+import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import Header from "../components/Header";
 import Badge from "../components/Badge";
@@ -41,13 +42,14 @@ const Content = ({
 );
 
 const MBTI = () => {
-  const { isLoading, data: user } = useUser();
+  const auth = useAuthenticatedState();
+  const { data: user, isLoading, isError } = useUserQuery(auth.user.uid);
 
   if (isLoading) {
     return <Skeleton.BoxLoader />;
   }
 
-  if (user instanceof Error) {
+  if (isError) {
     return <ErrorView.Default />;
   }
 
