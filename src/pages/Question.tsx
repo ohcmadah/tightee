@@ -5,12 +5,14 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { answer, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
 import { useTodayQuestions } from "../contexts/TodayQuestionContext";
-import { useMyAnswers } from "../contexts/MyAnswersContext";
+import { auth } from "../config";
+import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -98,7 +100,7 @@ const ExpiredError = ({
 };
 
 const ActualQuestion = ({ question }: { question: QuestionType }) => {
-  const { forceUpdate } = useMyAnswers();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<QuestionError | null>(null);
 
@@ -111,7 +113,9 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
     try {
       await answer(question.id, optionId);
       setIsLoading(false);
-      forceUpdate();
+      queryClient.invalidateQueries({
+        queryKey: ["answers", auth.currentUser?.uid],
+      });
     } catch (error: any) {
       setIsLoading(false);
       if (error.code === 400) {
@@ -185,12 +189,13 @@ const Question = ({ questionId }: { questionId: string }) => {
 const QuestionWrapper = () => {
   const { questionId } = useParams();
   const { state } = useLocation();
-  const { isLoading, data: myAnswers } = useMyAnswers();
+  const uid = auth.currentUser?.uid;
+  const { isLoading, isError, data: myAnswers } = useMyAnswersQuery(uid);
 
   if (isLoading) {
     return <Loading.Full />;
   }
-  if (myAnswers instanceof Error) {
+  if (isError) {
     return <ErrorView.Default />;
   }
 

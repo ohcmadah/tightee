@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 import { getMBTIName } from "../common/utils";
 import { useTodayQuestions } from "../contexts/TodayQuestionContext";
-import { useMyAnswers } from "../contexts/MyAnswersContext";
 import { useUserQuery } from "../hooks/queries/useUserQuery";
 import { useAuthenticatedState } from "../contexts/AuthContext";
+import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 
 import Header from "../components/Header";
 import Badge from "../components/Badge";
@@ -41,9 +41,8 @@ const Content = ({
   </div>
 );
 
-const MBTI = () => {
-  const auth = useAuthenticatedState();
-  const { data: user, isLoading, isError } = useUserQuery(auth.user.uid);
+const MBTI = ({ uid }: { uid: string }) => {
+  const { data: user, isLoading, isError } = useUserQuery(uid);
 
   if (isLoading) {
     return <Skeleton.BoxLoader />;
@@ -77,14 +76,14 @@ const MBTI = () => {
   );
 };
 
-const Answer = () => {
-  const { isLoading, data: myAnswers } = useMyAnswers();
+const Answer = ({ uid }: { uid: string }) => {
+  const { isLoading, isError, data: myAnswers } = useMyAnswersQuery(uid);
 
   if (isLoading) {
     return <Skeleton.BoxLoader />;
   }
 
-  if (myAnswers instanceof Error) {
+  if (isError) {
     return <Box>에러가 발생했습니다.</Box>;
   }
 
@@ -102,16 +101,20 @@ const Answer = () => {
   );
 };
 
-const Question = () => {
+const Question = ({ uid }: { uid: string }) => {
   const { isLoading: isLoadingQuestions, data: todayQuestions } =
     useTodayQuestions();
-  const { isLoading: isLoadingAnswers, data: myAnswers } = useMyAnswers();
+  const {
+    isLoading: isLoadingAnswers,
+    isError: isErrorAnswers,
+    data: myAnswers,
+  } = useMyAnswersQuery(uid);
 
   if (isLoadingQuestions || isLoadingAnswers) {
     return <Skeleton.BoxLoader />;
   }
 
-  if (todayQuestions instanceof Error || myAnswers instanceof Error) {
+  if (todayQuestions instanceof Error || isErrorAnswers) {
     return <ErrorView.Default />;
   }
 
@@ -154,22 +157,28 @@ const Question = () => {
   );
 };
 
-const Home = () => (
-  <>
-    <Header>
-      <Header.H1>
-        <Header.Icon iconSrc="/images/home.png">타이티입니다 :)</Header.Icon>
-      </Header.H1>
-    </Header>
-    <main>
-      <Box.Container>
-        <Question />
-        <Answer />
-        <MBTI />
-      </Box.Container>
-    </main>
-    <Footer />
-  </>
-);
+const Home = () => {
+  const {
+    user: { uid },
+  } = useAuthenticatedState();
+
+  return (
+    <>
+      <Header>
+        <Header.H1>
+          <Header.Icon iconSrc="/images/home.png">타이티입니다 :)</Header.Icon>
+        </Header.H1>
+      </Header>
+      <main>
+        <Box.Container>
+          <Question uid={uid} />
+          <Answer uid={uid} />
+          <MBTI uid={uid} />
+        </Box.Container>
+      </main>
+      <Footer />
+    </>
+  );
+};
 
 export default Home;
