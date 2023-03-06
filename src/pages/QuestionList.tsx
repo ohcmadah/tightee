@@ -1,10 +1,9 @@
-import { getAnswerGroups } from "../common/apis";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
-import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { Answer, Question as QuestionType } from "../@types";
 import { URL_CS, URL_QUESTION_GOOGLE_FORM } from "../common/constants";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
+import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
 import { auth } from "../config";
 
 import Box from "../components/Box";
@@ -95,7 +94,8 @@ const AlreadyAnswered = () => (
 
 const Main = () => {
   const groups = useAnswerGroupsQuery(["question"]);
-  const questions = useTodayQuestions();
+  const today = getLocalTime().format("YYYYMMDD");
+  const questions = useQuestionsQuery([today], { date: today });
   const myAnswers = useMyAnswersQuery(auth.currentUser?.uid);
 
   if (groups.isLoading || questions.isLoading || myAnswers.isLoading) {
@@ -113,11 +113,11 @@ const Main = () => {
     );
   }
 
-  if (groups.isError || questions.data instanceof Error || myAnswers.isError) {
+  if (groups.isError || questions.isError || myAnswers.isError) {
     return <ErrorView.Default />;
   }
 
-  if (!questions.data) {
+  if (questions.data.length === 0) {
     return (
       <ErrorView.Default>
         <article>

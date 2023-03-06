@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
-import { getFormattedDate, groupBy } from "../common/utils";
-import { useTodayQuestions } from "../contexts/TodayQuestionContext";
+import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
+import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import ErrorView from "../components/ErrorView";
@@ -108,7 +108,8 @@ const TodayQuestions = ({
   myAnswers: ReturnType<typeof useMyAnswersQuery>;
 }) => {
   const navigate = useNavigate();
-  const todayQuestions = useTodayQuestions();
+  const today = getLocalTime().format("YYYYMMDD");
+  const todayQuestions = useQuestionsQuery([today], { date: today });
 
   if (todayQuestions.isLoading || myAnswers.isLoading) {
     return (
@@ -120,11 +121,11 @@ const TodayQuestions = ({
     );
   }
 
-  if (todayQuestions.data instanceof Error || myAnswers.isError) {
+  if (todayQuestions.isError || myAnswers.isError) {
     return <ErrorView.Default />;
   }
 
-  if (!todayQuestions.data) {
+  if (todayQuestions.data.length === 0) {
     return (
       <section className="mb-8">
         <Question

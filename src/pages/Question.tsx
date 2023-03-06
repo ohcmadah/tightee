@@ -10,7 +10,6 @@ import { answer, getQuestion } from "../common/apis";
 import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
-import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { auth } from "../config";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 
@@ -86,12 +85,12 @@ const ExpiredError = ({
   setError: React.Dispatch<React.SetStateAction<QuestionError | null>>;
 }) => {
   const navigate = useNavigate();
-  const { forceUpdate } = useTodayQuestions();
+  const queryClient = useQueryClient();
 
   return (
     <ErrorView.ExpiredQuestion
       onReload={() => {
-        forceUpdate();
+        queryClient.invalidateQueries({ queryKey: ["questions"] });
         navigate("/questions");
         setError(null);
       }}
