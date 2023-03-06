@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getQuestion } from "../common/apis";
-import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Answer as AnswerType } from "../@types";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
@@ -15,6 +14,7 @@ import Header from "../components/Header";
 import Box from "../components/Box";
 import Question from "../components/Question";
 import Img from "../components/Img";
+import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
 
 const AnswerPlaceholder = () => (
   <Box>
@@ -35,21 +35,21 @@ const MyAnswer = ({
   options: string[];
 }) => {
   const { id, question: questionId, option: optionId } = answer;
-  const { state, data: question } = useAsyncAPI(getQuestion, questionId);
+  const { isLoading, isError, data: question } = useQuestionQuery(questionId);
 
   const sameAnswers = groupBy(options, (option) => option).get(optionId);
   const ratio = (sameAnswers?.length || 0) / options.length;
 
-  if (state !== "loaded") {
+  if (isLoading || isError || !question) {
     return <AnswerPlaceholder />;
   }
 
   return (
     <Question
-      createdAt={getFormattedDate(question.data.createdAt)}
-      title={question.data.title}
-      option={question.data.options[optionId]}
-      linkProps={{ to: id + "/report", state: { question: question.data } }}
+      createdAt={getFormattedDate(question.createdAt)}
+      title={question.title}
+      option={question.options[optionId]}
+      linkProps={{ to: id + "/report", state: { question } }}
       ratio={ratio}
     />
   );

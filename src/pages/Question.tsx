@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { answer, getQuestion } from "../common/apis";
-import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
 import { auth } from "../config";
@@ -21,6 +20,7 @@ import Footer from "../components/Footer";
 import ModalPortal from "../components/ModalPortal";
 import Notice from "../components/Notice";
 import Img from "../components/Img";
+import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
 
 const Tip = () => (
   <Notice
@@ -152,17 +152,17 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
 
 const Question = ({ questionId }: { questionId: string }) => {
   const navigate = useNavigate();
-  const { state, data } = useAsyncAPI(getQuestion, questionId);
+  const { status, data: question } = useQuestionQuery(questionId);
 
-  switch (state) {
+  switch (status) {
     case "loading":
       return <Loading.Full />;
 
     case "error":
       return <ErrorView.Default />;
 
-    case "loaded":
-      if (data.status === 204) {
+    case "success":
+      if (!question) {
         return (
           <ErrorView.Default>
             <article>질문이 존재하지 않습니다.</article>
@@ -171,7 +171,7 @@ const Question = ({ questionId }: { questionId: string }) => {
       }
 
       const today = getLocalTime().format("YYYYMMDD");
-      if (today !== data.data.createdAt) {
+      if (today !== question.createdAt) {
         return (
           <ErrorView.ExpiredQuestion
             onReload={() => {
@@ -181,7 +181,7 @@ const Question = ({ questionId }: { questionId: string }) => {
         );
       }
 
-      return <ActualQuestion question={data.data} />;
+      return <ActualQuestion question={question} />;
   }
 };
 

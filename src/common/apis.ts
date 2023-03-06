@@ -109,11 +109,6 @@ export const getQuestions = (params?: {
   return axios.get("/api/questions", { params });
 };
 
-export const getTodayQuestions = (): Promise<AxiosResponse<Question[]>> => {
-  const today = getLocalTime().format("YYYYMMDD");
-  return axios.get("/api/questions", { params: { date: today } });
-};
-
 export const getQuestion = (id: string): Promise<AxiosResponse<Question>> => {
   return axios.get("/api/questions/" + id);
 };
