@@ -1,9 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FieldValue, UpdateData } from "firebase/firestore";
+import {
+  useMutation,
+  useQueryClient,
+  UseMutateFunction,
+} from "@tanstack/react-query";
 import useForm from "../hooks/useForm";
 import { profileValidator } from "../common/validators";
-import { getNicknames, updateUser } from "../common/apis";
+import { updateUser } from "../common/apis";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {
@@ -20,7 +24,8 @@ import {
   getFormErrorMessage,
 } from "../common/utils";
 import { ProfileValues } from "../contexts/SignUpContext";
-import { useUser } from "../contexts/UserContext";
+import { useUserQuery } from "../hooks/queries/useUserQuery";
+import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import Button from "../components/Button";
 import Form from "../components/Form";
@@ -87,17 +92,24 @@ const Settings = ({
   );
 };
 
+type OnUpdateUser = UseMutateFunction<
+  Awaited<ReturnType<typeof updateUser>>,
+  unknown,
+  Parameters<typeof updateUser>,
+  unknown
+>;
+
 const Subscribe = ({
-  id,
+  user,
   subscribe,
   onUpdateUser,
 }: {
-  id: User["id"];
+  user: User;
   subscribe: boolean;
-  onUpdateUser: (id: string, data: UpdateData<User>) => any;
+  onUpdateUser: OnUpdateUser;
 }) => {
   const toggleSubscribe = () => {
-    onUpdateUser(id, { subscribe: { marketing: !subscribe } });
+    onUpdateUser([user.id, user, { subscribe: { marketing: !subscribe } }]);
   };
 
   return (
@@ -113,12 +125,12 @@ const Subscribe = ({
 
 const ProfileForm = ({
   user,
-  nicknameErrorMsg,
+  error,
   onUpdateUser,
 }: {
   user: User;
-  nicknameErrorMsg?: string;
-  onUpdateUser: (id: string, data: UpdateData<User>) => any;
+  error?: string;
+  onUpdateUser: OnUpdateUser;
 }) => {
   const initialValues = useMemo(
     () => ({
@@ -140,7 +152,7 @@ const ProfileForm = ({
           birthdate: convertBirthdateToUTC(values.birthdate),
           MBTI: values.MBTI || null,
         };
-        onUpdateUser(user.id, newProfile);
+        onUpdateUser([user.id, user, newProfile]);
       },
       validator: (values) => profileValidator(values, new Set()),
     }
@@ -155,7 +167,7 @@ const ProfileForm = ({
       <Form.Section
         required
         label="닉네임"
-        error={nicknameErrorMsg || getFormErrorMessage(errors, "nickname")}
+        error={error || getFormErrorMessage(errors, "nickname")}
       >
         <Input.Basic
           type="text"
@@ -246,18 +258,20 @@ const EditProfileLoader = () => {
 };
 
 const EditProfile = ({
-  setIsLoading,
+  onUpdateUser,
+  error,
 }: {
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  onUpdateUser: OnUpdateUser;
+  error?: string;
 }) => {
-  const { isLoading, data: user, forceUpdate } = useUser();
-  const [nicknameErrorMsg, setNicknameErrorMsg] = useState<string>();
+  const auth = useAuthenticatedState();
+  const { data: user, isLoading, isError } = useUserQuery(auth.user.uid);
 
   if (isLoading) {
     return <EditProfileLoader />;
   }
 
-  if (user instanceof Error || !user) {
+  if (isError || !user) {
     return (
       <ErrorView.Default>
         <article>유저 정보를 불러올 수 없습니다.</article>
@@ -265,36 +279,11 @@ const EditProfile = ({
     );
   }
 
-  const checkDuplicateNickname = async (nickname?: string | FieldValue) => {
-    const nicknames = await getNicknames();
-    return nickname !== user.nickname && nicknames.includes(nickname as string);
-  };
-
-  const onUpdateUser = async (id: string, data: UpdateData<User>) => {
-    setIsLoading(true);
-    try {
-      // TODO: 백엔드에서 처리하도록 변경
-      const isDuplicateNickname = await checkDuplicateNickname(data.nickname);
-      if (isDuplicateNickname) {
-        throw new Error("이미 존재하는 닉네임입니다.");
-      }
-      await updateUser(id, data);
-      forceUpdate();
-    } catch (error) {
-      setNicknameErrorMsg((error as Error).message);
-    }
-    setIsLoading(false);
-  };
-
   return (
     <>
-      <ProfileForm
-        user={user}
-        onUpdateUser={onUpdateUser}
-        nicknameErrorMsg={nicknameErrorMsg}
-      />
+      <ProfileForm user={user} error={error} onUpdateUser={onUpdateUser} />
       <Subscribe
-        id={user.id}
+        user={user}
         subscribe={user.subscribe.marketing}
         onUpdateUser={onUpdateUser}
       />
@@ -303,17 +292,21 @@ const EditProfile = ({
 };
 
 const Profile = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const onLogout = async () => {
-    try {
-      setIsLoading(true);
-      await firebaseAuth.signOut();
-      setIsLoading(false);
-      navigate("/");
-    } catch (error) {}
-  };
+  const onLogout = useMutation({
+    mutationFn: () => firebaseAuth.signOut(),
+    onSuccess: () => navigate("/"),
+  });
+
+  const queryClient = useQueryClient();
+  const onUpdateUser = useMutation({
+    mutationFn: (values: Parameters<typeof updateUser>) =>
+      updateUser(...values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
 
   return (
     <>
@@ -324,9 +317,18 @@ const Profile = () => {
           </Header.Icon>
         </Header.H1>
       </Header>
-      <EditProfile setIsLoading={setIsLoading} />
-      <Settings onLogout={onLogout} />
-      <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
+      <EditProfile
+        onUpdateUser={onUpdateUser.mutate}
+        error={
+          onUpdateUser.isError
+            ? (onUpdateUser.error as Error).message
+            : undefined
+        }
+      />
+      <Settings onLogout={() => onLogout.mutate()} />
+      <ModalPortal>
+        {(onLogout.isLoading || onUpdateUser.isLoading) && <Loading.Modal />}
+      </ModalPortal>
     </>
   );
 };

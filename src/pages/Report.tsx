@@ -7,8 +7,8 @@ import {
   useParams,
 } from "react-router-dom";
 import cn from "classnames";
+import { useQuery } from "@tanstack/react-query";
 import { getAnswer, getAnswerGroups, getQuestion } from "../common/apis";
-import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Question } from "../@types";
 import {
   calcAgeGroup,
@@ -29,7 +29,6 @@ import { User } from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import Layout from "../components/Layout";
 import Header from "../components/Header";
-import Loading from "../components/Loading";
 import ErrorView from "../components/ErrorView";
 import Box from "../components/Box";
 import Badge from "../components/Badge";
@@ -304,7 +303,7 @@ const RankItem = ({
   rank: number;
   mbti: string;
 }) => {
-  const { mbti: itemMBTI, option, ratio } = item;
+  const { mbti: itemMBTI, option } = item;
   const icon = rank <= 3 ? RANK_ICONS[rank - 1] : "/images/white_heart.png";
   return (
     <li
@@ -314,10 +313,7 @@ const RankItem = ({
     >
       <Icon src={icon} alt={`${rank}등`} />
       <div>
-        {itemMBTI}{" "}
-        <span className="text-grayscale-60">
-          ({option}, {formatPercent(ratio)})
-        </span>
+        {itemMBTI} <span className="text-grayscale-60">({option})</span>
       </div>
     </li>
   );
@@ -473,6 +469,47 @@ const PublicReport = () => {
   );
 };
 
+const ReportPlaceholder = () => (
+  <>
+    <Header>
+      <Skeleton.Container viewBox="0 0 340 40">
+        <Skeleton.Text y={0} width={150} size={40} />
+      </Skeleton.Container>
+    </Header>
+    <Box.Container>
+      <Box>
+        <Skeleton.Container viewBox="0 0 340 92">
+          <Skeleton.Badge width={120} />
+          <Skeleton.Text x={3} y={42} width={330} size={18} />
+          <Skeleton.Text y={72} width={200} size={20} />
+        </Skeleton.Container>
+      </Box>
+      <Box>
+        <Skeleton.Container viewBox="0 0 340 260">
+          <Skeleton.Text y={0} width={200} size={20} />
+          <circle r={60} cx="50%" cy={115} />
+          <Skeleton.Text y={205} width={160} size={18} />
+          <Skeleton.Text y={235} width={190} size={18} />
+        </Skeleton.Container>
+      </Box>
+      <Box>
+        <Skeleton.Container viewBox="0 0 340 190">
+          <Skeleton.Badge x={110} width={120} />
+          <Skeleton.Text y={50} width={300} size={20} />
+          <Skeleton.Text y={90} width={320} size={20} />
+          <Skeleton.Text y={120} width={320} size={20} />
+          <Skeleton.Text y={150} width={320} size={20} />
+        </Skeleton.Container>
+        <ToggleButton>
+          <span className="text-grayscale-20">펼치기</span>
+          <img src="/images/down_arrow.svg" className="ml-1.5" />
+        </ToggleButton>
+      </Box>
+    </Box.Container>
+  </>
+);
+
+// TODO: react-query에 관련 기능 있는지 알아보기
 const getMyAnswerAndAnswers = async (
   answerId: string,
   user: User | null,
@@ -536,46 +573,6 @@ const getMyAnswerAndAnswers = async (
   };
 };
 
-const ReportPlaceholder = () => (
-  <>
-    <Header>
-      <Skeleton.Container viewBox="0 0 340 40">
-        <Skeleton.Text y={0} width={150} size={40} />
-      </Skeleton.Container>
-    </Header>
-    <Box.Container>
-      <Box>
-        <Skeleton.Container viewBox="0 0 340 92">
-          <Skeleton.Badge width={120} />
-          <Skeleton.Text x={3} y={42} width={330} size={18} />
-          <Skeleton.Text y={72} width={200} size={20} />
-        </Skeleton.Container>
-      </Box>
-      <Box>
-        <Skeleton.Container viewBox="0 0 340 260">
-          <Skeleton.Text y={0} width={200} size={20} />
-          <circle r={60} cx="50%" cy={115} />
-          <Skeleton.Text y={205} width={160} size={18} />
-          <Skeleton.Text y={235} width={190} size={18} />
-        </Skeleton.Container>
-      </Box>
-      <Box>
-        <Skeleton.Container viewBox="0 0 340 190">
-          <Skeleton.Badge x={110} width={120} />
-          <Skeleton.Text y={50} width={300} size={20} />
-          <Skeleton.Text y={90} width={320} size={20} />
-          <Skeleton.Text y={120} width={320} size={20} />
-          <Skeleton.Text y={150} width={320} size={20} />
-        </Skeleton.Container>
-        <ToggleButton>
-          <span className="text-grayscale-20">펼치기</span>
-          <img src="/images/down_arrow.svg" className="ml-1.5" />
-        </ToggleButton>
-      </Box>
-    </Box.Container>
-  </>
-);
-
 const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
   const { answerId } = useParams();
   const location = useLocation();
@@ -588,21 +585,24 @@ const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
     return <Navigate to={isPublic ? "/" : "/answer"} />;
   }
 
-  const { state, data } = useAsyncAPI(
-    getMyAnswerAndAnswers,
-    answerId,
-    isAuthentication && !isPublic ? authState.user : null,
-    location.state?.question
-  );
+  const { status, data } = useQuery({
+    queryKey: ["report", answerId],
+    queryFn: () =>
+      getMyAnswerAndAnswers(
+        answerId,
+        isAuthentication && !isPublic ? authState.user : null,
+        location.state?.question
+      ),
+  });
 
-  switch (state) {
+  switch (status) {
     case "loading":
       return <ReportPlaceholder />;
 
     case "error":
       return <ErrorView.Default />;
 
-    case "loaded":
+    case "success":
       if (!isPublic && isAuthentication) {
         if (data.answer.user.id !== authState.user.uid) {
           return (

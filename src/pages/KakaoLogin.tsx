@@ -1,10 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
+import { useQuery } from "@tanstack/react-query";
 import { auth as firebaseAuth } from "../config";
 import { authKakao } from "../common/apis";
 
 import Loading from "../components/Loading";
-import useAsyncAPI from "../hooks/useAsyncAPI";
 import ErrorView from "../components/ErrorView";
 import Layout from "../components/Layout";
 
@@ -28,9 +28,12 @@ const KakaoLogin = () => {
     return <Navigate to="/login" />;
   }
 
-  const auth = useAsyncAPI(authorize, code);
+  const auth = useQuery({
+    queryKey: ["auth", "kakao"],
+    queryFn: () => authorize(code),
+  });
 
-  switch (auth.state) {
+  switch (auth.status) {
     case "loading":
       return <Loading.Full />;
 
@@ -41,7 +44,7 @@ const KakaoLogin = () => {
         </Layout>
       );
 
-    case "loaded":
+    case "success":
       if (auth.data.isLoggedIn) {
         return questionId ? (
           <Navigate to={"/questions/" + questionId} replace />

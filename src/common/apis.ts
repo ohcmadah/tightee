@@ -64,7 +64,19 @@ export const getUser = async (id: string): Promise<User | null> => {
   return res.data;
 };
 
-export const updateUser = async (id: string, data: UpdateData<User>) => {
+export const updateUser = async (
+  id: string,
+  original: User,
+  data: UpdateData<User>
+) => {
+  if (data.nickname && original.nickname !== data.nickname) {
+    const nicknames = await getNicknames();
+    const set = new Set(nicknames);
+    set.delete(original.nickname);
+    if (set.has(data.nickname as string)) {
+      throw new Error("이미 존재하는 닉네임입니다.");
+    }
+  }
   const token = await getAuthIdToken();
   return await axios.patch(
     "/api/users/" + id,
@@ -91,9 +103,10 @@ export const getNicknames = async (): Promise<string[]> => {
   return users.data.map((user: { nickname: string }) => user.nickname);
 };
 
-export const getTodayQuestions = (): Promise<AxiosResponse<Question[]>> => {
-  const today = getLocalTime().format("YYYYMMDD");
-  return axios.get("/api/questions", { params: { date: today } });
+export const getQuestions = (params?: {
+  date?: string;
+}): Promise<AxiosResponse<Question[]>> => {
+  return axios.get("/api/questions", { params });
 };
 
 export const getQuestion = (id: string): Promise<AxiosResponse<Question>> => {

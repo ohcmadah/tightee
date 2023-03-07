@@ -1,10 +1,12 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAnswerGroups, getQuestion } from "../common/apis";
-import useAsyncAPI from "../hooks/useAsyncAPI";
+import { getQuestion } from "../common/apis";
 import { Answer as AnswerType } from "../@types";
-import { getFormattedDate, groupBy } from "../common/utils";
-import { useMyAnswers } from "../contexts/MyAnswersContext";
-import { useTodayQuestions } from "../contexts/TodayQuestionContext";
+import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
+import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
+import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
+import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
+import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import ErrorView from "../components/ErrorView";
 import Skeleton from "../components/Skeleton";
@@ -12,7 +14,7 @@ import Header from "../components/Header";
 import Box from "../components/Box";
 import Question from "../components/Question";
 import Img from "../components/Img";
-import { useEffect } from "react";
+import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
 
 const AnswerPlaceholder = () => (
   <Box>
@@ -33,33 +35,38 @@ const MyAnswer = ({
   options: string[];
 }) => {
   const { id, question: questionId, option: optionId } = answer;
-  const { state, data: question } = useAsyncAPI(getQuestion, questionId);
+  const { isLoading, isError, data: question } = useQuestionQuery(questionId);
 
   const sameAnswers = groupBy(options, (option) => option).get(optionId);
   const ratio = (sameAnswers?.length || 0) / options.length;
 
-  if (state !== "loaded") {
+  if (isLoading || isError || !question) {
     return <AnswerPlaceholder />;
   }
 
   return (
     <Question
-      createdAt={getFormattedDate(question.data.createdAt)}
-      title={question.data.title}
-      option={question.data.options[optionId]}
-      linkProps={{ to: id + "/report", state: { question: question.data } }}
+      createdAt={getFormattedDate(question.createdAt)}
+      title={question.title}
+      option={question.options[optionId]}
+      linkProps={{ to: id + "/report", state: { question } }}
       ratio={ratio}
     />
   );
 };
 
-const MyAnswers = () => {
-  const { state, data: groups } = useAsyncAPI(getAnswerGroups, {
-    groups: ["question"],
-  });
-  const { isLoading, data: myAnswers } = useMyAnswers();
+const MyAnswers = ({
+  myAnswers,
+}: {
+  myAnswers: ReturnType<typeof useMyAnswersQuery>;
+}) => {
+  const {
+    isLoading,
+    isError,
+    data: groups,
+  } = useAnswerGroupsQuery(["question"]);
 
-  if (isLoading || state === "loading") {
+  if (myAnswers.isLoading || isLoading) {
     return (
       <Box.Container>
         {[0, 1, 2].map((i) => (
@@ -69,11 +76,12 @@ const MyAnswers = () => {
     );
   }
 
-  if (myAnswers instanceof Error || state === "error") {
+  if (myAnswers.isError || isError) {
     return <ErrorView.Default />;
   }
 
-  const isEmptyMyAnswers = myAnswers.length === 0;
+  const isEmptyMyAnswers = myAnswers.data.length === 0;
+  const answerByQuestionIdMap = groups["question"];
 
   return (
     <Box.Container>
@@ -82,11 +90,11 @@ const MyAnswers = () => {
           아직 질문에 응답한 내역이 없어요 :)
         </div>
       ) : (
-        myAnswers.map((myAnswer) => (
+        myAnswers.data.map((myAnswer) => (
           <MyAnswer
             key={myAnswer.id}
             answer={myAnswer}
-            options={groups["question"][myAnswer.question]}
+            options={answerByQuestionIdMap[myAnswer.question]}
           />
         ))
       )}
@@ -94,10 +102,14 @@ const MyAnswers = () => {
   );
 };
 
-const TodayQuestions = () => {
+const TodayQuestions = ({
+  myAnswers,
+}: {
+  myAnswers: ReturnType<typeof useMyAnswersQuery>;
+}) => {
   const navigate = useNavigate();
-  const todayQuestions = useTodayQuestions();
-  const myAnswers = useMyAnswers();
+  const today = getLocalTime().format("YYYYMMDD");
+  const todayQuestions = useQuestionsQuery([today], { date: today });
 
   if (todayQuestions.isLoading || myAnswers.isLoading) {
     return (
@@ -109,11 +121,11 @@ const TodayQuestions = () => {
     );
   }
 
-  if (todayQuestions.data instanceof Error || myAnswers.data instanceof Error) {
+  if (todayQuestions.isError || myAnswers.isError) {
     return <ErrorView.Default />;
   }
 
-  if (!todayQuestions.data) {
+  if (todayQuestions.data.length === 0) {
     return (
       <section className="mb-8">
         <Question
@@ -151,6 +163,9 @@ const TodayQuestions = () => {
 };
 
 const Answers = () => {
+  const auth = useAuthenticatedState();
+  const myAnswers = useMyAnswersQuery(auth.user.uid);
+
   useEffect(() => {
     const imgs = ["reply.svg", "right_arrow.svg", "chart.png"];
     imgs.forEach((src) => (new Image().src = "/images/" + src));
@@ -166,8 +181,8 @@ const Answers = () => {
         </Header.H1>
       </Header>
       <main>
-        <TodayQuestions />
-        <MyAnswers />
+        <TodayQuestions myAnswers={myAnswers} />
+        <MyAnswers myAnswers={myAnswers} />
       </main>
     </>
   );

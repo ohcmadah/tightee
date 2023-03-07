@@ -1,11 +1,11 @@
 import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
+import { useQuery } from "@tanstack/react-query";
 import { auth } from "../../config";
 import { User } from "../../@types";
 import { createUser } from "../../common/apis";
 import { SignUpState, useSignUpState } from "../../contexts/SignUpContext";
 import { convertBirthdateToUTC } from "../../common/utils";
-import useAsyncAPI from "../../hooks/useAsyncAPI";
 
 import Loading from "../../components/Loading";
 import ErrorView from "../../components/ErrorView";
@@ -44,16 +44,19 @@ const register = async (state: SignUpState) => {
 
 const Submitting = () => {
   const signUpState = useSignUpState();
-  const { state, data } = useAsyncAPI(register, signUpState);
+  const { status, data } = useQuery({
+    queryKey: ["signUp", signUpState.id],
+    queryFn: () => register(signUpState),
+  });
 
-  switch (state) {
+  switch (status) {
     case "loading":
       return <Loading.Full />;
 
     case "error":
       return <ErrorView.Default>{`${data}`}</ErrorView.Default>;
 
-    case "loaded":
+    case "success":
       return <Navigate to={signUpState.nextUrl} replace />;
   }
 };

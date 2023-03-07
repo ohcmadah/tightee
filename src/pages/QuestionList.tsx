@@ -1,10 +1,10 @@
-import { getAnswerGroups } from "../common/apis";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
-import useAsyncAPI from "../hooks/useAsyncAPI";
-import { useMyAnswers } from "../contexts/MyAnswersContext";
-import { useTodayQuestions } from "../contexts/TodayQuestionContext";
 import { Answer, Question as QuestionType } from "../@types";
 import { URL_CS, URL_QUESTION_GOOGLE_FORM } from "../common/constants";
+import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
+import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
+import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
+import { auth } from "../config";
 
 import Box from "../components/Box";
 import Badge from "../components/Badge";
@@ -80,8 +80,6 @@ const TodayQuestion = ({
   );
 };
 
-type PageData = Awaited<ReturnType<typeof getAnswerGroups>>;
-
 const AlreadyAnswered = () => (
   <Notice
     iconSrc="/images/writing_hand.png"
@@ -95,13 +93,12 @@ const AlreadyAnswered = () => (
 );
 
 const Main = () => {
-  const { state, data: answerGroups } = useAsyncAPI(getAnswerGroups, {
-    groups: ["question"],
-  });
-  const questions = useTodayQuestions();
-  const myAnswers = useMyAnswers();
+  const groups = useAnswerGroupsQuery(["question"]);
+  const today = getLocalTime().format("YYYYMMDD");
+  const questions = useQuestionsQuery([today], { date: today });
+  const myAnswers = useMyAnswersQuery(auth.currentUser?.uid);
 
-  if (state === "loading" || questions.isLoading || myAnswers.isLoading) {
+  if (groups.isLoading || questions.isLoading || myAnswers.isLoading) {
     return (
       <main className="flex flex-col items-center">
         <Badge className="mb-10 bg-primary-peach">
@@ -116,15 +113,11 @@ const Main = () => {
     );
   }
 
-  if (
-    state === "error" ||
-    questions.data instanceof Error ||
-    myAnswers.data instanceof Error
-  ) {
+  if (groups.isError || questions.isError || myAnswers.isError) {
     return <ErrorView.Default />;
   }
 
-  if (!questions.data) {
+  if (questions.data.length === 0) {
     return (
       <ErrorView.Default>
         <article>
@@ -145,6 +138,7 @@ const Main = () => {
   const isAlreadyAnswered = questions.data.every(({ id }) =>
     answeredQuestionIds.has(id)
   );
+  const answersByQuestionIdMap = groups.data["question"];
 
   return (
     <main className="flex flex-col items-center">
@@ -156,13 +150,9 @@ const Main = () => {
         {questions.data.map((question) => (
           <TodayQuestion
             key={question.id}
-            myAnswer={
-              myAnswers.data instanceof Error
-                ? undefined
-                : myAnswers.data.find((v) => v.question === question.id)
-            }
+            myAnswer={myAnswers.data.find((v) => v.question === question.id)}
             question={question}
-            options={answerGroups["question"][question.id]}
+            options={answersByQuestionIdMap[question.id]}
           />
         ))}
       </Box.Container>

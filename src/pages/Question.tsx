@@ -5,12 +5,12 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { answer, getQuestion } from "../common/apis";
-import useAsyncAPI from "../hooks/useAsyncAPI";
 import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
-import { useTodayQuestions } from "../contexts/TodayQuestionContext";
-import { useMyAnswers } from "../contexts/MyAnswersContext";
+import { auth } from "../config";
+import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 
 import Header from "../components/Header";
 import Button from "../components/Button";
@@ -20,6 +20,7 @@ import Footer from "../components/Footer";
 import ModalPortal from "../components/ModalPortal";
 import Notice from "../components/Notice";
 import Img from "../components/Img";
+import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
 
 const Tip = () => (
   <Notice
@@ -84,12 +85,12 @@ const ExpiredError = ({
   setError: React.Dispatch<React.SetStateAction<QuestionError | null>>;
 }) => {
   const navigate = useNavigate();
-  const { forceUpdate } = useTodayQuestions();
+  const queryClient = useQueryClient();
 
   return (
     <ErrorView.ExpiredQuestion
       onReload={() => {
-        forceUpdate();
+        queryClient.invalidateQueries({ queryKey: ["questions"] });
         navigate("/questions");
         setError(null);
       }}
@@ -98,7 +99,7 @@ const ExpiredError = ({
 };
 
 const ActualQuestion = ({ question }: { question: QuestionType }) => {
-  const { forceUpdate } = useMyAnswers();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<QuestionError | null>(null);
 
@@ -111,7 +112,9 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
     try {
       await answer(question.id, optionId);
       setIsLoading(false);
-      forceUpdate();
+      queryClient.invalidateQueries({
+        queryKey: ["answers", auth.currentUser?.uid],
+      });
     } catch (error: any) {
       setIsLoading(false);
       if (error.code === 400) {
@@ -149,17 +152,17 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
 
 const Question = ({ questionId }: { questionId: string }) => {
   const navigate = useNavigate();
-  const { state, data } = useAsyncAPI(getQuestion, questionId);
+  const { status, data: question } = useQuestionQuery(questionId);
 
-  switch (state) {
+  switch (status) {
     case "loading":
       return <Loading.Full />;
 
     case "error":
       return <ErrorView.Default />;
 
-    case "loaded":
-      if (data.status === 204) {
+    case "success":
+      if (!question) {
         return (
           <ErrorView.Default>
             <article>질문이 존재하지 않습니다.</article>
@@ -168,7 +171,7 @@ const Question = ({ questionId }: { questionId: string }) => {
       }
 
       const today = getLocalTime().format("YYYYMMDD");
-      if (today !== data.data.createdAt) {
+      if (today !== question.createdAt) {
         return (
           <ErrorView.ExpiredQuestion
             onReload={() => {
@@ -178,19 +181,20 @@ const Question = ({ questionId }: { questionId: string }) => {
         );
       }
 
-      return <ActualQuestion question={data.data} />;
+      return <ActualQuestion question={question} />;
   }
 };
 
 const QuestionWrapper = () => {
   const { questionId } = useParams();
   const { state } = useLocation();
-  const { isLoading, data: myAnswers } = useMyAnswers();
+  const uid = auth.currentUser?.uid;
+  const { isLoading, isError, data: myAnswers } = useMyAnswersQuery(uid);
 
   if (isLoading) {
     return <Loading.Full />;
   }
-  if (myAnswers instanceof Error) {
+  if (isError) {
     return <ErrorView.Default />;
   }
 

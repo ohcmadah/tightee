@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 
-import { getMBTIName } from "../common/utils";
-import { useUser } from "../contexts/UserContext";
-import { useTodayQuestions } from "../contexts/TodayQuestionContext";
-import { useMyAnswers } from "../contexts/MyAnswersContext";
+import { getLocalTime, getMBTIName } from "../common/utils";
+import { useUserQuery } from "../hooks/queries/useUserQuery";
+import { useAuthenticatedState } from "../contexts/AuthContext";
+import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 
 import Header from "../components/Header";
 import Badge from "../components/Badge";
@@ -12,6 +12,7 @@ import Img from "../components/Img";
 import Notice from "../components/Notice";
 import ErrorView from "../components/ErrorView";
 import Skeleton from "../components/Skeleton";
+import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
 
 const Footer = () => (
   <Notice
@@ -40,14 +41,14 @@ const Content = ({
   </div>
 );
 
-const MBTI = () => {
-  const { isLoading, data: user } = useUser();
+const MBTI = ({ uid }: { uid: string }) => {
+  const { data: user, isLoading, isError } = useUserQuery(uid);
 
   if (isLoading) {
     return <Skeleton.BoxLoader />;
   }
 
-  if (user instanceof Error) {
+  if (isError) {
     return <ErrorView.Default />;
   }
 
@@ -75,14 +76,14 @@ const MBTI = () => {
   );
 };
 
-const Answer = () => {
-  const { isLoading, data: myAnswers } = useMyAnswers();
+const Answer = ({ uid }: { uid: string }) => {
+  const { isLoading, isError, data: myAnswers } = useMyAnswersQuery(uid);
 
   if (isLoading) {
     return <Skeleton.BoxLoader />;
   }
 
-  if (myAnswers instanceof Error) {
+  if (isError) {
     return <Box>에러가 발생했습니다.</Box>;
   }
 
@@ -100,20 +101,20 @@ const Answer = () => {
   );
 };
 
-const Question = () => {
-  const { isLoading: isLoadingQuestions, data: todayQuestions } =
-    useTodayQuestions();
-  const { isLoading: isLoadingAnswers, data: myAnswers } = useMyAnswers();
+const Question = ({ uid }: { uid: string }) => {
+  const today = getLocalTime().format("YYYYMMDD");
+  const todayQuestions = useQuestionsQuery([today], { date: today });
+  const myAnswers = useMyAnswersQuery(uid);
 
-  if (isLoadingQuestions || isLoadingAnswers) {
+  if (todayQuestions.isLoading || myAnswers.isLoading) {
     return <Skeleton.BoxLoader />;
   }
 
-  if (todayQuestions instanceof Error || myAnswers instanceof Error) {
+  if (todayQuestions.isError || myAnswers.isError) {
     return <ErrorView.Default />;
   }
 
-  if (!todayQuestions) {
+  if (todayQuestions.data.length === 0) {
     return (
       <Box>
         <Badge className="bg-secondary-question font-bold text-white">
@@ -127,13 +128,13 @@ const Question = () => {
   }
 
   const answeredQuestionIds = new Set(
-    myAnswers.map(({ question }) => question)
+    myAnswers.data.map(({ question }) => question)
   );
-  const answeredCount = todayQuestions.reduce(
+  const answeredCount = todayQuestions.data.reduce(
     (count, { id }) => (answeredQuestionIds.has(id) ? count + 1 : count),
     0
   );
-  const remaining = todayQuestions.length - answeredCount;
+  const remaining = todayQuestions.data.length - answeredCount;
   const isAllAnswered = remaining === 0;
 
   return (
@@ -152,22 +153,28 @@ const Question = () => {
   );
 };
 
-const Home = () => (
-  <>
-    <Header>
-      <Header.H1>
-        <Header.Icon iconSrc="/images/home.png">타이티입니다 :)</Header.Icon>
-      </Header.H1>
-    </Header>
-    <main>
-      <Box.Container>
-        <Question />
-        <Answer />
-        <MBTI />
-      </Box.Container>
-    </main>
-    <Footer />
-  </>
-);
+const Home = () => {
+  const {
+    user: { uid },
+  } = useAuthenticatedState();
+
+  return (
+    <>
+      <Header>
+        <Header.H1>
+          <Header.Icon iconSrc="/images/home.png">타이티입니다 :)</Header.Icon>
+        </Header.H1>
+      </Header>
+      <main>
+        <Box.Container>
+          <Question uid={uid} />
+          <Answer uid={uid} />
+          <MBTI uid={uid} />
+        </Box.Container>
+      </main>
+      <Footer />
+    </>
+  );
+};
 
 export default Home;
