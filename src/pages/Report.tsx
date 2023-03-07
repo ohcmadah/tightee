@@ -29,7 +29,6 @@ import { User } from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import Layout from "../components/Layout";
 import Header from "../components/Header";
-import Loading from "../components/Loading";
 import ErrorView from "../components/ErrorView";
 import Box from "../components/Box";
 import Badge from "../components/Badge";
@@ -304,7 +303,7 @@ const RankItem = ({
   rank: number;
   mbti: string;
 }) => {
-  const { mbti: itemMBTI, option, ratio } = item;
+  const { mbti: itemMBTI, option } = item;
   const icon = rank <= 3 ? RANK_ICONS[rank - 1] : "/images/white_heart.png";
   return (
     <li
@@ -314,10 +313,7 @@ const RankItem = ({
     >
       <Icon src={icon} alt={`${rank}등`} />
       <div>
-        {itemMBTI}{" "}
-        <span className="text-grayscale-60">
-          ({option}, {formatPercent(ratio)})
-        </span>
+        {itemMBTI} <span className="text-grayscale-60">({option})</span>
       </div>
     </li>
   );
