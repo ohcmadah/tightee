@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getQuestion } from "../common/apis";
 import { Answer as AnswerType } from "../@types";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
 import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
+import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import ErrorView from "../components/ErrorView";
@@ -14,7 +14,7 @@ import Header from "../components/Header";
 import Box from "../components/Box";
 import Question from "../components/Question";
 import Img from "../components/Img";
-import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
+import Button from "../components/Button";
 
 const AnswerPlaceholder = () => (
   <Box>
@@ -184,6 +184,7 @@ const Answers = () => {
         <TodayQuestions myAnswers={myAnswers} />
         <MyAnswers myAnswers={myAnswers} />
       </main>
+      <Button.GoogleForm />
     </>
   );
 };
