@@ -37,12 +37,12 @@ const MyAnswer = ({
   const { id, question: questionId, option: optionId } = answer;
   const { isLoading, isError, data: question } = useQuestionQuery(questionId);
 
-  const sameAnswers = groupBy(options, (option) => option).get(optionId);
-  const ratio = (sameAnswers?.length || 0) / options.length;
-
-  if (isLoading || isError || !question) {
+  if (isLoading || isError || !question || !options) {
     return <AnswerPlaceholder />;
   }
+
+  const sameAnswers = groupBy(options, (option) => option).get(optionId);
+  const ratio = (sameAnswers?.length || 0) / options.length;
 
   return (
     <Question
