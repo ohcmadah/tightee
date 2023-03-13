@@ -5,8 +5,8 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import { answer, getQuestion } from "../common/apis";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { answer } from "../common/apis";
 import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
 import { auth } from "../config";
@@ -100,28 +100,30 @@ const ExpiredError = ({
 
 const ActualQuestion = ({ question }: { question: QuestionType }) => {
   const queryClient = useQueryClient();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<QuestionError | null>(null);
 
-  const onAnswer = async (optionId: string) => {
-    const today = getLocalTime().format("YYYYMMDD");
-    if (today !== question.createdAt) {
-      return setError("expired-question");
-    }
-    setIsLoading(true);
-    try {
-      await answer(question.id, optionId);
-      setIsLoading(false);
-      queryClient.invalidateQueries({
-        queryKey: ["answers", auth.currentUser?.uid],
-      });
-    } catch (error: any) {
-      setIsLoading(false);
-      if (error.code === 400) {
-        setError("already-answered");
+  const onAnswer = useMutation({
+    mutationFn: async (optionId: string) => {
+      const today = getLocalTime().format("YYYYMMDD");
+      if (today !== question.createdAt) {
+        throw new Error("expired-question");
       }
-    }
-  };
+      try {
+        await answer(question.id, optionId);
+      } catch (error: any) {
+        if (error.code === 400) {
+          throw new Error("already-answered");
+        }
+      }
+    },
+    onError: (error: any) => {
+      setError(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["answers", auth.currentUser?.uid]);
+      queryClient.invalidateQueries(["answerGroups"]);
+    },
+  });
 
   switch (error) {
     case "expired-question":
@@ -140,11 +142,11 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
               </Header.Icon>
             </Header.H1>
           </Header>
-          <Main question={question} onAnswer={onAnswer} />
+          <Main question={question} onAnswer={onAnswer.mutate} />
           <Footer className="text-center">
             <Tip />
           </Footer>
-          <ModalPortal>{isLoading && <Loading.Modal />}</ModalPortal>
+          <ModalPortal>{onAnswer.isLoading && <Loading.Modal />}</ModalPortal>
         </>
       );
   }

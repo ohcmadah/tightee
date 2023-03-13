@@ -26,6 +26,9 @@ const TodayQuestion = ({
   options: string[];
 }) => {
   if (myAnswer) {
+    if (!options) {
+      return <Skeleton.BoxLoader key={question.id} />;
+    }
     const sameAnswers = groupBy(options, (option) => option).get(
       myAnswer?.option
     );
