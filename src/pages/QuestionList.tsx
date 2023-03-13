@@ -1,6 +1,6 @@
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { Answer, Question as QuestionType } from "../@types";
-import { URL_CS, URL_QUESTION_GOOGLE_FORM } from "../common/constants";
+import { URL_CS } from "../common/constants";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
 import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
@@ -14,37 +14,7 @@ import ExternalLink from "../components/ExternalLink";
 import Header from "../components/Header";
 import Question from "../components/Question";
 import Notice from "../components/Notice";
-import Icon from "../components/Icon";
-import Footer from "../components/Footer";
-import Img from "../components/Img";
-
-const FormButton = () => {
-  const openInNewTab = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  return (
-    <Footer.Floating
-      className="bottom-nav mt-4"
-      color="violet"
-      onClick={() => openInNewTab(URL_QUESTION_GOOGLE_FORM)}
-    >
-      <Icon src="/images/letter.png" alt="letter" className="mr-3" />
-      <div className="text-left font-medium">
-        평소에 궁금한 게 있었나요?
-        <br />
-        질문을 접수하면 타이티에 올려드려요!
-      </div>
-      <Img
-        width={9}
-        lazy
-        src="/images/right_arrow_white.svg"
-        alt="right arrow"
-        className="ml-auto inline-block"
-      />
-    </Footer.Floating>
-  );
-};
+import Button from "../components/Button";
 
 const TodayQuestion = ({
   myAnswer,
@@ -170,7 +140,7 @@ const QuestionList = () => (
       </Header.H1>
     </Header>
     <Main />
-    <FormButton />
+    <Button.GoogleForm />
   </>
 );
 

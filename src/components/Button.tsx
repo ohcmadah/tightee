@@ -1,8 +1,13 @@
 import cn from "classnames";
-import { GENDER_FEMALE, GENDER_MALE } from "../common/constants";
+import {
+  GENDER_FEMALE,
+  GENDER_MALE,
+  URL_QUESTION_GOOGLE_FORM,
+} from "../common/constants";
 
 import Icon from "./Icon";
 import Img from "./Img";
+import Footer from "./Footer";
 
 import styles from "../styles/components/Button.module.scss";
 
@@ -127,10 +132,39 @@ const Kakao = ({
   </button>
 );
 
+const GoogleForm = () => {
+  const openInNewTab = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <Footer.Floating
+      className="bottom-nav mt-4"
+      color="violet"
+      onClick={() => openInNewTab(URL_QUESTION_GOOGLE_FORM)}
+    >
+      <Icon src="/images/letter.png" alt="letter" className="mr-3" />
+      <div className="text-left font-medium">
+        평소에 궁금한 게 있었나요?
+        <br />
+        질문을 접수하면 타이티에 올려드려요!
+      </div>
+      <Img
+        width={9}
+        lazy
+        src="/images/right_arrow_white.svg"
+        alt="right arrow"
+        className="ml-auto inline-block"
+      />
+    </Footer.Floating>
+  );
+};
+
 export default {
   Basic: Basic,
   Colored: Colored,
   Outline: Outline,
   GenderToggle: GenderToggle,
   Kakao: Kakao,
+  GoogleForm: GoogleForm,
 };
