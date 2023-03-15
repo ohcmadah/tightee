@@ -3,7 +3,7 @@ import { Answer, Question as QuestionType } from "../@types";
 import { URL_CS } from "../common/constants";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
-import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
+import { useTodayQuestionsQuery } from "../hooks/queries/useTodayQuestionsQuery";
 import { auth } from "../config";
 
 import Box from "../components/Box";
@@ -67,8 +67,7 @@ const AlreadyAnswered = () => (
 
 const Main = () => {
   const groups = useAnswerGroupsQuery(["question"]);
-  const today = getLocalTime().format("YYYYMMDD");
-  const questions = useQuestionsQuery([today], { date: today });
+  const questions = useTodayQuestionsQuery();
   const myAnswers = useMyAnswersQuery(auth.currentUser?.uid);
 
   if (groups.isLoading || questions.isLoading || myAnswers.isLoading) {

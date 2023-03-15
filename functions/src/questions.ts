@@ -14,21 +14,21 @@ app.get("/", async (req, res) => {
     const app = getAdminApp();
     const db = admin.firestore(app);
 
-    const { docs } = await db
-      .collection("questions")
-      .where("createdAt", "==", date)
-      .get();
+    const query = date
+      ? db.collection("questions").where("createdAt", "==", date)
+      : db.collection("questions");
 
-    if (docs.length === 0) {
-      return res
-        .status(204)
-        .json({ code: 204, message: "오늘의 질문이 존재하지 않습니다." });
-    }
-
+    const { docs } = await query.get();
     const questions = docs.map((doc) => ({
       ...(doc.data() as Question),
       id: doc.id,
     }));
+
+    if (questions.length === 0) {
+      return res
+        .status(204)
+        .json({ code: 204, message: "질문이 존재하지 않습니다." });
+    }
 
     return res.status(200).json(questions);
   } catch (error) {

@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 
-import { getLocalTime, getMBTIName } from "../common/utils";
+import { getMBTIName } from "../common/utils";
 import { useUserQuery } from "../hooks/queries/useUserQuery";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
+import { useTodayQuestionsQuery } from "../hooks/queries/useTodayQuestionsQuery";
 
 import Header from "../components/Header";
 import Badge from "../components/Badge";
@@ -12,7 +13,6 @@ import Img from "../components/Img";
 import Notice from "../components/Notice";
 import ErrorView from "../components/ErrorView";
 import Skeleton from "../components/Skeleton";
-import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
 
 const Footer = () => (
   <Notice
@@ -102,8 +102,7 @@ const Answer = ({ uid }: { uid: string }) => {
 };
 
 const Question = ({ uid }: { uid: string }) => {
-  const today = getLocalTime().format("YYYYMMDD");
-  const todayQuestions = useQuestionsQuery([today], { date: today });
+  const todayQuestions = useTodayQuestionsQuery();
   const myAnswers = useMyAnswersQuery(uid);
 
   if (todayQuestions.isLoading || myAnswers.isLoading) {
