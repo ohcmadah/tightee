@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Answer as AnswerType } from "../@types";
+import { Answer as AnswerType, Question as QuestionType } from "../@types";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useAnswerGroupsQuery } from "../hooks/queries/useAnswerGroupsQuery";
 import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
-import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 
 import ErrorView from "../components/ErrorView";
@@ -15,6 +14,7 @@ import Box from "../components/Box";
 import Question from "../components/Question";
 import Img from "../components/Img";
 import Button from "../components/Button";
+import { useTodayQuestionsQuery } from "../hooks/queries/useTodayQuestionsQuery";
 
 const AnswerPlaceholder = () => (
   <Box>
@@ -28,16 +28,17 @@ const AnswerPlaceholder = () => (
 );
 
 const MyAnswer = ({
+  question,
   answer,
   options,
 }: {
+  question: QuestionType;
   answer: AnswerType;
   options: string[];
 }) => {
-  const { id, question: questionId, option: optionId } = answer;
-  const { isLoading, isError, data: question } = useQuestionQuery(questionId);
+  const { id, option: optionId } = answer;
 
-  if (isLoading || isError || !question || !options) {
+  if (!question || !options) {
     return <AnswerPlaceholder />;
   }
 
@@ -60,13 +61,10 @@ const MyAnswers = ({
 }: {
   myAnswers: ReturnType<typeof useMyAnswersQuery>;
 }) => {
-  const {
-    isLoading,
-    isError,
-    data: groups,
-  } = useAnswerGroupsQuery(["question"]);
+  const answerGroups = useAnswerGroupsQuery(["question"]);
+  const questions = useQuestionsQuery();
 
-  if (myAnswers.isLoading || isLoading) {
+  if (myAnswers.isLoading || answerGroups.isLoading || questions.isLoading) {
     return (
       <Box.Container>
         {[0, 1, 2].map((i) => (
@@ -76,12 +74,16 @@ const MyAnswers = ({
     );
   }
 
-  if (myAnswers.isError || isError) {
+  if (myAnswers.isError || answerGroups.isError || questions.isError) {
     return <ErrorView.Default />;
   }
 
   const isEmptyMyAnswers = myAnswers.data.length === 0;
-  const answerByQuestionIdMap = groups["question"];
+  const answerByQuestionIdMap = answerGroups.data["question"];
+  const questionByIdMap = questions.data.reduce(
+    (acc: Record<string, QuestionType>, q) => ({ ...acc, [q.id]: q }),
+    {}
+  );
 
   return (
     <Box.Container>
@@ -93,6 +95,7 @@ const MyAnswers = ({
         myAnswers.data.map((myAnswer) => (
           <MyAnswer
             key={myAnswer.id}
+            question={questionByIdMap[myAnswer.question]}
             answer={myAnswer}
             options={answerByQuestionIdMap[myAnswer.question]}
           />
@@ -108,8 +111,7 @@ const TodayQuestions = ({
   myAnswers: ReturnType<typeof useMyAnswersQuery>;
 }) => {
   const navigate = useNavigate();
-  const today = getLocalTime().format("YYYYMMDD");
-  const todayQuestions = useQuestionsQuery([today], { date: today });
+  const todayQuestions = useTodayQuestionsQuery();
 
   if (todayQuestions.isLoading || myAnswers.isLoading) {
     return (
