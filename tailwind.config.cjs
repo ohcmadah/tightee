@@ -26,10 +26,10 @@ module.exports = {
         nav: "99",
       },
       height: {
-        nav: "58px",
+        nav: "62px",
       },
       inset: {
-        nav: "58px",
+        nav: "62px",
       },
     },
   },
