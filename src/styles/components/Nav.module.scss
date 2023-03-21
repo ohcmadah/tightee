@@ -1,0 +1,19 @@
+.container {
+  column-gap: 4rem;
+
+  .menu {
+    transition: width 200ms ease;
+  }
+}
+
+@media (max-width: 430px) {
+  .container {
+    column-gap: 2rem;
+
+    .menu {
+      .label {
+        display: none;
+      }
+    }
+  }
+}
