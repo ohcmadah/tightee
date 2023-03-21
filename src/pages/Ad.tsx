@@ -66,7 +66,7 @@ const PublicFooter = () => {
 };
 
 const Reply = ({ children }: { children?: React.ReactNode }) => (
-  <div className="mb-5 flex items-center text-primary">
+  <div className="mb-5 flex items-center">
     <Icon src="/images/reply.svg" alt="reply" />
     {children}
   </div>

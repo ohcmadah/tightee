@@ -24,7 +24,7 @@ const Floating = ({
   <footer className={cn("sticky z-nav w-full pb-[20px] pt-6", className)}>
     <Button.Colored
       color={color}
-      className="flex w-full items-center py-4 text-white"
+      className="flex w-full items-center rounded-[12px] py-4 px-6 text-white"
       onClick={onClick}
     >
       {children}

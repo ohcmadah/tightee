@@ -32,7 +32,7 @@ const Basic = ({ className, onClick, disabled, children }: ButtonProps) => (
 );
 
 export interface ColoredProps extends ButtonProps {
-  color: "primary" | "yellow" | "violet";
+  color: "primary" | "yellow" | "violet" | "blue";
 }
 
 const convertColorToClassName = (color: ColoredProps["color"]): string => {
@@ -40,6 +40,7 @@ const convertColorToClassName = (color: ColoredProps["color"]): string => {
     primary: "bg-primary",
     yellow: "bg-system-yellow",
     violet: "bg-secondary-question",
+    blue: "bg-secondary-mbti",
   };
   return map[color];
 };
@@ -140,20 +141,17 @@ const GoogleForm = () => {
   return (
     <Footer.Floating
       className="bottom-nav mt-4"
-      color="violet"
+      color="blue"
       onClick={() => openInNewTab(URL_QUESTION_GOOGLE_FORM)}
     >
-      <Icon src="/images/letter.png" alt="letter" className="mr-3" />
-      <div className="text-left font-medium">
-        평소에 궁금한 게 있었나요?
-        <br />
-        질문을 접수하면 타이티에 올려드려요!
+      <div className="text-left">
+        <div className="text-base">질문을 접수하면 타이티에 올려드려요!</div>
+        <div className="text-sm font-normal">구글 폼으로 이동하기</div>
       </div>
       <Img
-        width={9}
-        lazy
-        src="/images/right_arrow_white.svg"
-        alt="right arrow"
+        width={20}
+        src="/images/external.svg"
+        alt="google form"
         className="ml-auto inline-block"
       />
     </Footer.Floating>
