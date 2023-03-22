@@ -49,6 +49,7 @@ const Divider = ({ className }: { className?: cn.Argument }) => (
 const Title = ({ children }: { children: React.ReactNode }) => (
   <div className="text-base font-medium">{children}</div>
 );
+
 const Author = ({ children }: { children: React.ReactNode }) => (
   <span className="mt-1 text-xs text-grayscale-60">{children}</span>
 );
@@ -76,7 +77,7 @@ const NotAnsweredQuestion = ({
         <div className="flex w-full items-center justify-between">
           <div>
             <Title>{question.title}</Title>
-            {question.author && <Author>{question.author}님</Author>}
+            {question.author && <Author>{question.author}</Author>}
           </div>
           {isToday && <Img src="/images/right_arrow.svg" />}
         </div>
@@ -104,9 +105,7 @@ const Question = ({
       <Link to={"/answer/" + answer.id + "/report"} className="w-full">
         <Box>
           <Title>{question.title}</Title>
-          <Author>
-            {question.author ? question.author + "님" : "Tightee"}
-          </Author>
+          <Author>{question.author ? question.author : "Tightee"}</Author>
           <Divider className="my-3 bg-grayscale-10" />
           <div className="flex w-full items-center justify-between">
             <div>
