@@ -3,6 +3,7 @@ import * as express from "express";
 import * as cors from "cors";
 import { Question } from "./@types";
 import { getAdminApp, https } from "./common";
+import { checkAdmin } from "./middleware";
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -52,6 +53,53 @@ app.get("/:id", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
+    return res.status(500).json(error);
+  }
+});
+
+app.post("/", checkAdmin, async (req, res) => {
+  try {
+    const app = getAdminApp();
+    const db = admin.firestore(app);
+
+    const { title, createdAt, author, options } = req.body;
+
+    if (!title || !createdAt || !options) {
+      return res.status(400).json({
+        code: 400,
+        message: "Bad Request.",
+      });
+    }
+
+    const { docs: questions } = await db
+      .collection("questions")
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .get();
+    const lastOptions = (questions[0].data() as Question).options;
+    const lastOptionId = Object.keys(lastOptions).sort(
+      (a, b) => Number(b) - Number(a)
+    )[0];
+    const newOptionId = Number(lastOptionId) + 1;
+
+    const newOptions = (options as string[]).reduce(
+      (acc: Record<string, string>, option, index) => ({
+        ...acc,
+        [newOptionId + index]: option,
+      }),
+      {}
+    );
+
+    const data = {
+      title,
+      createdAt,
+      ...(author !== "" ? { author } : {}),
+      options: newOptions,
+    };
+    const question = await db.collection("questions").add(data);
+
+    return res.status(200).json({ id: question.id });
+  } catch (error) {
     return res.status(500).json(error);
   }
 });
