@@ -1,6 +1,9 @@
 import * as admin from "firebase-admin";
 import * as express from "express";
+import { config } from "dotenv";
 import { getAdminApp } from "../common";
+
+config();
 
 export const checkToken: express.RequestHandler = async (req, res, next) => {
   try {
@@ -23,6 +26,30 @@ export const checkToken: express.RequestHandler = async (req, res, next) => {
     return res
       .status(403)
       .json({ code: 403, message: "사용자 인증에 실패하였습니다." });
+  }
+};
+
+export const checkAdmin: express.RequestHandler = async (req, res, next) => {
+  try {
+    const key = req.headers.authorization?.split("Bearer ")[1];
+
+    if (!key) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "No credentials sent!" });
+    }
+
+    if (key !== process.env.ADMIN_KEY) {
+      return res
+        .status(403)
+        .json({ code: 403, message: "어드민 인증에 실패하였습니다." });
+    }
+
+    return next();
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ code: 500, message: "어드민 인증에 실패하였습니다." });
   }
 };
 
