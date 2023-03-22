@@ -81,7 +81,7 @@ export const getLocalTime = () => {
 };
 
 export const getFormattedDate = (date?: moment.MomentInput) => {
-  return moment(date).format("YY.MM.DD(ddd)");
+  return moment(date).format("YYYY년 MM월 DD일");
 };
 
 export const convertBirthdateToUTC = (birthdate: {

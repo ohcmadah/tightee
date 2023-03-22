@@ -63,7 +63,7 @@ const H1 = ({
   className?: cn.Argument;
   children: React.ReactNode;
 }) => (
-  <h1 className={cn("select-none text-[24px] font-bold", className)}>
+  <h1 className={cn("select-none text-3xl font-bold", className)}>
     {children}
   </h1>
 );

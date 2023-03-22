@@ -392,7 +392,7 @@ const BasicReport = () => {
             {getFormattedDate(question.createdAt)}
           </Badge>
           <div className="mt-3 ml-2">{question.title}</div>
-          <div className="mt-3 ml-1 flex items-center font-medium text-primary">
+          <div className="mt-3 ml-1 flex items-center font-medium">
             <Icon src="/images/reply.svg" alt="reply" />
             {question.options[answer.option]}
           </div>

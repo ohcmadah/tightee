@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { UpdateData } from "firebase/firestore";
 import { auth } from "../config";
-import { getLocalTime } from "./utils";
 
 import { Answer, Auth, Question, User } from "../@types";
 import {
