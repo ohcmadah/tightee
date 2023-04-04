@@ -7,7 +7,7 @@ import styles from "../styles/components/Nav.module.scss";
 
 const pages = [
   { path: "/", icon: "/images/home.svg", label: "HOME" },
-  { path: "/answer", icon: "/images/pencil.svg", label: "ANSWER" },
+  { path: "/answer", icon: "/images/pencil.svg", label: "ANSWERS" },
   { path: "/profile", icon: "/images/profile.svg", label: "PROFILE" },
 ];
 
