@@ -91,7 +91,7 @@ const ExpiredError = ({
     <ErrorView.ExpiredQuestion
       onReload={() => {
         queryClient.invalidateQueries({ queryKey: ["questions"] });
-        navigate("/questions");
+        navigate("/answer");
         setError(null);
       }}
     />
@@ -189,7 +189,6 @@ const Question = ({ questionId }: { questionId: string }) => {
 
 const QuestionWrapper = () => {
   const { questionId } = useParams();
-  const { state } = useLocation();
   const uid = auth.currentUser?.uid;
   const { isLoading, isError, data: myAnswers } = useMyAnswersQuery(uid);
 
@@ -205,14 +204,10 @@ const QuestionWrapper = () => {
     return <Navigate to={"/answer/" + answer.id + "/report"} />;
   }
 
-  if (state && state.question) {
-    return <ActualQuestion question={state.question} />;
-  }
-
   return questionId ? (
     <Question questionId={questionId} />
   ) : (
-    <Navigate to="/questions" />
+    <Navigate to="/answer" />
   );
 };
 

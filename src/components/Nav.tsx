@@ -7,13 +7,13 @@ import styles from "../styles/components/Nav.module.scss";
 
 const pages = [
   { path: "/", icon: "/images/home.svg", label: "HOME" },
-  { path: "/questions", icon: "/images/question.svg", label: "QUESTION" },
-  { path: "/answer", icon: "/images/answer.svg", label: "ANSWER" },
+  { path: "/answer", icon: "/images/pencil.svg", label: "ANSWER" },
   { path: "/profile", icon: "/images/profile.svg", label: "PROFILE" },
 ];
 
 const Menu = ({ path, icon, label }: typeof pages[0]) => {
-  const isMatched = useMatch(path + "/*");
+  const isQuestionPage = location.pathname.startsWith("/questions");
+  const isMatched = isQuestionPage ? path === "/answer" : useMatch(path + "/*");
   return (
     <li
       key={path}

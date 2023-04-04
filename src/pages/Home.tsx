@@ -137,7 +137,7 @@ const Question = ({ uid }: { uid: string }) => {
   const isAllAnswered = remaining === 0;
 
   return (
-    <Link to="/questions">
+    <Link to="/answer">
       <Box>
         <Badge className="bg-secondary-question font-bold text-white">
           오늘의 질문
