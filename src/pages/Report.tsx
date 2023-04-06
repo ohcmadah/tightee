@@ -546,6 +546,9 @@ const Report = ({
   if (answer.isLoading || question.isLoading || groups.isLoading) {
     return <ReportPlaceholder />;
   }
+  if (!isPublic && answer.isRefetching) {
+    return <ReportPlaceholder />;
+  }
   if (answer.isError || question.isError || !question.data || groups.isError) {
     return <ErrorView.Default />;
   }
