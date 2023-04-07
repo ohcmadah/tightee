@@ -11,7 +11,6 @@ import Login from "./pages/Login";
 import Welcome from "./pages/Welcome";
 import KakaoLogin from "./pages/KakaoLogin";
 import SignUp from "./pages/SignUp";
-import QuestionList from "./pages/QuestionList";
 import Question from "./pages/Question";
 import Profile from "./pages/Profile";
 import Answers from "./pages/Answers";
@@ -28,9 +27,9 @@ const Routes = () => (
   <RouteList>
     <Route path="/" element={<Main />}>
       <Route index element={<Home />} />
-      <Route path="questions" element={<QuestionList />} />
+      <Route path="questions" element={<Navigate to="/answer" replace />} />
       <Route path="questions/:questionId" element={<Question />} />
-      <Route path="question" element={<Navigate to="/questions" replace />} />
+      <Route path="question" element={<Navigate to="/answer" replace />} />
       <Route path="question/:questionId" element={<RedirectQuestion />} />
       <Route path="profile" element={<Profile />} />
       <Route path="delete-account" element={<DeleteAccount />} />

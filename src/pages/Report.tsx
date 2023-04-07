@@ -8,23 +8,21 @@ import {
 } from "react-router-dom";
 import cn from "classnames";
 import { useQuery } from "@tanstack/react-query";
-import { getAnswer, getAnswerGroups, getQuestion } from "../common/apis";
-import { Question } from "../@types";
+import { getAnswer, getAnswerGroups } from "../common/apis";
 import {
   calcAgeGroup,
   convertGenderCodeToReadable,
   convertRegionCodeToReadable,
-  formatPercent,
   getFormattedDate,
   groupBy,
 } from "../common/utils";
+import copyToClipboard from "../common/copyToClipboard";
 import {
   ReportContextProvider,
   useReportState,
 } from "../contexts/ReportContext";
-import copyToClipboard from "../common/copyToClipboard";
 import { useAuthState } from "../contexts/AuthContext";
-import { User } from "firebase/auth";
+import { useQuestionQuery } from "../hooks/queries/useQuestionQuery";
 
 import { ToastContainer, toast } from "react-toastify";
 import Layout from "../components/Layout";
@@ -37,6 +35,7 @@ import Icon from "../components/Icon";
 import Notice from "../components/Notice";
 import Footer from "../components/Footer";
 import Skeleton from "../components/Skeleton";
+import Loading from "../components/Loading";
 
 const RANK_ICONS = [
   "/images/gold.png",
@@ -509,12 +508,26 @@ const ReportPlaceholder = () => (
   </>
 );
 
-// TODO: react-query에 관련 기능 있는지 알아보기
-const getMyAnswerAndAnswers = async (
-  answerId: string,
-  user: User | null,
-  question?: Question
-) => {
+const Report = ({
+  answerId,
+  isPublic = false,
+}: {
+  answerId: string;
+  isPublic?: boolean;
+}) => {
+  const authState = useAuthState();
+  const isAuthentication =
+    authState.state === "loaded" && authState.isAuthentication;
+  const answer = useQuery({
+    queryKey: ["report", answerId],
+    queryFn: async () => {
+      const user = isAuthentication && !isPublic ? authState.user : null;
+      const token = await user?.getIdToken();
+      const answer = await getAnswer(answerId, { token });
+      return answer;
+    },
+    select: (data) => data.data,
+  });
   const groupKeys = [
     "user.MBTI",
     "user.region",
@@ -522,116 +535,66 @@ const getMyAnswerAndAnswers = async (
     "user.gender",
     "option",
   ];
-  if (question) {
-    const answerPromise = user
-      ? user.getIdToken().then((token) => getAnswer(answerId, { token }))
-      : getAnswer(answerId);
-    const groupsPromise = getAnswerGroups({
-      groups: groupKeys,
-      questionId: question.id,
-    });
-    const [answerResult, groupsResult] = await Promise.allSettled([
-      answerPromise,
-      groupsPromise,
-    ]);
-    if (answerResult.status === "rejected") {
-      throw new Error(answerResult.reason);
-    }
-    if (groupsResult.status === "rejected") {
-      throw new Error(groupsResult.reason);
-    }
-    return {
-      answer: answerResult.value.data,
-      question,
-      groups: groupsResult.value,
-    };
-  }
-
-  const token = await user?.getIdToken();
-  const answer = await getAnswer(answerId, { token });
-
-  const questionPromise = getQuestion(answer.data.question);
-  const groupsPromise = getAnswerGroups({
-    groups: groupKeys,
-    questionId: answer.data.question,
+  const question = useQuestionQuery(answer.data?.question);
+  const groups = useQuery({
+    queryKey: ["answerGroups"],
+    queryFn: () =>
+      getAnswerGroups({ groups: groupKeys, questionId: answer.data?.question }),
+    enabled: !!answer.data?.question,
   });
-  const [questionResult, groupsResult] = await Promise.allSettled([
-    questionPromise,
-    groupsPromise,
-  ]);
-  if (questionResult.status === "rejected") {
-    throw new Error(questionResult.reason);
+
+  if (answer.isLoading || question.isLoading || groups.isLoading) {
+    return <ReportPlaceholder />;
   }
-  if (groupsResult.status === "rejected") {
-    throw new Error(groupsResult.reason);
+  if (!isPublic && answer.isRefetching) {
+    return <ReportPlaceholder />;
+  }
+  if (answer.isError || question.isError || !question.data || groups.isError) {
+    return <ErrorView.Default />;
   }
 
-  return {
+  if (!isPublic && isAuthentication) {
+    if (answer.data.user.id !== authState.user.uid) {
+      return (
+        <ErrorView.Default>
+          <article>리포트를 볼 수 있는 권한이 없어요 :(</article>
+        </ErrorView.Default>
+      );
+    }
+  }
+  const data = {
     answer: answer.data,
-    question: questionResult.value.data,
-    groups: groupsResult.value,
+    question: question.data,
+    groups: groups.data,
   };
+  return (
+    <ReportContextProvider data={{ ...data, isPublic }}>
+      {isPublic ? <PublicReport /> : <MyReport />}
+      <ToastContainer className="text-base" autoClose={3000} theme="colored" />
+    </ReportContextProvider>
+  );
 };
 
-const Report = ({ isPublic = false }: { isPublic?: boolean }) => {
-  const { answerId } = useParams();
-  const location = useLocation();
+const ReportWrapper = ({ isPublic = false }: { isPublic?: boolean }) => {
   const authState = useAuthState();
-  const isAuthentication =
-    authState.state === "loaded" && authState.isAuthentication;
+  const { answerId } = useParams();
 
   if (!answerId) {
     // TODO: 404 페이지 만들기
     return <Navigate to={isPublic ? "/" : "/answer"} />;
   }
 
-  const { status, data } = useQuery({
-    queryKey: ["report", answerId],
-    queryFn: () =>
-      getMyAnswerAndAnswers(
-        answerId,
-        isAuthentication && !isPublic ? authState.user : null,
-        location.state?.question
-      ),
-  });
-
-  switch (status) {
-    case "loading":
-      return <ReportPlaceholder />;
-
-    case "error":
-      return <ErrorView.Default />;
-
-    case "success":
-      if (!isPublic && isAuthentication) {
-        if (data.answer.user.id !== authState.user.uid) {
-          return (
-            <ErrorView.Default>
-              <article>리포트를 볼 수 있는 권한이 없어요 :(</article>
-            </ErrorView.Default>
-          );
-        }
-      }
-      return (
-        <ReportContextProvider data={{ ...data, isPublic }}>
-          {isPublic ? <PublicReport /> : <MyReport />}
-          <ToastContainer
-            className="text-base"
-            autoClose={3000}
-            theme="colored"
-          />
-        </ReportContextProvider>
-      );
+  if (authState.state !== "loaded") {
+    return <Loading.Full />;
   }
-};
 
-const ReportWrapper = ({ isPublic = false }: { isPublic?: boolean }) =>
-  isPublic ? (
+  return isPublic ? (
     <Layout>
-      <Report isPublic={isPublic} />
+      <Report answerId={answerId} isPublic={isPublic} />
     </Layout>
   ) : (
-    <Report isPublic={isPublic} />
+    <Report answerId={answerId} isPublic={isPublic} />
   );
+};
 
 export default ReportWrapper;
