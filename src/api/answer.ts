@@ -24,7 +24,7 @@ const getAuthIdToken = () => {
 };
 
 export const answer = (questionId: string, optionId: string) => {
-  return instance.post<{ id: string }>("/api/answers", {
+  return instance.post<{ id: string }>("/answers", {
     question: questionId,
     option: optionId,
     user: getCurrentUserId(),
@@ -32,7 +32,7 @@ export const answer = (questionId: string, optionId: string) => {
 };
 
 const getAnswers = <T>(config: AxiosRequestConfig) => {
-  return instance.get<T>("/api/answers", config);
+  return instance.get<T>("/answers", config);
 };
 
 export const getMyAnswers = async (userId: string) => {
@@ -58,7 +58,7 @@ export const getAnswerGroups = async (params: {
 
 export const getAnswer = (answerId: string, params?: { token?: string }) => {
   const headers = params && { Authorization: `Bearer ${params.token}` };
-  return instance.get<GetAnswerResponse>("/api/answers/" + answerId, {
+  return instance.get<GetAnswerResponse>("/answers/" + answerId, {
     headers,
   });
 };

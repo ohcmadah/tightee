@@ -33,18 +33,18 @@ export const loginWithKakao = (state?: any) => {
 };
 
 export const authKakao = (code: string) => {
-  return instance.post<AuthenticateResponse>("/api/auth/kakao", { code });
+  return instance.post<AuthenticateResponse>("/auth/kakao", { code });
 };
 
 export const createUser = (user: User) => {
-  return instance.post<CreateUserResponse>("/api/users/" + user.id, {
+  return instance.post<CreateUserResponse>("/users/" + user.id, {
     ...user,
   });
 };
 
 export const getUser = async (id: User["id"]) => {
   const token = await auth.currentUser?.getIdToken();
-  const res = await instance.get<GetUserResponse>("/api/users/" + id, {
+  const res = await instance.get<GetUserResponse>("/users/" + id, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -70,7 +70,7 @@ export const updateUser = async (
   }
   const token = await auth.currentUser?.getIdToken();
   return await instance.patch<UpdateUserResponse>(
-    "/api/users/" + id,
+    "/users/" + id,
     { ...data },
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -78,7 +78,7 @@ export const updateUser = async (
 
 export const deleteUser = (token: string) => {
   const userId = auth.currentUser?.uid;
-  return instance.delete<DeleteUserResponse>("/api/users/" + userId, {
+  return instance.delete<DeleteUserResponse>("/users/" + userId, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -86,7 +86,7 @@ export const deleteUser = (token: string) => {
 };
 
 export const getNicknames = async () => {
-  const users = await instance.get<GetUsersResponse<"nickname">>("/api/users", {
+  const users = await instance.get<GetUsersResponse<"nickname">>("/users", {
     params: { fields: ["nickname"] },
   });
   if (users.status === 204) {
