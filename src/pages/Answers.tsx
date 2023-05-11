@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import cn from "classnames";
-import { Answer, Question as QuestionType } from "../@types";
+import { Question as QuestionType } from "../@types/question";
+import { Answer } from "../@types/answer";
 import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";

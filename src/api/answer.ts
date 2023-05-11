@@ -1,7 +1,11 @@
 import instance from "./instance";
 import { auth } from "../config";
 import { AxiosRequestConfig } from "axios";
-import { Answer } from "../@types";
+import {
+  GetAnswerGroupsResponse,
+  GetAnswerResponse,
+  GetAnswersResponce,
+} from "../@types/response";
 
 const getCurrentUserId = () => {
   const userId = auth.currentUser?.uid;
@@ -27,13 +31,13 @@ export const answer = (questionId: string, optionId: string) => {
   });
 };
 
-const getAnswers = (config: AxiosRequestConfig) => {
-  return instance.get("/api/answers", config);
+const getAnswers = <T>(config: AxiosRequestConfig) => {
+  return instance.get<T>("/api/answers", config);
 };
 
-export const getMyAnswers = async (userId: string): Promise<Answer[]> => {
+export const getMyAnswers = async (userId: string) => {
   const token = await getAuthIdToken();
-  const res = await getAnswers({
+  const res = await getAnswers<GetAnswersResponce>({
     params: { user: userId },
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -43,16 +47,18 @@ export const getMyAnswers = async (userId: string): Promise<Answer[]> => {
 export const getAnswerGroups = async (params: {
   groups: string[];
   questionId?: string;
-}): Promise<{ [groupKey: string]: { [id: string]: string[] } }> => {
+}) => {
   const { groups, questionId } = params;
   const config = {
     params: { groups, ...(questionId ? { question: questionId } : {}) },
   };
-  const res = await getAnswers(config);
+  const res = await getAnswers<GetAnswerGroupsResponse>(config);
   return res.status === 204 ? {} : res.data;
 };
 
 export const getAnswer = (answerId: string, params?: { token?: string }) => {
   const headers = params && { Authorization: `Bearer ${params.token}` };
-  return instance.get<Answer>("/api/answers/" + answerId, { headers });
+  return instance.get<GetAnswerResponse>("/api/answers/" + answerId, {
+    headers,
+  });
 };

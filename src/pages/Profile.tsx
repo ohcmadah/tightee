@@ -8,7 +8,7 @@ import {
 import useForm from "../hooks/useForm";
 import { profileValidator } from "../common/validators";
 import { updateUser } from "../api/user";
-import { User } from "../@types";
+import { User } from "../@types/user";
 import Loading from "../components/Loading";
 import {
   URL_CONTACT,

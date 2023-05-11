@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
-import { Answer, Question } from "../@types";
+import { Answer } from "../@types/answer";
+import { Question } from "../@types/question";
 
 type ReportState = {
   isPublic: boolean;

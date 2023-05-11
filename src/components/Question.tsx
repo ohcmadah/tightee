@@ -1,6 +1,6 @@
 import cn from "classnames";
 import { Link, LinkProps } from "react-router-dom";
-import { Question as QuestionType } from "../@types";
+import { Question as QuestionType } from "../@types/question";
 
 import Badge from "./Badge";
 import Box from "./Box";

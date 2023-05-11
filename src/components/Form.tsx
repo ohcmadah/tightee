@@ -1,7 +1,6 @@
 import cn from "classnames";
 import React from "react";
 import { range } from "../common/utils";
-import { FormError } from "../@types";
 
 import Input from "./Input";
 

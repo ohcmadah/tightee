@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FormError } from "../@types";
+import { FormError } from "../@types/error";
 import { setProperty } from "../common/utils";
 
 export type Validator<T> = (values: T) => FormError | {};

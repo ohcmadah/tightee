@@ -1,6 +1,7 @@
 import moment from "moment";
-import { FormError, MBTI } from "../@types";
 import * as constants from "../common/constants";
+import { FormError } from "../@types/error";
+import { MBTI } from "../@types/user";
 
 export const setProperty = <T extends Record<string, any>>(
   obj: T,

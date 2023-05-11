@@ -6,7 +6,15 @@ import {
   KAKAO_SCOPE_NICKNAME,
 } from "../common/constants";
 import { auth } from "../config";
-import { Auth, User } from "../@types";
+import {
+  AuthenticateResponse,
+  CreateUserResponse,
+  DeleteUserResponse,
+  GetUserResponse,
+  UpdateUserResponse,
+  GetUsersResponse,
+} from "../@types/response";
+import { User } from "../@types/user";
 
 export const loginWithKakao = (state?: any) => {
   const redirectUri = `${location.origin}/callback/kakaotalk`;
@@ -25,16 +33,18 @@ export const loginWithKakao = (state?: any) => {
 };
 
 export const authKakao = (code: string) => {
-  return instance.post<Auth>("/api/auth/kakao", { code });
+  return instance.post<AuthenticateResponse>("/api/auth/kakao", { code });
 };
 
 export const createUser = (user: User) => {
-  return instance.post("/api/users/" + user.id, { ...user });
+  return instance.post<CreateUserResponse>("/api/users/" + user.id, {
+    ...user,
+  });
 };
 
-export const getUser = async (id: string): Promise<User | null> => {
+export const getUser = async (id: User["id"]) => {
   const token = await auth.currentUser?.getIdToken();
-  const res = await instance.get("/api/users/" + id, {
+  const res = await instance.get<GetUserResponse>("/api/users/" + id, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -59,7 +69,7 @@ export const updateUser = async (
     }
   }
   const token = await auth.currentUser?.getIdToken();
-  return await instance.patch(
+  return await instance.patch<UpdateUserResponse>(
     "/api/users/" + id,
     { ...data },
     { headers: { Authorization: `Bearer ${token}` } }
@@ -68,19 +78,19 @@ export const updateUser = async (
 
 export const deleteUser = (token: string) => {
   const userId = auth.currentUser?.uid;
-  return instance.delete("/api/users/" + userId, {
+  return instance.delete<DeleteUserResponse>("/api/users/" + userId, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 };
 
-export const getNicknames = async (): Promise<string[]> => {
-  const users = await instance.get("/api/users", {
+export const getNicknames = async () => {
+  const users = await instance.get<GetUsersResponse<"nickname">>("/api/users", {
     params: { fields: ["nickname"] },
   });
   if (users.status === 204) {
     return [];
   }
-  return users.data.map((user: { nickname: string }) => user.nickname);
+  return users.data.map(({ nickname }) => nickname);
 };

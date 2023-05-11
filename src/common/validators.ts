@@ -1,5 +1,5 @@
 import moment from "moment";
-import { FormError } from "../@types";
+import { FormError } from "../@types/error";
 import { AgreementValues, ProfileValues } from "../contexts/SignUpContext";
 
 const isEmpty = (value: any) => {

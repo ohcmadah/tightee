@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { answer } from "../api/answer";
-import { Question as QuestionType } from "../@types";
+import { Question as QuestionType } from "../@types/question";
 import { getLocalTime } from "../common/utils";
 import { auth } from "../config";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";

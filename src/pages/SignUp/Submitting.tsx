@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { auth } from "../../config";
-import { User } from "../../@types";
+import { User } from "../../@types/user";
 import { createUser } from "../../api/user";
 import { SignUpState, useSignUpState } from "../../contexts/SignUpContext";
 import { convertBirthdateToUTC } from "../../common/utils";

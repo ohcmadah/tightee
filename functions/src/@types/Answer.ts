@@ -1,5 +1,5 @@
 import { DocumentReference } from "firebase/firestore";
-import { User } from "../../../src/@types";
+import { User } from "../../../src/@types/user";
 import { Question } from "./Question";
 
 export interface Answer {
