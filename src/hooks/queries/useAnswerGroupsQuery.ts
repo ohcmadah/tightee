@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAnswerGroups } from "../../common/apis";
+import { getAnswerGroups } from "../../api/answer";
 
 export const useAnswerGroupsQuery = (groupKeys: string[]) => {
   const query = useQuery({

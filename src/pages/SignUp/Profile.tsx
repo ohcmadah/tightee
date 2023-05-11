@@ -6,7 +6,7 @@ import {
 } from "../../contexts/SignUpContext";
 import { getFormErrorMessage, isValidForm } from "../../common/utils";
 import { profileValidator } from "../../common/validators";
-import { getNicknames } from "../../common/apis";
+import { getNicknames } from "../../api/user";
 
 import Header from "../../components/Header";
 import Button from "../../components/Button";

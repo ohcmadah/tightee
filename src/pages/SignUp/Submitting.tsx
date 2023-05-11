@@ -3,7 +3,7 @@ import { signInWithCustomToken } from "firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { auth } from "../../config";
 import { User } from "../../@types";
-import { createUser } from "../../common/apis";
+import { createUser } from "../../api/user";
 import { SignUpState, useSignUpState } from "../../contexts/SignUpContext";
 import { convertBirthdateToUTC } from "../../common/utils";
 

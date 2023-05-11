@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { deleteUser } from "../common/apis";
+import { deleteUser } from "../api/user";
 import { useNavigate } from "react-router-dom";
 import { useAuthenticatedState } from "../contexts/AuthContext";
 import { auth } from "../config";

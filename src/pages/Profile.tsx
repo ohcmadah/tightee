@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import useForm from "../hooks/useForm";
 import { profileValidator } from "../common/validators";
-import { updateUser } from "../common/apis";
+import { updateUser } from "../api/user";
 import { User } from "../@types";
 import Loading from "../components/Loading";
 import {

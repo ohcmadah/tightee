@@ -1,5 +1,5 @@
 import { URL_CS } from "../common/constants";
-import { loginWithKakao } from "../common/apis";
+import { loginWithKakao } from "../api/user";
 
 import Layout from "../components/Layout";
 import Button from "../components/Button";

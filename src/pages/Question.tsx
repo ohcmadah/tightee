@@ -6,7 +6,7 @@ import {
   useParams,
 } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { answer } from "../common/apis";
+import { answer } from "../api/answer";
 import { Question as QuestionType } from "../@types";
 import { getLocalTime } from "../common/utils";
 import { auth } from "../config";

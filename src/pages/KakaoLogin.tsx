@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { signInWithCustomToken } from "firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { auth as firebaseAuth } from "../config";
-import { authKakao } from "../common/apis";
+import { authKakao } from "../api/user";
 
 import Loading from "../components/Loading";
 import ErrorView from "../components/ErrorView";

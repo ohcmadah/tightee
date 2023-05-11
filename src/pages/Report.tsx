@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import cn from "classnames";
 import { useQuery } from "@tanstack/react-query";
-import { getAnswer, getAnswerGroups } from "../common/apis";
+import { getAnswer, getAnswerGroups } from "../api/answer";
 import {
   calcAgeGroup,
   convertGenderCodeToReadable,

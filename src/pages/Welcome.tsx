@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { loginWithKakao } from "../common/apis";
+import { loginWithKakao } from "../api/user";
 
 import Layout from "../components/Layout";
 import Header from "../components/Header";
