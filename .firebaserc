@@ -1,9 +1,0 @@
-{
-  "projects": {
-    "default": "tightee",
-    "prod": "tightee",
-    "dev": "tightee"
-  },
-  "targets": {},
-  "etags": {}
-}

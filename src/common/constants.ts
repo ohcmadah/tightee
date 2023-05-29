@@ -35,3 +35,5 @@ export const REGION_JEOLLANAMDO = "jeollanam-do";
 export const REGION_GYEONGSANGNAMDO = "gyeongsangnam-do";
 export const REGION_GYEONGSANGBUKDO = "gyeongsangbuk-do";
 export const REGION_JEJUDO = "jeju-do";
+
+export const FIREBASE_SEOUL_CODE = "asia-northeast3";
