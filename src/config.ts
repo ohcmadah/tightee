@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getFunctions } from "firebase/functions";
-import { SEOUL_CODE } from "../functions/src/constants";
+import { FIREBASE_SEOUL_CODE } from "./common/constants";
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -17,4 +17,4 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export const functions = getFunctions(app, SEOUL_CODE);
+export const functions = getFunctions(app, FIREBASE_SEOUL_CODE);
