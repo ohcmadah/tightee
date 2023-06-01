@@ -2,7 +2,12 @@ import React, { useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import cn from "classnames";
 import { Answer, Question as QuestionType } from "../@types";
-import { getFormattedDate, getLocalTime, groupBy } from "../common/utils";
+import {
+  getFormattedDate,
+  getLocalTime,
+  groupBy,
+  isNotExpiredQuestion,
+} from "../common/utils";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 import { useQuestionsQuery } from "../hooks/queries/useQuestionsQuery";
 import { useAuthenticatedState } from "../contexts/AuthContext";
@@ -55,23 +60,31 @@ const Author = ({ children }: { children: React.ReactNode }) => (
 );
 
 const NotAnsweredQuestion = ({
-  isToday,
+  isAnswerable,
   question,
 }: {
-  isToday: boolean;
+  isAnswerable: boolean;
   question: QuestionType;
 }) => {
   const navigate = useNavigate();
+
+  const goToQuestionPage = () => {
+    if (!isAnswerable) {
+      return;
+    }
+
+    navigate("/questions/" + question.id);
+  };
 
   return (
     <li className="flex">
       <Checkbox checked={false} />
       <Box
-        onClick={() => isToday && navigate("/questions/" + question.id)}
+        onClick={goToQuestionPage}
         className={cn(
           "flex-row",
-          { "select-none opacity-50": !isToday },
-          { "cursor-pointer": isToday }
+          { "select-none opacity-50": !isAnswerable },
+          { "cursor-pointer": isAnswerable }
         )}
       >
         <div className="flex w-full items-center justify-between">
@@ -79,7 +92,7 @@ const NotAnsweredQuestion = ({
             <Title>{question.title}</Title>
             {question.author && <Author>{question.author}</Author>}
           </div>
-          {isToday && <Img src="/images/right_arrow.svg" />}
+          {isAnswerable && <Img src="/images/right_arrow.svg" />}
         </div>
       </Box>
     </li>
@@ -87,16 +100,19 @@ const NotAnsweredQuestion = ({
 };
 
 const Question = ({
-  isToday,
   answer,
   question,
 }: {
-  isToday: boolean;
   answer?: Answer;
   question: QuestionType;
 }) => {
   if (!answer) {
-    return <NotAnsweredQuestion isToday={isToday} question={question} />;
+    return (
+      <NotAnsweredQuestion
+        isAnswerable={isNotExpiredQuestion(question.createdAt)}
+        question={question}
+      />
+    );
   }
 
   return (
@@ -179,7 +195,6 @@ const Main = () => {
               {questions.map((question) => (
                 <Question
                   key={question.id}
-                  isToday={isToday}
                   answer={answerByQuestionIdMap[question.id]}
                   question={question}
                 />

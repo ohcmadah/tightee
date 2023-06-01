@@ -1,5 +1,5 @@
 import moment from "moment";
-import { FormError, MBTI } from "../@types";
+import { FormError, MBTI, Question } from "../@types";
 import * as constants from "../common/constants";
 
 export const setProperty = <T extends Record<string, any>>(
@@ -82,6 +82,11 @@ export const getLocalTime = () => {
 
 export const getFormattedDate = (date?: moment.MomentInput) => {
   return moment(date).format("YYYY년 MM월 DD일");
+};
+
+export const isNotExpiredQuestion = (createdAt: Question["createdAt"]) => {
+  const aWeekAgo = getLocalTime().subtract(7, "days");
+  return aWeekAgo.isSameOrBefore(createdAt);
 };
 
 export const convertBirthdateToUTC = (birthdate: {

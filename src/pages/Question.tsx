@@ -1,14 +1,9 @@
 import React, { useState } from "react";
-import {
-  Navigate,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { answer } from "../common/apis";
 import { Question as QuestionType } from "../@types";
-import { getLocalTime } from "../common/utils";
+import { getLocalTime, isNotExpiredQuestion } from "../common/utils";
 import { auth } from "../config";
 import { useMyAnswersQuery } from "../hooks/queries/useMyAnswersQuery";
 
@@ -104,8 +99,7 @@ const ActualQuestion = ({ question }: { question: QuestionType }) => {
 
   const onAnswer = useMutation({
     mutationFn: async (optionId: string) => {
-      const today = getLocalTime().format("YYYYMMDD");
-      if (today !== question.createdAt) {
+      if (!isNotExpiredQuestion(question.createdAt)) {
         throw new Error("expired-question");
       }
       try {
@@ -172,8 +166,7 @@ const Question = ({ questionId }: { questionId: string }) => {
         );
       }
 
-      const today = getLocalTime().format("YYYYMMDD");
-      if (today !== question.createdAt) {
+      if (!isNotExpiredQuestion(question.createdAt)) {
         return (
           <ErrorView.ExpiredQuestion
             onReload={() => {
