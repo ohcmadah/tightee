@@ -24,6 +24,7 @@ jobs:
         from: commits
 
     - name: Transition issue
+      if: steps.jira-ticket.outputs.issue != ''
       uses: atlassian/gajira-transition@v3
       with:
         issue: ${{ steps.create.outputs.issue }}
