@@ -28,4 +28,4 @@ jobs:
       uses: atlassian/gajira-transition@v3
       with:
         issue: ${{ steps.create.outputs.issue }}
-        transition: "QA 시작"
+        transition: "개발 배포"
